@@ -2,15 +2,22 @@
  * End-to-end tests for Task Management API
  * Tests complete workflows from API endpoints through services to database
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll, vi } from 'vitest';
 import {
   createMockAuthRequest,
   createMockResponse,
   mockUser,
 } from '../../lib/__tests__/helpers';
 
-vi.mock('../../lib/services/index.js', () => {
-  const mockTaskService = {
+// Use vi.hoisted to define mocks before imports
+const {
+  mockTaskService,
+  mockTaskListService,
+  mockSendSuccess,
+  mockSendError,
+  mockGetAllServices,
+} = vi.hoisted(() => {
+  const taskService = {
     findAll: vi.fn(),
     findPaginated: vi.fn(),
     create: vi.fn(),
@@ -19,7 +26,7 @@ vi.mock('../../lib/services/index.js', () => {
     delete: vi.fn(),
     toggleCompletion: vi.fn(),
   };
-  const mockTaskListService = {
+  const taskListService = {
     findAll: vi.fn(),
     getWithTaskCount: vi.fn(),
     create: vi.fn(),
@@ -29,44 +36,87 @@ vi.mock('../../lib/services/index.js', () => {
     setDefault: vi.fn(),
   };
   return {
-    getAllServices: vi.fn(() => ({
-      task: mockTaskService,
-      taskList: mockTaskListService,
+    mockTaskService: taskService,
+    mockTaskListService: taskListService,
+    mockSendSuccess: vi.fn((res, data, statusCode = 200) => {
+      res.status(statusCode).json({ success: true, data });
+    }),
+    mockSendError: vi.fn((res, error) => {
+      const statusCode = error?.statusCode ?? 500;
+      res.status(statusCode).json({
+        success: false,
+        error: {
+          code: error?.code,
+          message: error?.message,
+        },
+      });
+    }),
+    mockGetAllServices: vi.fn(() => ({
+      task: taskService,
+      taskList: taskListService,
     })),
-    __mockServices: {
-      task: mockTaskService,
-      taskList: mockTaskListService,
-    },
   };
 });
 
-vi.mock('../../lib/middleware/errorHandler.js', () => {
-  const sendSuccess = vi.fn((res, data, statusCode = 200) => {
-    res.status(statusCode).json({ success: true, data });
-  });
-  const sendError = vi.fn((res, error) => {
-    const statusCode = error?.statusCode ?? 500;
-    res.status(statusCode).json({
-      success: false,
-      error: {
-        code: error?.code,
-        message: error?.message,
-      },
-    });
-  });
+vi.mock('../../lib/services/index.js', () => ({
+  getAllServices: mockGetAllServices,
+}));
+
+vi.mock('../../lib/middleware/errorHandler.js', async (importOriginal) => {
+  const actual = await importOriginal();
   return {
+    ...actual,
     asyncHandler: (handler: any) => handler,
-    errorHandler: vi.fn(),
-    sendSuccess,
-    sendError,
+    sendSuccess: mockSendSuccess,
+    sendError: mockSendError,
+  };
+});
+
+vi.mock('../../lib/middleware/auth.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    devAuth: () => (_req: any, _res: any, next: any) => next(),
+    authenticateJWT: () => (_req: any, _res: any, next: any) => next(),
   };
 });
 
 // Import handlers after mocking
-import tasksHandler from '../tasks/index';
-import taskHandler from '../tasks/[id]';
-import taskListsHandler from '../task-lists/index';
-import taskListHandler from '../task-lists/[id]';
+let tasksHandler: typeof import('../tasks/index').default;
+let taskHandler: typeof import('../tasks/[id]').default;
+let taskListsHandler: typeof import('../task-lists/index').default;
+let taskListHandler: typeof import('../task-lists/[id]').default;
+
+beforeAll(async () => {
+  tasksHandler = (await import('../tasks/index')).default;
+  taskHandler = (await import('../tasks/[id]')).default;
+  taskListsHandler = (await import('../task-lists/index')).default;
+  taskListHandler = (await import('../task-lists/[id]')).default;
+});
+
+// Mock data
+const mockTask = {
+  id: 'task-123',
+  title: 'Test Task',
+  completed: false,
+  scheduledDate: new Date('2024-01-15T10:00:00Z'),
+  priority: 'MEDIUM',
+  taskListId: 'list-123',
+  userId: 'user-123',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  tags: [],
+};
+
+const mockTaskList = {
+  id: 'list-123',
+  name: 'Work Projects',
+  color: '#FF5722',
+  userId: 'user-123',
+  isDefault: false,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
 
 // Test scenarios that cover the requirements from Task 6
 describe('Task Management API End-to-End Tests', () => {
@@ -80,6 +130,35 @@ describe('Task Management API End-to-End Tests', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // Setup default mock return values
+    mockTaskService.findAll.mockResolvedValue([mockTask]);
+    mockTaskService.findPaginated.mockResolvedValue({
+      data: [mockTask],
+      total: 1,
+      page: 1,
+      limit: 20,
+    });
+    mockTaskService.create.mockResolvedValue(mockTask);
+    mockTaskService.findById.mockResolvedValue(mockTask);
+    mockTaskService.update.mockResolvedValue(mockTask);
+    mockTaskService.delete.mockResolvedValue({ success: true });
+    mockTaskService.toggleCompletion.mockResolvedValue({
+      ...mockTask,
+      completed: true,
+    });
+
+    mockTaskListService.findAll.mockResolvedValue([mockTaskList]);
+    mockTaskListService.getWithTaskCount.mockResolvedValue([
+      { ...mockTaskList, taskCount: 5 },
+    ]);
+    mockTaskListService.create.mockResolvedValue(mockTaskList);
+    mockTaskListService.findById.mockResolvedValue(mockTaskList);
+    mockTaskListService.update.mockResolvedValue(mockTaskList);
+    mockTaskListService.delete.mockResolvedValue({ success: true });
+    mockTaskListService.setDefault.mockResolvedValue({
+      ...mockTaskList,
+      isDefault: true,
+    });
   });
 
   describe('Requirement 5.1: Task CRUD Operations', () => {

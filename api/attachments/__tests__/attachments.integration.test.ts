@@ -60,6 +60,7 @@ vi.mock('../../../lib/middleware/auth.js', async (importOriginal) => {
   return {
     ...actual,
     devAuth: () => (_req: any, _res: any, next: any) => next(),
+    authenticateJWT: () => (_req: any, _res: any, next: any) => next(),
   };
 });
 vi.mock('@vercel/blob', () => ({

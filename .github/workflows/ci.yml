@@ -90,7 +90,7 @@ jobs:
         run: npm run build:shared
 
       - name: Run backend tests
-        run: npm run test:backend:run -- --exclude="**/api/**/__tests__/**"
+        run: npm run test:backend:run
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/test_db
 
