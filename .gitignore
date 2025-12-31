@@ -1,0 +1,69 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# IDE and LLM tool config (should not be in repo)
+.cursor/
+.cursorignore
+.mcp.json
+.claude/
+AGENTS.md
+tests.md
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+
+# Database
+*.db
+*.sqlite
+
+# Monorepo
+packages/*/dist
+packages/*/node_modules
+
+# Prisma
+packages/backend/prisma/migrations/*
+!packages/backend/prisma/migrations/.gitkeep
+
+# Docker
+docker-compose.override.yml
+
+# Gemini-added ignores
+.kiro/
+.shree/
+CLAUDE.md
+
+# Compiled output
+lib/**/*.js
+lib/**/*.map
+*.tsbuildinfo
+
+# Other
+screenshots/
+test-scroll.html
+.vercel
+.env*.local

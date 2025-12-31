@@ -1,0 +1,17 @@
+node_modules
+dist
+build
+.next
+.nuxt
+.vscode
+.idea
+*.log
+*.lock
+package-lock.json
+yarn.lock
+packages/*/dist
+packages/*/node_modules
+.env
+.env.local
+.env.production
+.env.staging
