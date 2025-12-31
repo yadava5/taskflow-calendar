@@ -205,10 +205,11 @@ class GoogleOAuthService {
             id: string;
             email: string;
             name: string | null;
+            googleId: string | null;
             createdAt: Date;
           }>(
             `INSERT INTO users (id, email, name, "googleId", "createdAt", "updatedAt")
-             VALUES (gen_random_uuid()::text, $1, $2, $3, NOW(), NOW()) RETURNING id, email, name, "createdAt"`,
+             VALUES (gen_random_uuid()::text, $1, $2, $3, NOW(), NOW()) RETURNING id, email, name, "googleId", "createdAt"`,
             [email.toLowerCase(), name || null, googleId],
             tx
           );
@@ -225,9 +226,7 @@ class GoogleOAuthService {
       }
     } else {
       // Update existing Google user info if needed
-      const updates: { name?: string } = {};
       if (name && name !== user.name) {
-        updates.name = name;
         await query(
           `UPDATE users SET name = $1, "updatedAt" = NOW() WHERE id = $2`,
           [name, user.id]
@@ -242,6 +241,11 @@ class GoogleOAuthService {
           [picture, user.id]
         );
       }
+    }
+
+    // Ensure user is defined at this point
+    if (!user) {
+      throw new Error('Failed to find or create user');
     }
 
     // Generate JWT tokens

@@ -5,13 +5,14 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon --exec \"node --loader ts-node/esm\" src/server.ts",
-    "build": "tsc",
+    "build": "echo 'Backend uses tsx runtime - no build needed'",
+    "typecheck": "tsc --noEmit",
     "start": "node dist/server.js",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
     "test": "vitest",
     "test:run": "vitest run",
-    "db:seed": "npm run build && node dist/scripts/seed.js"
+    "db:seed": "npx tsx src/scripts/seed.ts"
   },
   "dependencies": {
     "@react-calendar-app/shared": "*",

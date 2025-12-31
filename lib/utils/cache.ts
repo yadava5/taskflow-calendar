@@ -38,7 +38,7 @@ export class InMemoryCache<T> {
   constructor(
     private readonly ttlMs: number = 5 * 60 * 1000, // Default: 5 minutes
     private readonly maxSize: number = 1000, // Prevent memory leaks
-    private readonly enableAutoCleanup: boolean = true
+    enableAutoCleanup: boolean = true
   ) {
     if (enableAutoCleanup) {
       // Clean up expired entries every minute

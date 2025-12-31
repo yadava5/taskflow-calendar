@@ -61,6 +61,7 @@ export interface CalendarFilters {
   isVisible?: boolean;
   isDefault?: boolean;
   search?: string;
+  withEventCounts?: boolean;
 }
 
 /**

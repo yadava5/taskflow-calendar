@@ -146,7 +146,6 @@ export class TaskService extends BaseService<
   UpdateTaskDTO,
   TaskFilters
 > {
-  private tagService?: unknown; // placeholder for DI
   private static didEnsureStatusColumn = false;
 
   private async ensureStatusColumnExists(): Promise<void> {
@@ -378,6 +377,7 @@ export class TaskService extends BaseService<
         fileUrl: row.fileUrl,
         fileType: row.fileType,
         fileSize: row.fileSize,
+        taskId: row.taskId,
         createdAt: row.createdAt,
         thumbnailUrl: row.thumbnailUrl,
       });
@@ -1087,7 +1087,7 @@ export class TaskService extends BaseService<
       [userId],
       this.db
     );
-    if (existing.rowCount > 0) return existing.rows[0];
+    if ((existing.rowCount ?? 0) > 0) return existing.rows[0];
     const created = await query<{ id: string; name: string; color: string }>(
       `INSERT INTO "task_lists" (id, name, color, "userId", "createdAt", "updatedAt")
        VALUES (gen_random_uuid()::text, 'General', '#8B5CF6', $1, NOW(), NOW()) RETURNING id, name, color`,
