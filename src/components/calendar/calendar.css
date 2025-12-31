@@ -1,0 +1,680 @@
+/* ================================
+   FULLCALENDAR THEME INTEGRATION
+   ================================ */
+
+/* CSS Custom Properties for theme consistency */
+.fc {
+  --fc-border-color: var(--border);
+  --fc-today-bg-color: oklch(
+    0.7 0.15 140 / 0.15
+  ) !important; /* Muted green for today */
+  --fc-page-bg-color: hsl(var(--background)) !important;
+  --fc-neutral-bg-color: hsl(var(--background)) !important;
+}
+
+.dark .fc {
+  --fc-border-color: var(--border);
+  --fc-today-bg-color: oklch(
+    0.7 0.15 140 / 0.1
+  ) !important; /* Muted green for dark mode */
+  --fc-page-bg-color: hsl(var(--background)) !important;
+  --fc-neutral-bg-color: hsl(var(--background)) !important;
+}
+
+/* Consolidated muted foreground usage */
+.day-header-name,
+.fc-col-header-cell-cushion,
+.fc .fc-timegrid-slot-label-cushion,
+.fc .fc-timegrid-axis-cushion,
+.fc-list-event-time,
+.fc-popover-close {
+  color: hsl(var(--muted-foreground));
+}
+
+/* ================================
+   CALENDAR CONTAINER & LAYOUT
+   ================================ */
+
+/* Main calendar container */
+.fc {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  height: 100% !important;
+}
+
+/* Calendar content area */
+.fc-view-harness,
+.fc-scroller-harness,
+.fc-scroller {
+  height: 100% !important;
+}
+
+.fc-scroller {
+  overflow-y: auto;
+}
+
+/* ================================
+   CURRENT DAY STYLING
+   ================================ */
+
+/* Today highlighting - Subtle muted green background for current day COLUMN (not headers) */
+.fc-day-today {
+  background-color: oklch(
+    0.7 0.15 140 / 0.15
+  ) !important; /* Light mode muted green */
+}
+
+.dark .fc-day-today {
+  background-color: oklch(
+    0.7 0.15 140 / 0.1
+  ) !important; /* Dark mode muted green - different opacity for theme responsiveness */
+}
+
+/* NO SPECIAL STYLING FOR TODAY'S COLUMN HEADER - BOTH LIGHT AND DARK MODE */
+.fc-col-header-cell.fc-day-today {
+  background-color: hsl(var(--muted)) !important;
+}
+
+/* Custom day header styling for React components */
+.day-header-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* Capitalize weekday label strictly in Week and Month views */
+.fc-timeGridWeek-view .day-header-name,
+.fc-dayGridMonth-view .day-header-name {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5; /* match AM/PM time label style */
+}
+
+.fc-timeGridWeek-view .day-header-number,
+.fc-dayGridMonth-view .day-header-number {
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  min-width: 24px;
+  text-align: center;
+  color: hsl(var(--secondary-foreground));
+}
+
+.day-header-number.today {
+  background-color: oklch(0.7 0.15 140);
+  color: white;
+  font-weight: 600;
+}
+
+.dark .day-header-number.today {
+  background-color: oklch(0.6 0.25 140);
+}
+
+/* Today's date number - circular highlight */
+.fc-day-today .fc-daygrid-day-number {
+  background-color: oklch(0.7 0.3 140);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+}
+
+.dark .fc-day-today .fc-daygrid-day-number {
+  background-color: oklch(0.6 0.25 140);
+}
+
+/* ================================
+   COLUMN HEADERS
+   ================================ */
+
+.fc-col-header-cell {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+}
+
+.fc-col-header-cell-cushion {
+  text-decoration: none; /* remove underline */
+  padding: 8px 4px;
+}
+
+/* Keep hover subtle without blocking navlink underline */
+.fc-col-header-cell-cushion:hover:not(.fc-navlink) {
+  color: hsl(var(--muted-foreground));
+  text-decoration: none;
+}
+
+.fc-col-header-cell.fc-sticky {
+  background-color: hsl(var(--muted));
+  z-index: 2;
+}
+
+/* ================================
+   DAY GRID CELLS
+   ================================ */
+
+/* day cells inherit page background */
+
+.fc-daygrid-day-number {
+  color: hsl(var(--foreground));
+  text-decoration: none; /* remove underline */
+  padding: 4px;
+}
+
+/* Do not suppress underline when element is a navlink */
+.fc-daygrid-day:not(.fc-day-today) .fc-daygrid-day-number:hover:not(.fc-navlink) {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  border-radius: 4px;
+  text-decoration: none;
+}
+
+.fc-daygrid-day:not(.fc-day-today):hover {
+  background-color: hsl(var(--accent) / 0.3);
+}
+
+/* ================================
+   TIME GRID
+   ================================ */
+
+/* timegrid slots inherit page background */
+
+/* Increase specificity and force styles to take effect */
+.fc .fc-timegrid-slot-label-cushion {
+  /* Smaller and lower-contrast for time labels; remains theme-aware */
+  /* Do NOT fade the whole container; it would dim children too */
+  opacity: 1 !important;
+  text-align: right;
+  padding-right: 8px;
+  font-weight: 500;
+  font-size: 0.72em;
+}
+
+/* Hour/minute split styling injected by slotLabelContent */
+.fc .fc-timegrid-slot-label-cushion .fc-slot-hour {
+  /* Force bright hour text regardless of inherited color */
+  opacity: 1;
+  font-size: 1.2em;
+}
+.fc .fc-timegrid-slot-label-cushion .fc-slot-meridiem {
+  color: hsl(var(--muted-foreground));
+  opacity: 0.5;
+  font-weight: 500;
+  font-size: 0.8em;
+}
+
+/* All-day axis label styling to match time labels */
+.fc .fc-timegrid-axis-cushion {
+  opacity: 0.65;
+  text-transform: uppercase;
+  font-weight: 500;
+  font-size: 0.72em;
+}
+
+.fc-timegrid-axis {
+  border-left: none !important;
+  opacity: 1; /* Show left time bar */
+}
+
+.fc-timegrid-axis.fc-sticky {
+  z-index: 3;
+}
+
+.fc-timegrid-slot:hover {
+  background-color: hsl(var(--accent) / 0.1);
+}
+
+/* Minor grid lines - consolidated */
+.fc-timegrid-slot-minor,
+.fc-timegrid-slot-minor td {
+  border-color: oklch(0.5 0 0 / 0.1) !important;
+}
+
+.dark .fc-timegrid-slot-minor,
+.dark .fc-timegrid-slot-minor td {
+  border-color: oklch(1 0 0 / 0.05) !important;
+}
+
+/* ================================
+   EVENTS
+   ================================ */
+
+.fc-event {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-radius: 4px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+/* Mirror/preview event (selection or drag) should match real event styling and use default calendar color */
+.fc .fc-event.fc-event-mirror.fc-event-preview,
+.fc .fc-event-preview {
+  border-radius: 4px !important;
+  background-color: var(--default-calendar-color, hsl(var(--primary))) !important;
+  border-color: var(--default-calendar-color, hsl(var(--primary))) !important;
+  color: #fff !important;
+  opacity: 0.9;
+}
+
+.fc-event:hover {
+  background-color: hsl(var(--primary) / 0.9);
+  border-color: hsl(var(--primary) / 0.9);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px hsl(var(--primary) / 0.3);
+}
+
+/* .fc-event-main inherits color from .fc-event */
+
+.fc-event-title {
+  font-size: 0.8em;
+  font-weight: 600;
+  color: inherit;
+}
+
+.fc-event-time {
+  font-size: 0.8em;
+  font-weight: 500;
+  color: inherit;
+}
+
+/* Event areas */
+.fc-daygrid-event-harness {
+  margin: 1px 2px;
+}
+
+.fc-timegrid-event-harness {
+  margin-right: 2px;
+}
+
+/* ================================
+   NOW INDICATOR
+   ================================ */
+
+.fc-timegrid-now-indicator-line {
+  background: var(--destructive) !important;
+  height: 2px;
+}
+
+/* Ensure the now-indicator arrow renders as a triangle. FullCalendar builds it with
+   borders; we must keep three sides transparent and only color the side that points
+   toward the grid. Handle both LTR and RTL directions. */
+.fc .fc-now-indicator-arrow {
+  border-color: transparent !important;
+}
+.fc:not(.fc-direction-rtl) .fc-now-indicator-arrow {
+  border-left-color: var(--destructive) !important;
+}
+.fc.fc-direction-rtl .fc-now-indicator-arrow {
+  border-right-color: var(--destructive) !important;
+}
+
+/* ================================
+   DRAG & DROP
+   ================================ */
+
+.fc-event-dragging {
+  opacity: 0.75;
+  z-index: 999;
+}
+
+.fc-event-resizer {
+  background-color: hsl(var(--primary-foreground));
+  opacity: 0.8;
+}
+
+.fc-event-resizer:hover {
+  opacity: 1;
+}
+
+/* Selection styling */
+.fc-highlight {
+  background-color: color-mix(in srgb, var(--default-calendar-color, hsl(var(--primary))) 20%, transparent) !important;
+  border-color: var(--default-calendar-color, hsl(var(--primary))) !important;
+  border-radius: 4px;
+}
+
+.fc-timegrid-slot.fc-highlight {
+  background-color: color-mix(in srgb, var(--default-calendar-color, hsl(var(--primary))) 10%, transparent) !important;
+}
+
+/* ================================
+   LIST VIEW
+   ================================ */
+
+/* Shared list backgrounds */
+/* list table inherits page background */
+
+.fc-list-day-cushion {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+/* list event background inherits from table/page background */
+
+.fc-list-event:hover {
+  background-color: hsl(var(--accent) / 0.5);
+  cursor: pointer;
+}
+
+.fc-list-event-time {
+  font-weight: 500;
+}
+
+.fc-list-event-title {
+  color: hsl(var(--foreground));
+  width: 100%;
+}
+
+.fc-list-event-dot {
+  background-color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+
+.fc-list-empty {
+  color: hsl(var(--muted-foreground));
+  text-align: center;
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* ================================
+   SCROLLGRID & BORDERS
+   ================================ */
+
+.fc-scrollgrid,
+.fc-scrollgrid-liquid,
+.fc-scrollgrid-sync-table {
+  border-left: none !important;
+}
+
+/* section background inherits from parent */
+
+/* Border coloring should rely on FullCalendar CSS variables defined at the top
+   (e.g., --fc-border-color) to avoid clobbering border-based shapes like arrows. */
+
+/* ================================
+   POPOVER & MORE LINKS
+   ================================ */
+
+.fc-more-link {
+  color: hsl(var(--primary));
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.fc-more-link:hover {
+  color: hsl(var(--primary) / 0.8);
+  text-decoration: underline;
+}
+
+.fc-popover {
+  background-color: hsl(var(--popover));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  box-shadow:
+    0 10px 15px -3px hsl(var(--foreground) / 0.1),
+    0 4px 6px -2px hsl(var(--foreground) / 0.05);
+}
+
+.fc-popover-header {
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 8px 12px;
+  font-weight: 600;
+}
+
+.fc-popover-body {
+  background-color: hsl(var(--popover));
+  color: hsl(var(--popover-foreground));
+  padding: 8px;
+}
+
+.fc-popover-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+}
+
+.fc-popover-close:hover {
+  color: hsl(var(--foreground));
+  background-color: hsl(var(--accent));
+  border-radius: 4px;
+}
+
+/* ================================
+   NAVIGATION LINKS
+   ================================ */
+
+.fc-daygrid-day-number.fc-navlink:hover,
+.fc-col-header-cell-cushion.fc-navlink:hover {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+}
+
+/* ================================
+   SPECIAL DAY STYLING
+   ================================ */
+
+.fc-non-business {
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+.fc-day-sat,
+.fc-day-sun {
+  background-color: hsl(var(--muted) / 0.1);
+}
+
+.fc-event-past {
+  opacity: 0.8;
+}
+
+.fc-day-disabled {
+  background-color: hsl(var(--muted) / 0.5);
+  color: hsl(var(--muted-foreground));
+}
+
+.fc-loading {
+  background-color: hsl(var(--background) / 0.8);
+  color: hsl(var(--muted-foreground));
+}
+
+/* ================================
+   SCROLLBARS
+   ================================ */
+
+.fc-scroller::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.fc-scroller::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+
+.fc-scroller::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* ================================
+   MOBILE RESPONSIVE
+   ================================ */
+
+@media (max-width: 768px) {
+  .fc-event {
+    font-size: 0.75rem;
+    padding: 1px 2px;
+  }
+
+  .fc-daygrid-day-number {
+    font-size: 0.875rem;
+  }
+
+  .fc-col-header-cell-cushion {
+    padding: 4px 2px;
+    font-size: 0.875rem;
+  }
+}
+
+/* ================================
+   ACCESSIBILITY
+   ================================ */
+
+/* Focus states */
+.fc-daygrid-day-number:focus,
+.fc-event:focus,
+.fc-more-link:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .fc-event {
+    border-width: 2px;
+    font-weight: 600;
+  }
+
+  .fc-daygrid-day-number {
+    font-weight: 700;
+  }
+
+  .fc-col-header-cell-cushion {
+    font-weight: 700;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .fc-event,
+  .fc-daygrid-day-number,
+  .fc-more-link,
+  .fc-popover-close {
+    transition: none;
+  }
+}
+
+/* ================================
+   PRINT STYLES
+   ================================ */
+
+@media print {
+  .fc {
+    background-color: white !important;
+    color: black !important;
+  }
+
+  .fc-event {
+    background-color: #f0f0f0 !important;
+    color: black !important;
+    border: 1px solid #ccc !important;
+  }
+
+  .fc-col-header-cell {
+    background-color: #f8f8f8 !important;
+    color: black !important;
+  }
+}
+
+/* ================================
+   SCROLLING BEHAVIOR & GESTURE HANDLING
+   ================================ */
+
+/* Prevent elastic scrolling and browser navigation interference */
+.right-pane-container,
+.fc,
+.fc-view-harness,
+.fc-scroller-harness,
+.presentation,
+.fc-scroller.fc-scroller-liquid-absolute,
+.fc-scroller {
+  overscroll-behavior: none !important;
+  overscroll-behavior-x: contain !important;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 !important;
+  border: none !important;
+
+  /* Prevent browser back/forward navigation on horizontal swipes */
+  touch-action: pan-y pinch-zoom !important;
+}
+
+/* DO NOT BLOCK TIME PICKER SCROLLING */
+.right-pane-container *:not(.fc):not(.fc *) {
+  overscroll-behavior: auto !important;
+}
+
+.fc-timegrid-body,
+.fc-daygrid-body,
+.fc-list-table {
+  overscroll-behavior: none !important;
+}
+
+/* ================================
+   CALENDAR LIST ANIMATIONS
+   ================================ */
+
+.calendar-item {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.2s ease-out;
+  animation-delay: var(--animation-delay, 0ms);
+  animation-fill-mode: forwards;
+}
+
+/* When collapsible content is open, animate items in */
+[data-state='open'] .calendar-item {
+  animation: fadeInStagger 0.2s ease-out forwards;
+}
+
+/* When collapsible content is closed, animate items out */
+[data-state='closed'] .calendar-item {
+  animation: fadeOutStagger 0.15s ease-out forwards;
+}
+
+@keyframes fadeInStagger {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOutStagger {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
