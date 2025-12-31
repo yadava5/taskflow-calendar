@@ -155,9 +155,11 @@ export function ProfileSettings() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Form {...(form as unknown as import('react-hook-form').UseFormReturn)}>
+          <Form
+            {...(form as unknown as import('react-hook-form').UseFormReturn)}
+          >
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Name Field */}
                 <FormField
                   control={form.control}
@@ -183,7 +185,12 @@ export function ProfileSettings() {
                 {/* Email is not editable. Display-only row mirrors form inputs for consistency. */}
                 <div className="space-y-2">
                   <FormLabel>Email Address</FormLabel>
-                  <Input type="email" value={profileData.email} readOnly disabled />
+                  <Input
+                    type="email"
+                    value={profileData.email}
+                    readOnly
+                    disabled
+                  />
                   <FormDescription>
                     {profileData.canEditEmail
                       ? 'Email changes are restricted for security reasons. Contact support to update.'

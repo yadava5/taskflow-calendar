@@ -44,22 +44,25 @@ export const TaskFocusPane: React.FC<TaskFocusPaneProps> = ({ className }) => {
     title: string,
     _groupId?: string,
     smartData?: {
-      priority?: 'low' | 'medium' | 'high'
-      scheduledDate?: Date
+      priority?: 'low' | 'medium' | 'high';
+      scheduledDate?: Date;
       tags?: Array<{
-        id: string
-        type: string
-        value: string
-        displayText: string
-        iconName: string
-        color?: string
-      }>
-      originalInput?: string
-      title?: string
+        id: string;
+        type: string;
+        value: string;
+        displayText: string;
+        iconName: string;
+        color?: string;
+      }>;
+      originalInput?: string;
+      title?: string;
     },
-    files?: UploadedFile[],
+    files?: UploadedFile[]
   ) => {
-    const taskListId = _groupId && _groupId !== 'default' && _groupId !== 'all' ? _groupId : undefined;
+    const taskListId =
+      _groupId && _groupId !== 'default' && _groupId !== 'all'
+        ? _groupId
+        : undefined;
     addTask.mutate({
       title,
       taskListId,
@@ -68,7 +71,14 @@ export const TaskFocusPane: React.FC<TaskFocusPaneProps> = ({ className }) => {
       tags: smartData?.tags?.map((tag) => ({
         id: tag.id,
         // enforce union-compatible tag type
-        type: tag.type as 'date' | 'time' | 'priority' | 'location' | 'person' | 'label' | 'project',
+        type: tag.type as
+          | 'date'
+          | 'time'
+          | 'priority'
+          | 'location'
+          | 'person'
+          | 'label'
+          | 'project',
         value: typeof tag.value === 'string' ? tag.value : String(tag.value),
         displayText: tag.displayText,
         iconName: tag.iconName,
@@ -104,8 +114,14 @@ export const TaskFocusPane: React.FC<TaskFocusPaneProps> = ({ className }) => {
   const canAddPane = taskPanes.length < maxTaskPanes && taskViewMode === 'list';
 
   // Show/Hide enhanced input on demand
-  const { enhancedInputVisible, setEnhancedInputVisible, enhancedInputTaskListId, setEnhancedInputTaskListId } = useSettingsStore();
-  const [showEnhancedInput, setShowEnhancedInput] = useState(enhancedInputVisible);
+  const {
+    enhancedInputVisible,
+    setEnhancedInputVisible,
+    enhancedInputTaskListId,
+    setEnhancedInputTaskListId,
+  } = useSettingsStore();
+  const [showEnhancedInput, setShowEnhancedInput] =
+    useState(enhancedInputVisible);
   const handleToggleAddTaskInput = () => setShowEnhancedInput((v) => !v);
   const handleHideAddTaskInput = () => setShowEnhancedInput(false);
 
@@ -123,7 +139,10 @@ export const TaskFocusPane: React.FC<TaskFocusPaneProps> = ({ className }) => {
 
     const tryFocus = () => {
       for (const id of focusTargets) {
-        const el = document.getElementById(id) as HTMLTextAreaElement | HTMLInputElement | null;
+        const el = document.getElementById(id) as
+          | HTMLTextAreaElement
+          | HTMLInputElement
+          | null;
         if (el) {
           el.focus();
           if ('select' in el && typeof el.select === 'function') {
@@ -233,7 +252,12 @@ export const TaskFocusPane: React.FC<TaskFocusPaneProps> = ({ className }) => {
                   handleAddTask(...args);
                   handleHideAddTaskInput();
                 }}
-                onAddTaskWithFiles={(title, groupId, smart: SmartTaskData | undefined, files) => {
+                onAddTaskWithFiles={(
+                  title,
+                  groupId,
+                  smart: SmartTaskData | undefined,
+                  files
+                ) => {
                   const normalizedSmart = smart
                     ? {
                         priority: smart.priority,
@@ -241,7 +265,10 @@ export const TaskFocusPane: React.FC<TaskFocusPaneProps> = ({ className }) => {
                         tags: smart.tags?.map((t) => ({
                           id: t.id,
                           type: t.type,
-                          value: typeof t.value === 'string' ? t.value : String(t.value),
+                          value:
+                            typeof t.value === 'string'
+                              ? t.value
+                              : String(t.value),
                           displayText: t.displayText,
                           iconName: t.iconName,
                           color: t.color,
@@ -250,7 +277,12 @@ export const TaskFocusPane: React.FC<TaskFocusPaneProps> = ({ className }) => {
                         title: smart.title,
                       }
                     : undefined;
-                  handleAddTaskWithFiles(title, groupId, normalizedSmart, files);
+                  handleAddTaskWithFiles(
+                    title,
+                    groupId,
+                    normalizedSmart,
+                    files
+                  );
                   handleHideAddTaskInput();
                 }}
                 taskGroups={taskGroups}

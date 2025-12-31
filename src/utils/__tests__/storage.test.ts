@@ -18,13 +18,19 @@ import {
   DEFAULT_SETTINGS,
   DEFAULT_CALENDARS,
 } from '../storage';
-import type { Task, CalendarEvent, Calendar, AppSettings, GoogleAuthState } from "@shared/types";
+import type {
+  Task,
+  CalendarEvent,
+  Calendar,
+  AppSettings,
+  GoogleAuthState,
+} from '@shared/types';
 
 // localStorage is already mocked in setup.ts - no need for custom mock here
 
 describe('Storage Utilities', () => {
   // Remove the custom localStorage mock - use the global one from setup.ts instead
-  
+
   describe('isStorageAvailable', () => {
     it('should return true when localStorage is available', () => {
       expect(isStorageAvailable()).toBe(true);
@@ -59,15 +65,17 @@ describe('Storage Utilities', () => {
       });
 
       it('should return stored tasks with dates converted', () => {
-        const storedData = JSON.stringify([{
-          ...mockTask,
-          createdAt: mockTask.createdAt.toISOString(),
-          scheduledDate: mockTask.scheduledDate?.toISOString(),
-        }]);
-        
+        const storedData = JSON.stringify([
+          {
+            ...mockTask,
+            createdAt: mockTask.createdAt.toISOString(),
+            scheduledDate: mockTask.scheduledDate?.toISOString(),
+          },
+        ]);
+
         // Set the data in localStorage
         localStorage.setItem(STORAGE_KEYS.TASKS, storedData);
-        
+
         const tasks = taskStorage.getTasks();
         expect(tasks).toHaveLength(1);
         expect(tasks[0].createdAt).toBeInstanceOf(Date);
@@ -83,7 +91,7 @@ describe('Storage Utilities', () => {
     describe('saveTasks', () => {
       it('should save tasks to localStorage', () => {
         const result = taskStorage.saveTasks([mockTask]);
-        
+
         expect(result).toBe(true);
         expect(localStorage.setItem).toHaveBeenCalledWith(
           STORAGE_KEYS.TASKS,
@@ -95,7 +103,7 @@ describe('Storage Utilities', () => {
     describe('addTask', () => {
       it('should add task to existing tasks', () => {
         taskStorage.saveTasks([mockTask]);
-        
+
         const newTask: Task = {
           id: '2',
           title: 'New Task',
@@ -104,9 +112,9 @@ describe('Storage Utilities', () => {
           updatedAt: new Date(),
           userId: 'test-user',
         };
-        
+
         const result = taskStorage.addTask(newTask);
-        
+
         expect(result).toBe(true);
         const tasks = taskStorage.getTasks();
         expect(tasks).toHaveLength(2);
@@ -120,7 +128,7 @@ describe('Storage Utilities', () => {
 
       it('should update existing task', () => {
         const result = taskStorage.updateTask('1', { completed: true });
-        
+
         expect(result).toBe(true);
         const tasks = taskStorage.getTasks();
         expect(tasks[0].completed).toBe(true);
@@ -139,7 +147,7 @@ describe('Storage Utilities', () => {
 
       it('should delete existing task', () => {
         const result = taskStorage.deleteTask('1');
-        
+
         expect(result).toBe(true);
         const tasks = taskStorage.getTasks();
         expect(tasks).toHaveLength(0);
@@ -167,14 +175,16 @@ describe('Storage Utilities', () => {
       });
 
       it('should return stored events with dates converted', () => {
-        const storedData = JSON.stringify([{
-          ...mockEvent,
-          start: mockEvent.start.toISOString(),
-          end: mockEvent.end.toISOString(),
-        }]);
-        
+        const storedData = JSON.stringify([
+          {
+            ...mockEvent,
+            start: mockEvent.start.toISOString(),
+            end: mockEvent.end.toISOString(),
+          },
+        ]);
+
         localStorage.setItem(STORAGE_KEYS.EVENTS, storedData);
-        
+
         const events = eventStorage.getEvents();
         expect(events).toHaveLength(1);
         expect(events[0].start).toBeInstanceOf(Date);
@@ -185,7 +195,7 @@ describe('Storage Utilities', () => {
     describe('addEvent', () => {
       it('should add event to existing events', () => {
         const result = eventStorage.addEvent(mockEvent);
-        
+
         expect(result).toBe(true);
         const events = eventStorage.getEvents();
         expect(events).toHaveLength(1);
@@ -198,8 +208,10 @@ describe('Storage Utilities', () => {
       });
 
       it('should update existing event', () => {
-        const result = eventStorage.updateEvent('1', { title: 'Updated Event' });
-        
+        const result = eventStorage.updateEvent('1', {
+          title: 'Updated Event',
+        });
+
         expect(result).toBe(true);
         const events = eventStorage.getEvents();
         expect(events[0].title).toBe('Updated Event');
@@ -218,7 +230,7 @@ describe('Storage Utilities', () => {
 
       it('should delete existing event', () => {
         const result = eventStorage.deleteEvent('1');
-        
+
         expect(result).toBe(true);
         const events = eventStorage.getEvents();
         expect(events).toHaveLength(0);
@@ -242,8 +254,11 @@ describe('Storage Utilities', () => {
       it('should return stored calendars', () => {
         // First clear the store to avoid default calendars
         localStorage.clear();
-        localStorage.setItem(STORAGE_KEYS.CALENDARS, JSON.stringify([mockCalendar]));
-        
+        localStorage.setItem(
+          STORAGE_KEYS.CALENDARS,
+          JSON.stringify([mockCalendar])
+        );
+
         const calendars = calendarStorage.getCalendars();
         expect(calendars).toEqual([mockCalendar]);
       });
@@ -252,7 +267,7 @@ describe('Storage Utilities', () => {
     describe('addCalendar', () => {
       it('should add new calendar', () => {
         const result = calendarStorage.addCalendar(mockCalendar);
-        
+
         expect(result).toBe(true);
         const calendars = calendarStorage.getCalendars();
         expect(calendars).toContainEqual(mockCalendar);
@@ -261,7 +276,7 @@ describe('Storage Utilities', () => {
       it('should not add calendar with duplicate name', () => {
         calendarStorage.addCalendar(mockCalendar);
         const result = calendarStorage.addCalendar(mockCalendar);
-        
+
         expect(result).toBe(false);
       });
     });
@@ -272,15 +287,19 @@ describe('Storage Utilities', () => {
       });
 
       it('should update existing calendar', () => {
-        const result = calendarStorage.updateCalendar('Test Calendar', { color: '#00FF00' });
-        
+        const result = calendarStorage.updateCalendar('Test Calendar', {
+          color: '#00FF00',
+        });
+
         expect(result).toBe(true);
         const calendars = calendarStorage.getCalendars();
         expect(calendars[0].color).toBe('#00FF00');
       });
 
       it('should return false for non-existing calendar', () => {
-        const result = calendarStorage.updateCalendar('Non-existing', { color: '#00FF00' });
+        const result = calendarStorage.updateCalendar('Non-existing', {
+          color: '#00FF00',
+        });
         expect(result).toBe(false);
       });
     });
@@ -292,7 +311,7 @@ describe('Storage Utilities', () => {
 
       it('should delete calendar without deleting events', () => {
         const result = calendarStorage.deleteCalendar('Test Calendar', false);
-        
+
         expect(result).toBe(true);
         const calendars = calendarStorage.getCalendars();
         expect(calendars).not.toContainEqual(mockCalendar);
@@ -306,11 +325,11 @@ describe('Storage Utilities', () => {
           end: new Date(),
           calendarName: 'Test Calendar',
         };
-        
+
         eventStorage.saveEvents([mockEvent]);
-        
+
         const result = calendarStorage.deleteCalendar('Test Calendar', true);
-        
+
         expect(result).toBe(true);
         const events = eventStorage.getEvents();
         expect(events).toHaveLength(0);
@@ -330,9 +349,12 @@ describe('Storage Utilities', () => {
           ...DEFAULT_SETTINGS,
           theme: 'dark',
         };
-        
-        localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(customSettings));
-        
+
+        localStorage.setItem(
+          STORAGE_KEYS.SETTINGS,
+          JSON.stringify(customSettings)
+        );
+
         const settings = settingsStorage.getSettings();
         expect(settings.theme).toBe('dark');
       });
@@ -341,7 +363,7 @@ describe('Storage Utilities', () => {
     describe('updateSetting', () => {
       it('should update specific setting', () => {
         const result = settingsStorage.updateSetting('theme', 'dark');
-        
+
         expect(result).toBe(true);
         const settings = settingsStorage.getSettings();
         expect(settings.theme).toBe('dark');
@@ -364,8 +386,11 @@ describe('Storage Utilities', () => {
       });
 
       it('should return stored auth state', () => {
-        localStorage.setItem(STORAGE_KEYS.GOOGLE_AUTH, JSON.stringify(mockAuthState));
-        
+        localStorage.setItem(
+          STORAGE_KEYS.GOOGLE_AUTH,
+          JSON.stringify(mockAuthState)
+        );
+
         const authState = googleAuthStorage.getAuthState();
         expect(authState).toEqual(mockAuthState);
       });
@@ -374,9 +399,9 @@ describe('Storage Utilities', () => {
     describe('clearAuthState', () => {
       it('should clear authentication state', () => {
         googleAuthStorage.saveAuthState(mockAuthState);
-        
+
         const result = googleAuthStorage.clearAuthState();
-        
+
         expect(result).toBe(true);
         const authState = googleAuthStorage.getAuthState();
         expect(authState.isAuthenticated).toBe(false);
@@ -390,11 +415,13 @@ describe('Storage Utilities', () => {
       taskStorage.saveTasks([]);
       eventStorage.saveEvents([]);
       settingsStorage.saveSettings(DEFAULT_SETTINGS);
-      
+
       const result = clearAllData();
-      
+
       expect(result).toBe(true);
-      expect(localStorage.removeItem).toHaveBeenCalledTimes(Object.keys(STORAGE_KEYS).length);
+      expect(localStorage.removeItem).toHaveBeenCalledTimes(
+        Object.keys(STORAGE_KEYS).length
+      );
     });
   });
 
@@ -408,11 +435,11 @@ describe('Storage Utilities', () => {
         updatedAt: new Date(),
         userId: 'test-user',
       };
-      
+
       taskStorage.saveTasks([mockTask]);
-      
+
       const exportedData = exportData();
-      
+
       expect(exportedData.tasks).toHaveLength(1);
       expect(exportedData.events).toEqual([]);
       expect(exportedData.settings).toEqual(DEFAULT_SETTINGS);
@@ -429,9 +456,9 @@ describe('Storage Utilities', () => {
         updatedAt: new Date(),
         userId: 'test-user',
       };
-      
+
       const result = importData({ tasks: [mockTask] });
-      
+
       expect(result).toBe(true);
       const tasks = taskStorage.getTasks();
       expect(tasks).toHaveLength(1);
@@ -444,10 +471,10 @@ describe('Storage Utilities', () => {
       localStorage.setItem = vi.fn(() => {
         throw new Error('Storage error');
       });
-      
+
       const result = importData({ tasks: [] });
       expect(result).toBe(false);
-      
+
       // Restore original implementation
       localStorage.setItem = originalSetItem;
     });
@@ -456,7 +483,7 @@ describe('Storage Utilities', () => {
   describe('getStorageInfo', () => {
     it('should return storage usage information', () => {
       const info = getStorageInfo();
-      
+
       expect(info).toHaveProperty('used');
       expect(info).toHaveProperty('available');
       expect(typeof info.used).toBe('number');

@@ -7,7 +7,7 @@ export const useCalendarManagement = () => {
     addCalendar,
     updateCalendar,
     deleteCalendar,
-    isLoading: calendarsLoading
+    isLoading: calendarsLoading,
   } = useCalendars();
 
   const handleToggleCalendar = (name: string) => {
@@ -18,11 +18,15 @@ export const useCalendarManagement = () => {
     addCalendar.mutate({ name, color });
   };
 
-  const handleEditCalendar = (currentName: string, newName: string, color: string) => {
+  const handleEditCalendar = (
+    currentName: string,
+    newName: string,
+    color: string
+  ) => {
     // Request to update, then optimistically show create dialog behavior is not required.
     updateCalendar.mutate({
       name: currentName,
-      updates: { name: newName, color }
+      updates: { name: newName, color },
     });
   };
 

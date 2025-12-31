@@ -38,21 +38,13 @@ export {
   DEFAULT_CALENDAR_COLORS,
 } from './useCalendars';
 
-export type {
-  TaskFilters,
-} from './useTasks';
+export type { TaskFilters } from './useTasks';
 
-export type {
-  EventFilters,
-} from './useEvents';
+export type { EventFilters } from './useEvents';
 
-export type {
-  CalendarFilters,
-} from './useCalendars';
+export type { CalendarFilters } from './useCalendars';
 
-export {
-  useSwipeDetection,
-} from './useSwipeDetection';
+export { useSwipeDetection } from './useSwipeDetection';
 
 // Re-export API types
 export type {

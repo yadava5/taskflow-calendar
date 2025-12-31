@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { TaskItem } from './TaskItem';
-import type { Task } from "@shared/types";
+import type { Task } from '@shared/types';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 const demoTask: Task = {
@@ -36,7 +36,9 @@ export const TaskItemDemo: React.FC = () => {
   return (
     <TooltipProvider>
       <div className="p-4 max-w-md">
-        <h3 className="text-lg font-semibold mb-4">TaskItem with Tooltip Demo</h3>
+        <h3 className="text-lg font-semibold mb-4">
+          TaskItem with Tooltip Demo
+        </h3>
         <TaskItem
           task={demoTask}
           onToggle={handleToggle}
@@ -45,7 +47,8 @@ export const TaskItemDemo: React.FC = () => {
           onSchedule={handleSchedule}
         />
         <p className="text-sm text-muted-foreground mt-4">
-          Hover over the task to see the three dots menu, then hover over the info icon (ⓘ) next to "Schedule" to see the tooltip.
+          Hover over the task to see the three dots menu, then hover over the
+          info icon (ⓘ) next to "Schedule" to see the tooltip.
         </p>
       </div>
     </TooltipProvider>

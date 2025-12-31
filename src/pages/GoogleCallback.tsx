@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, AlertCircle, CheckCircle } from 'lucide-react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/stores/authStore';
@@ -10,9 +16,11 @@ import { authAPI } from '@/services/api/auth';
 export function GoogleCallbackPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  );
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
+
   const { setGoogleAuth, setError } = useAuthStore();
 
   useEffect(() => {
@@ -49,15 +57,17 @@ export function GoogleCallbackPage() {
         });
 
         setStatus('success');
-        
+
         // Redirect after a short delay
         setTimeout(() => {
           navigate('/', { replace: true });
         }, 1500);
-
       } catch (error) {
         console.error('Google callback error:', error);
-        const message = error instanceof Error ? error.message : 'Google authentication failed';
+        const message =
+          error instanceof Error
+            ? error.message
+            : 'Google authentication failed';
         setErrorMessage(message);
         setError(message);
         setStatus('error');
@@ -130,14 +140,14 @@ export function GoogleCallbackPage() {
                   </p>
                 </div>
               </div>
-              
+
               <Alert className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/50">
                 <AlertDescription className="text-red-800 dark:text-red-200 text-sm">
                   {errorMessage}
                 </AlertDescription>
               </Alert>
 
-              <Button 
+              <Button
                 onClick={handleRetry}
                 className="w-full h-11 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white"
               >
@@ -149,7 +159,10 @@ export function GoogleCallbackPage() {
           {/* Progress indicator for loading state */}
           {status === 'loading' && (
             <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1">
-              <div className="bg-gradient-to-r from-emerald-500 to-teal-600 h-1 rounded-full animate-pulse" style={{ width: '60%' }} />
+              <div
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 h-1 rounded-full animate-pulse"
+                style={{ width: '60%' }}
+              />
             </div>
           )}
         </CardContent>

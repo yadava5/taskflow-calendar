@@ -13,4 +13,4 @@ export const COLOR_PRESETS = [
   '#84cc16', // Lime
 ] as const;
 
-export type ColorPreset = typeof COLOR_PRESETS[number];
+export type ColorPreset = (typeof COLOR_PRESETS)[number];

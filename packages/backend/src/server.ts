@@ -251,12 +251,10 @@ app.put('/api/calendars/:id', async (req, res) => {
     console.error('PUT /api/calendars/:id error:', error);
     const message = getErrorMessage(error);
     if (message.startsWith('VALIDATION_ERROR:')) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: { message: message.replace('VALIDATION_ERROR: ', '') },
-        });
+      return res.status(400).json({
+        success: false,
+        error: { message: message.replace('VALIDATION_ERROR: ', '') },
+      });
     }
     res.status(500).json({ success: false, error: { message } });
   }
@@ -296,12 +294,10 @@ app.patch('/api/calendars/:id', async (req, res) => {
     console.error('PATCH /api/calendars/:id error:', error);
     const message = getErrorMessage(error);
     if (message.startsWith('VALIDATION_ERROR:')) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: { message: message.replace('VALIDATION_ERROR: ', '') },
-        });
+      return res.status(400).json({
+        success: false,
+        error: { message: message.replace('VALIDATION_ERROR: ', '') },
+      });
     }
     res.status(500).json({ success: false, error: { message } });
   }

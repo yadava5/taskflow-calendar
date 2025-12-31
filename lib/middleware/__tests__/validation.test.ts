@@ -239,8 +239,8 @@ describe('Validation Middleware', () => {
 
     it('should transform data using Zod transforms', async () => {
       const schema = z.object({
-        priority: z.string().transform(val => parseInt(val, 10)),
-        tags: z.string().transform(val => val.split(',')),
+        priority: z.string().transform((val) => parseInt(val, 10)),
+        tags: z.string().transform((val) => val.split(',')),
       });
 
       const req = createMockRequest({
@@ -267,7 +267,7 @@ describe('Validation Middleware', () => {
           password: z.string(),
           confirmPassword: z.string(),
         })
-        .refine(data => data.password === data.confirmPassword, {
+        .refine((data) => data.password === data.confirmPassword, {
           message: 'Passwords do not match',
           path: ['confirmPassword'],
         });
@@ -566,7 +566,9 @@ describe('Validation Middleware', () => {
 
         expect(vi.mocked(res.status)).toHaveBeenCalledWith(400);
         const jsonCall = vi.mocked(res.json).mock.calls[0][0];
-        expect(jsonCall.error?.message).toContain('Start date must be before end date');
+        expect(jsonCall.error?.message).toContain(
+          'Start date must be before end date'
+        );
       });
 
       it('should accept same start and end date', async () => {

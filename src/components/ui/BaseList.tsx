@@ -508,7 +508,12 @@ function BaseListItem<T extends BaseListItem>({
             aria-label={`Select ${item.name}`}
             aria-pressed={isActive}
           >
-            <span className={cn('text-[18px] leading-none', isActive ? '' : 'opacity-80')}>
+            <span
+              className={cn(
+                'text-[18px] leading-none',
+                isActive ? '' : 'opacity-80'
+              )}
+            >
               {item.emoji ?? '📁'}
             </span>
           </button>
@@ -540,7 +545,11 @@ function BaseListItem<T extends BaseListItem>({
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Settings</span>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => (onStartEdit ? onStartEdit(item) : setIsEditing(true))}>
+              <DropdownMenuItem
+                onClick={() =>
+                  onStartEdit ? onStartEdit(item) : setIsEditing(true)
+                }
+              >
                 <Edit className="mr-2 h-4 w-4" />
                 <span>Edit</span>
               </DropdownMenuItem>

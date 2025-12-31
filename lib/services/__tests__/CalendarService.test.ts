@@ -4,7 +4,10 @@
  */
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { CalendarService } from '../CalendarService';
-import { query as mockQuery, withTransaction as mockWithTransaction } from '../../config/database.js';
+import {
+  query as mockQuery,
+  withTransaction as mockWithTransaction,
+} from '../../config/database.js';
 import { testUsers, testCalendars } from '../../__tests__/helpers/fixtures';
 import { createQueryResult } from './helpers/mockDatabase';
 
@@ -64,7 +67,10 @@ describe('CalendarService', () => {
       const visibleCalendars = [testCalendars.primary];
       mockedQuery.mockResolvedValueOnce(createQueryResult(visibleCalendars));
 
-      const result = await calendarService.findAll({ isVisible: true }, mockContext);
+      const result = await calendarService.findAll(
+        { isVisible: true },
+        mockContext
+      );
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('"isVisible" = $2'),
@@ -87,7 +93,10 @@ describe('CalendarService', () => {
       const otherUserId = testUsers.secondary.id;
       mockedQuery.mockResolvedValueOnce(createQueryResult([]));
 
-      await calendarService.findAll({}, { ...mockContext, userId: otherUserId });
+      await calendarService.findAll(
+        {},
+        { ...mockContext, userId: otherUserId }
+      );
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.any(String),
@@ -102,7 +111,10 @@ describe('CalendarService', () => {
       const mockCalendar = testCalendars.primary;
       mockedQuery.mockResolvedValueOnce(createQueryResult([mockCalendar]));
 
-      const result = await calendarService.findById(mockCalendar.id, mockContext);
+      const result = await calendarService.findById(
+        mockCalendar.id,
+        mockContext
+      );
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('SELECT * FROM calendars WHERE id = $1'),
@@ -115,7 +127,10 @@ describe('CalendarService', () => {
     it('should return null when calendar not found', async () => {
       mockedQuery.mockResolvedValueOnce(createQueryResult([]));
 
-      const result = await calendarService.findById('non-existent-id', mockContext);
+      const result = await calendarService.findById(
+        'non-existent-id',
+        mockContext
+      );
 
       expect(result).toBeNull();
     });
@@ -152,13 +167,19 @@ describe('CalendarService', () => {
       mockedQuery.mockImplementation(async (sql: string) => {
         const lower = sql.toLowerCase();
 
-        if (lower.includes('select id from calendars') && lower.includes('name')) {
+        if (
+          lower.includes('select id from calendars') &&
+          lower.includes('name')
+        ) {
           return createQueryResult([]);
         }
         if (lower.includes('insert into users')) {
           return createQueryResult([], 1);
         }
-        if (lower.includes('select count(*)') && lower.includes('from calendars')) {
+        if (
+          lower.includes('select count(*)') &&
+          lower.includes('from calendars')
+        ) {
           return createQueryResult([{ count: '1' }]);
         }
         if (lower.includes('insert into calendars')) {
@@ -197,16 +218,25 @@ describe('CalendarService', () => {
       mockedQuery.mockImplementation(async (sql: string) => {
         const lower = sql.toLowerCase();
 
-        if (lower.includes('select id from calendars') && lower.includes('name')) {
+        if (
+          lower.includes('select id from calendars') &&
+          lower.includes('name')
+        ) {
           return createQueryResult([]);
         }
         if (lower.includes('insert into users')) {
           return createQueryResult([], 1);
         }
-        if (lower.includes('select count(*)') && lower.includes('from calendars')) {
+        if (
+          lower.includes('select count(*)') &&
+          lower.includes('from calendars')
+        ) {
           return createQueryResult([{ count: '0' }]);
         }
-        if (lower.includes('update calendars') && lower.includes('"isdefault" = false')) {
+        if (
+          lower.includes('update calendars') &&
+          lower.includes('"isdefault" = false')
+        ) {
           return createQueryResult([], 0);
         }
         if (lower.includes('insert into calendars')) {
@@ -231,7 +261,9 @@ describe('CalendarService', () => {
         color: '',
       };
 
-      await expect(calendarService.create(invalidDTO as any, mockContext)).rejects.toThrow();
+      await expect(
+        calendarService.create(invalidDTO as any, mockContext)
+      ).rejects.toThrow();
     });
 
     it('should validate color format', async () => {
@@ -240,7 +272,9 @@ describe('CalendarService', () => {
         color: 'invalid-color',
       };
 
-      await expect(calendarService.create(invalidDTO as any, mockContext)).rejects.toThrow();
+      await expect(
+        calendarService.create(invalidDTO as any, mockContext)
+      ).rejects.toThrow();
     });
   });
 
@@ -262,7 +296,11 @@ describe('CalendarService', () => {
         .mockResolvedValueOnce(createQueryResult([]))
         .mockResolvedValueOnce(createQueryResult([updatedCalendar]));
 
-      const result = await calendarService.update(calendarId, updateDTO, mockContext);
+      const result = await calendarService.update(
+        calendarId,
+        updateDTO,
+        mockContext
+      );
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE calendars SET'),
@@ -274,17 +312,25 @@ describe('CalendarService', () => {
     });
 
     it('should not update calendars belonging to other users', async () => {
-      mockedQuery.mockResolvedValueOnce(createQueryResult([{ userId: 'other-user' }]));
+      mockedQuery.mockResolvedValueOnce(
+        createQueryResult([{ userId: 'other-user' }])
+      );
 
       await expect(
-        calendarService.update('other-user-calendar', { name: 'Hacked' }, mockContext)
+        calendarService.update(
+          'other-user-calendar',
+          { name: 'Hacked' },
+          mockContext
+        )
       ).rejects.toThrow('AUTHORIZATION_ERROR');
     });
 
     it('should return null when update finds no rows without ownership checks', async () => {
       mockedQuery.mockResolvedValueOnce(createQueryResult([]));
 
-      const result = await calendarService.update('non-existent-id', { name: 'Test' });
+      const result = await calendarService.update('non-existent-id', {
+        name: 'Test',
+      });
 
       expect(result).toBeNull();
     });
@@ -321,7 +367,10 @@ describe('CalendarService', () => {
         .mockResolvedValueOnce(createQueryResult([], 1))
         .mockResolvedValueOnce(createQueryResult([], 1));
 
-      const result = await calendarService.delete(defaultCalendar.id, mockContext);
+      const result = await calendarService.delete(
+        defaultCalendar.id,
+        mockContext
+      );
 
       expect(result).toBe(true);
       expect(mockedQuery).toHaveBeenCalledWith(
@@ -332,7 +381,9 @@ describe('CalendarService', () => {
     });
 
     it('should not delete calendars belonging to other users', async () => {
-      mockedQuery.mockResolvedValueOnce(createQueryResult([{ userId: 'other-user' }]));
+      mockedQuery.mockResolvedValueOnce(
+        createQueryResult([{ userId: 'other-user' }])
+      );
 
       await expect(
         calendarService.delete('other-user-calendar', mockContext)
@@ -349,7 +400,10 @@ describe('CalendarService', () => {
         .mockResolvedValueOnce(createQueryResult([{ isVisible: true }]))
         .mockResolvedValueOnce(createQueryResult([calendar]));
 
-      const result = await calendarService.toggleVisibility(calendar.id, mockContext);
+      const result = await calendarService.toggleVisibility(
+        calendar.id,
+        mockContext
+      );
 
       expect(mockedQuery).toHaveBeenCalledWith(
         expect.stringContaining('UPDATE calendars SET "isVisible"'),
@@ -367,13 +421,18 @@ describe('CalendarService', () => {
         .mockResolvedValueOnce(createQueryResult([{ isVisible: false }]))
         .mockResolvedValueOnce(createQueryResult([calendar]));
 
-      const result = await calendarService.toggleVisibility(calendar.id, mockContext);
+      const result = await calendarService.toggleVisibility(
+        calendar.id,
+        mockContext
+      );
 
       expect(result.isVisible).toBe(true);
     });
 
     it('should not toggle visibility for other users calendars', async () => {
-      mockedQuery.mockResolvedValueOnce(createQueryResult([{ userId: 'other-user' }]));
+      mockedQuery.mockResolvedValueOnce(
+        createQueryResult([{ userId: 'other-user' }])
+      );
 
       await expect(
         calendarService.toggleVisibility('other-user-calendar', mockContext)
@@ -388,7 +447,9 @@ describe('CalendarService', () => {
       mockedQuery
         .mockResolvedValueOnce(createQueryResult([{ userId: mockUserId }]))
         .mockResolvedValueOnce(createQueryResult([], 1))
-        .mockResolvedValueOnce(createQueryResult([{ ...testCalendars.personal, isDefault: true }]));
+        .mockResolvedValueOnce(
+          createQueryResult([{ ...testCalendars.personal, isDefault: true }])
+        );
 
       const result = await calendarService.setDefault(calendarId, mockContext);
 
@@ -402,7 +463,9 @@ describe('CalendarService', () => {
       mockedQuery
         .mockResolvedValueOnce(createQueryResult([{ userId: mockUserId }]))
         .mockResolvedValueOnce(createQueryResult([], 1))
-        .mockResolvedValueOnce(createQueryResult([{ ...testCalendars.personal, isDefault: true }]));
+        .mockResolvedValueOnce(
+          createQueryResult([{ ...testCalendars.personal, isDefault: true }])
+        );
 
       await calendarService.setDefault(newDefaultId, mockContext);
 
@@ -419,7 +482,9 @@ describe('CalendarService', () => {
     });
 
     it('should not set default for other users calendars', async () => {
-      mockedQuery.mockResolvedValueOnce(createQueryResult([{ userId: 'other-user' }]));
+      mockedQuery.mockResolvedValueOnce(
+        createQueryResult([{ userId: 'other-user' }])
+      );
 
       await expect(
         calendarService.setDefault('other-user-calendar', mockContext)
@@ -431,7 +496,9 @@ describe('CalendarService', () => {
     it('should handle database connection errors gracefully', async () => {
       mockedQuery.mockRejectedValueOnce(new Error('Connection timeout'));
 
-      await expect(calendarService.findAll({}, mockContext)).rejects.toThrow('Connection timeout');
+      await expect(calendarService.findAll({}, mockContext)).rejects.toThrow(
+        'Connection timeout'
+      );
     });
 
     it('should handle concurrent visibility toggles', async () => {
@@ -446,7 +513,9 @@ describe('CalendarService', () => {
           return createQueryResult([{ isVisible: false }]);
         }
         if (lower.includes('update calendars set "isvisible"')) {
-          return createQueryResult([{ ...testCalendars.primary, isVisible: true }]);
+          return createQueryResult([
+            { ...testCalendars.primary, isVisible: true },
+          ]);
         }
         return createQueryResult([]);
       });
@@ -477,13 +546,19 @@ describe('CalendarService', () => {
       mockedQuery.mockImplementation(async (sql: string) => {
         const lower = sql.toLowerCase();
 
-        if (lower.includes('select id from calendars') && lower.includes('name')) {
+        if (
+          lower.includes('select id from calendars') &&
+          lower.includes('name')
+        ) {
           return createQueryResult([]);
         }
         if (lower.includes('insert into users')) {
           return createQueryResult([], 1);
         }
-        if (lower.includes('select count(*)') && lower.includes('from calendars')) {
+        if (
+          lower.includes('select count(*)') &&
+          lower.includes('from calendars')
+        ) {
           return createQueryResult([{ count: '1' }]);
         }
         if (lower.includes('insert into calendars')) {

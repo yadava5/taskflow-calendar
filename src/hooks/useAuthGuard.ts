@@ -26,7 +26,9 @@ export interface AuthGuardState {
 /**
  * Hook for protecting routes and managing authentication state
  */
-export function useAuthGuard(options: UseAuthGuardOptions = {}): AuthGuardState {
+export function useAuthGuard(
+  options: UseAuthGuardOptions = {}
+): AuthGuardState {
   const {
     requireAuth = true,
     redirectTo = '/login',
@@ -99,7 +101,7 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}): AuthGuardState 
             } else if (authMethod === 'google') {
               clearGoogleAuth();
             }
-            
+
             if (requireAuth) {
               if (isMounted) {
                 setState({
@@ -136,12 +138,14 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}): AuthGuardState 
           const isMockToken = jwtTokens?.accessToken === 'mock-access-token';
           if (authMethod === 'jwt' && jwtTokens && !isMockToken) {
             try {
-              const verification = await authAPI.verifyToken(jwtTokens.accessToken);
+              const verification = await authAPI.verifyToken(
+                jwtTokens.accessToken
+              );
               if (!verification.valid) {
                 console.log('Token verification failed, clearing auth');
                 clearJWTAuth();
                 setError('Session expired. Please log in again.');
-                
+
                 if (requireAuth) {
                   if (isMounted) {
                     setState({
@@ -161,8 +165,13 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}): AuthGuardState 
             }
           } else if (isMockToken) {
             // Reduce noisy logs in dev; log only once per mount/session
-            if (process.env.NODE_ENV !== 'production' && !hasLoggedMockSkipRef.current) {
-              console.debug('Mock token detected, skipping backend verification');
+            if (
+              process.env.NODE_ENV !== 'production' &&
+              !hasLoggedMockSkipRef.current
+            ) {
+              console.debug(
+                'Mock token detected, skipping backend verification'
+              );
               hasLoggedMockSkipRef.current = true;
             }
           }
@@ -178,7 +187,6 @@ export function useAuthGuard(options: UseAuthGuardOptions = {}): AuthGuardState 
             redirectPath: null,
           });
         }
-
       } catch (error) {
         console.error('Auth guard error:', error);
         if (isMounted) {

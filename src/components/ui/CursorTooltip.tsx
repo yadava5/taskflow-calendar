@@ -16,7 +16,7 @@ export const CursorTooltip: React.FC<CursorTooltipProps> = ({
   children,
   content,
   className,
-  containerClassName
+  containerClassName,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -31,14 +31,14 @@ export const CursorTooltip: React.FC<CursorTooltipProps> = ({
       const rect = container.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
-      
+
       // Position tooltip to top-right of cursor
       const offsetX = 12;
       const offsetY = -8;
-      
-      setPosition({ 
-        x: x + offsetX, 
-        y: y + offsetY 
+
+      setPosition({
+        x: x + offsetX,
+        y: y + offsetY,
       });
     };
 
@@ -56,7 +56,7 @@ export const CursorTooltip: React.FC<CursorTooltipProps> = ({
       const touch = e.touches[0];
       const x = touch.clientX - rect.left;
       const y = touch.clientY - rect.top;
-      
+
       setPosition({ x: x + 12, y: y - 8 });
       setIsVisible(true);
     };
@@ -70,9 +70,11 @@ export const CursorTooltip: React.FC<CursorTooltipProps> = ({
     container.addEventListener('mouseenter', handleMouseEnter);
     container.addEventListener('mouseleave', handleMouseLeave);
     container.addEventListener('mousemove', handleMouseMove);
-    
+
     // Touch events for mobile
-    container.addEventListener('touchstart', handleTouchStart, { passive: true });
+    container.addEventListener('touchstart', handleTouchStart, {
+      passive: true,
+    });
     container.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
@@ -85,12 +87,9 @@ export const CursorTooltip: React.FC<CursorTooltipProps> = ({
   }, []);
 
   return (
-    <div 
-      ref={containerRef} 
-      className={cn('relative', containerClassName)}
-    >
+    <div ref={containerRef} className={cn('relative', containerClassName)}>
       {children}
-      
+
       {isVisible && (
         <div
           ref={tooltipRef}

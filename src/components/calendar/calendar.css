@@ -169,7 +169,8 @@
 }
 
 /* Do not suppress underline when element is a navlink */
-.fc-daygrid-day:not(.fc-day-today) .fc-daygrid-day-number:hover:not(.fc-navlink) {
+.fc-daygrid-day:not(.fc-day-today)
+  .fc-daygrid-day-number:hover:not(.fc-navlink) {
   background-color: hsl(var(--accent));
   color: hsl(var(--accent-foreground));
   border-radius: 4px;
@@ -264,7 +265,10 @@
 .fc .fc-event.fc-event-mirror.fc-event-preview,
 .fc .fc-event-preview {
   border-radius: 4px !important;
-  background-color: var(--default-calendar-color, hsl(var(--primary))) !important;
+  background-color: var(
+    --default-calendar-color,
+    hsl(var(--primary))
+  ) !important;
   border-color: var(--default-calendar-color, hsl(var(--primary))) !important;
   color: #fff !important;
   opacity: 0.9;
@@ -342,13 +346,21 @@
 
 /* Selection styling */
 .fc-highlight {
-  background-color: color-mix(in srgb, var(--default-calendar-color, hsl(var(--primary))) 20%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--default-calendar-color, hsl(var(--primary))) 20%,
+    transparent
+  ) !important;
   border-color: var(--default-calendar-color, hsl(var(--primary))) !important;
   border-radius: 4px;
 }
 
 .fc-timegrid-slot.fc-highlight {
-  background-color: color-mix(in srgb, var(--default-calendar-color, hsl(var(--primary))) 10%, transparent) !important;
+  background-color: color-mix(
+    in srgb,
+    var(--default-calendar-color, hsl(var(--primary))) 10%,
+    transparent
+  ) !important;
 }
 
 /* ================================

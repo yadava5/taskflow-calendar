@@ -1,7 +1,11 @@
 import * as React from 'react';
 import { Clock } from 'lucide-react';
 import { Input } from '@/components/ui/Input';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { Button } from '@/components/ui/Button';
 
 export function CustomTimeInput({
@@ -52,9 +56,14 @@ export function CustomTimeInput({
   const handlePeriodSelect = (period: string) => setSelectedPeriod(period);
 
   const handleConfirm = () => {
-    const hour24 = selectedPeriod === 'AM'
-      ? (selectedHour === 12 ? 0 : selectedHour)
-      : (selectedHour === 12 ? 12 : selectedHour + 12);
+    const hour24 =
+      selectedPeriod === 'AM'
+        ? selectedHour === 12
+          ? 0
+          : selectedHour
+        : selectedHour === 12
+          ? 12
+          : selectedHour + 12;
     const timeString = `${hour24.toString().padStart(2, '0')}:${selectedMinute
       .toString()
       .padStart(2, '0')}`;
@@ -89,13 +98,19 @@ export function CustomTimeInput({
           <div className="p-4">
             <div className="flex gap-1">
               <div className="relative">
-                <div className="text-xs text-muted-foreground text-center mb-1">Hour</div>
+                <div className="text-xs text-muted-foreground text-center mb-1">
+                  Hour
+                </div>
                 <div className="h-32 w-16 rounded border border-border relative overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-popover to-transparent pointer-events-none z-10" />
                   <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-popover to-transparent pointer-events-none z-10" />
                   <div
                     className="h-full w-full scrollbar-hide"
-                    style={{ overflowY: 'scroll', overflowX: 'hidden', touchAction: 'pan-y' }}
+                    style={{
+                      overflowY: 'scroll',
+                      overflowX: 'hidden',
+                      touchAction: 'pan-y',
+                    }}
                   >
                     {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
                       <div
@@ -105,7 +120,9 @@ export function CustomTimeInput({
                           handleHourSelect(hour);
                         }}
                         className={`w-full px-2 py-2 text-sm transition-colors flex items-center justify-center cursor-pointer ${
-                          selectedHour === hour ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+                          selectedHour === hour
+                            ? 'bg-primary text-primary-foreground'
+                            : 'hover:bg-accent'
                         }`}
                         style={{ height: '32px', minHeight: '32px' }}
                       >
@@ -117,13 +134,19 @@ export function CustomTimeInput({
               </div>
 
               <div className="relative">
-                <div className="text-xs text-muted-foreground text-center mb-1">Min</div>
+                <div className="text-xs text-muted-foreground text-center mb-1">
+                  Min
+                </div>
                 <div className="h-32 w-16 rounded border border-border relative overflow-hidden">
                   <div className="absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-popover to-transparent pointer-events-none z-10" />
                   <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-popover to-transparent pointer-events-none z-10" />
                   <div
                     className="h-full w-full scrollbar-hide"
-                    style={{ overflowY: 'scroll', overflowX: 'hidden', touchAction: 'pan-y' }}
+                    style={{
+                      overflowY: 'scroll',
+                      overflowX: 'hidden',
+                      touchAction: 'pan-y',
+                    }}
                   >
                     {Array.from({ length: 60 }, (_, i) => i).map((minute) => (
                       <div
@@ -133,7 +156,9 @@ export function CustomTimeInput({
                           handleMinuteSelect(minute);
                         }}
                         className={`w-full px-2 py-2 text-sm transition-colors flex items-center justify-center cursor-pointer ${
-                          selectedMinute === minute ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+                          selectedMinute === minute
+                            ? 'bg-primary text-primary-foreground'
+                            : 'hover:bg-accent'
                         }`}
                         style={{ height: '32px', minHeight: '32px' }}
                       >
@@ -145,7 +170,9 @@ export function CustomTimeInput({
               </div>
 
               <div className="relative">
-                <div className="text-xs text-muted-foreground text-center mb-1">Period</div>
+                <div className="text-xs text-muted-foreground text-center mb-1">
+                  Period
+                </div>
                 <div className="h-32 w-16 rounded border border-border relative flex flex-col">
                   {['AM', 'PM'].map((period) => (
                     <button
@@ -156,7 +183,9 @@ export function CustomTimeInput({
                         handlePeriodSelect(period);
                       }}
                       className={`flex-1 px-2 py-4 text-sm transition-colors ${
-                        selectedPeriod === period ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+                        selectedPeriod === period
+                          ? 'bg-primary text-primary-foreground'
+                          : 'hover:bg-accent'
                       }`}
                     >
                       {period}
@@ -175,7 +204,12 @@ export function CustomTimeInput({
                   const now = new Date();
                   const currentHour = now.getHours();
                   const currentMinute = now.getMinutes();
-                  const hour12 = currentHour === 0 ? 12 : currentHour > 12 ? currentHour - 12 : currentHour;
+                  const hour12 =
+                    currentHour === 0
+                      ? 12
+                      : currentHour > 12
+                        ? currentHour - 12
+                        : currentHour;
                   const period = currentHour >= 12 ? 'PM' : 'AM';
                   setSelectedHour(hour12);
                   setSelectedMinute(currentMinute);
@@ -185,7 +219,13 @@ export function CustomTimeInput({
               >
                 Now
               </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={handleConfirm} className="p-2">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleConfirm}
+                className="p-2"
+              >
                 Confirm
               </Button>
             </div>
@@ -197,5 +237,3 @@ export function CustomTimeInput({
 }
 
 export default CustomTimeInput;
-
-

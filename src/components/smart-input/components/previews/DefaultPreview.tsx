@@ -1,6 +1,6 @@
 /**
  * DefaultPreview - Fallback preview component with enhanced file type icons
- * 
+ *
  * Provides enhanced visual indicators for file types that don't have
  * specialized preview generation (documents, audio, video, archives).
  */
@@ -42,7 +42,7 @@ const FILE_TYPE_ICONS = {
   pptx: Presentation,
   txt: FileText,
   csv: FileSpreadsheet,
-  
+
   // Images (fallback)
   jpg: ImageIcon,
   jpeg: ImageIcon,
@@ -50,25 +50,25 @@ const FILE_TYPE_ICONS = {
   gif: ImageIcon,
   webp: ImageIcon,
   svg: ImageIcon,
-  
+
   // Audio
   mp3: Music,
   m4a: Music,
   wav: Music,
   webm: Music,
   ogg: Music,
-  
+
   // Video
   mp4: Video,
   mov: Video,
   avi: Video,
   mkv: Video,
-  
+
   // Archives
   zip: Archive,
   rar: Archive,
   '7z': Archive,
-  
+
   // Fallback
   default: File,
 } as const;
@@ -87,7 +87,7 @@ const FILE_TYPE_COLORS = {
   pptx: 'text-orange-600',
   txt: 'text-gray-600',
   csv: 'text-green-500',
-  
+
   // Images - Blue tones
   jpg: 'text-blue-500',
   jpeg: 'text-blue-500',
@@ -95,25 +95,25 @@ const FILE_TYPE_COLORS = {
   gif: 'text-blue-500',
   webp: 'text-blue-500',
   svg: 'text-purple-500',
-  
+
   // Audio - Purple tones
   mp3: 'text-purple-500',
   m4a: 'text-purple-500',
   wav: 'text-purple-500',
   webm: 'text-purple-600',
   ogg: 'text-purple-600',
-  
+
   // Video - Red tones
   mp4: 'text-red-500',
   mov: 'text-red-500',
   avi: 'text-red-600',
   mkv: 'text-red-600',
-  
+
   // Archives - Orange tones
   zip: 'text-orange-500',
   rar: 'text-orange-600',
   '7z': 'text-orange-600',
-  
+
   // Fallback
   default: 'text-gray-500',
 } as const;
@@ -144,8 +144,12 @@ export const DefaultPreview: React.FC<DefaultPreviewProps> = ({
 
   // Get file extension and determine icon/color
   const extension = getFileExtension(file.name);
-  const IconComponent = FILE_TYPE_ICONS[extension as keyof typeof FILE_TYPE_ICONS] || FILE_TYPE_ICONS.default;
-  const iconColor = FILE_TYPE_COLORS[extension as keyof typeof FILE_TYPE_COLORS] || FILE_TYPE_COLORS.default;
+  const IconComponent =
+    FILE_TYPE_ICONS[extension as keyof typeof FILE_TYPE_ICONS] ||
+    FILE_TYPE_ICONS.default;
+  const iconColor =
+    FILE_TYPE_COLORS[extension as keyof typeof FILE_TYPE_COLORS] ||
+    FILE_TYPE_COLORS.default;
 
   // Get file display info for additional context
   const displayInfo = getFileDisplayInfo(file);
@@ -161,10 +165,8 @@ export const DefaultPreview: React.FC<DefaultPreviewProps> = ({
       title={`${displayInfo.displayName} file: ${file.name}`}
     >
       {/* Main file icon */}
-      <IconComponent
-        className={cn(iconSize, iconColor)}
-      />
-      
+      <IconComponent className={cn(iconSize, iconColor)} />
+
       {/* No subtitle/extension overlay for non-PDF previews to avoid obscuring icons */}
     </div>
   );

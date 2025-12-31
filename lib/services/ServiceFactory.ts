@@ -2,7 +2,11 @@
  * Service Factory - Dependency injection and service instantiation
  */
 import type { PoolClient } from 'pg';
-import { pool, withTransaction as sqlWithTransaction, checkDatabaseHealth as sqlHealth } from '../config/database.js';
+import {
+  pool,
+  withTransaction as sqlWithTransaction,
+  checkDatabaseHealth as sqlHealth,
+} from '../config/database.js';
 import { TaskService } from './TaskService.js';
 import { CalendarService } from './CalendarService.js';
 import { EventService } from './EventService.js';
@@ -55,7 +59,10 @@ export class ServiceFactory {
    */
   getTaskService(): TaskService {
     if (!this.services.task) {
-      this.services.task = new TaskService(this.config.dbClient || pool, this.baseServiceConfig);
+      this.services.task = new TaskService(
+        this.config.dbClient || pool,
+        this.baseServiceConfig
+      );
     }
     return this.services.task;
   }
@@ -65,7 +72,10 @@ export class ServiceFactory {
    */
   getCalendarService(): CalendarService {
     if (!this.services.calendar) {
-      this.services.calendar = new CalendarService(this.config.dbClient || pool, this.baseServiceConfig);
+      this.services.calendar = new CalendarService(
+        this.config.dbClient || pool,
+        this.baseServiceConfig
+      );
     }
     return this.services.calendar;
   }
@@ -75,7 +85,10 @@ export class ServiceFactory {
    */
   getEventService(): EventService {
     if (!this.services.event) {
-      this.services.event = new EventService(this.config.dbClient || pool, this.baseServiceConfig);
+      this.services.event = new EventService(
+        this.config.dbClient || pool,
+        this.baseServiceConfig
+      );
     }
     return this.services.event;
   }
@@ -85,7 +98,10 @@ export class ServiceFactory {
    */
   getTaskListService(): TaskListService {
     if (!this.services.taskList) {
-      this.services.taskList = new TaskListService(this.config.dbClient || pool, this.baseServiceConfig);
+      this.services.taskList = new TaskListService(
+        this.config.dbClient || pool,
+        this.baseServiceConfig
+      );
     }
     return this.services.taskList;
   }
@@ -95,7 +111,10 @@ export class ServiceFactory {
    */
   getTagService(): TagService {
     if (!this.services.tag) {
-      this.services.tag = new TagService(this.config.dbClient || pool, this.baseServiceConfig);
+      this.services.tag = new TagService(
+        this.config.dbClient || pool,
+        this.baseServiceConfig
+      );
     }
     return this.services.tag;
   }
@@ -105,7 +124,10 @@ export class ServiceFactory {
    */
   getAttachmentService(): AttachmentService {
     if (!this.services.attachment) {
-      this.services.attachment = new AttachmentService(this.config.dbClient || pool, this.baseServiceConfig);
+      this.services.attachment = new AttachmentService(
+        this.config.dbClient || pool,
+        this.baseServiceConfig
+      );
     }
     return this.services.attachment;
   }
@@ -129,7 +151,7 @@ export class ServiceFactory {
    */
   updateConfig(config: Partial<BaseServiceConfig>): void {
     this.baseServiceConfig = { ...this.baseServiceConfig, ...config };
-    
+
     // Clear cached service instances to force recreation with new config
     this.services = {};
   }
@@ -139,9 +161,14 @@ export class ServiceFactory {
   /**
    * Execute database transaction with all services
    */
-  async transaction<T>(callback: (services: Services, client: PoolClient) => Promise<T>): Promise<T> {
+  async transaction<T>(
+    callback: (services: Services, client: PoolClient) => Promise<T>
+  ): Promise<T> {
     return await sqlWithTransaction(async (client) => {
-      const txFactory = new ServiceFactory({ ...this.config, dbClient: client });
+      const txFactory = new ServiceFactory({
+        ...this.config,
+        dbClient: client,
+      });
       const services = txFactory.getAllServices();
       return await callback(services, client);
     });
@@ -164,8 +191,15 @@ export class ServiceFactory {
     results.database = await sqlHealth();
 
     // Check each service
-    const serviceNames: (keyof Services)[] = ['task', 'calendar', 'event', 'taskList', 'tag', 'attachment'];
-    
+    const serviceNames: (keyof Services)[] = [
+      'task',
+      'calendar',
+      'event',
+      'taskList',
+      'tag',
+      'attachment',
+    ];
+
     for (const serviceName of serviceNames) {
       try {
         const service = this.getAllServices()[serviceName];
@@ -197,7 +231,9 @@ let globalServiceFactory: ServiceFactory | null = null;
 /**
  * Initialize the global service factory
  */
-export function initializeServiceFactory(config: ServiceFactoryConfig): ServiceFactory {
+export function initializeServiceFactory(
+  config: ServiceFactoryConfig
+): ServiceFactory {
   globalServiceFactory = new ServiceFactory(config);
   return globalServiceFactory;
 }
@@ -207,7 +243,9 @@ export function initializeServiceFactory(config: ServiceFactoryConfig): ServiceF
  */
 export function getServiceFactory(): ServiceFactory {
   if (!globalServiceFactory) {
-    throw new Error('Service factory not initialized. Call initializeServiceFactory first.');
+    throw new Error(
+      'Service factory not initialized. Call initializeServiceFactory first.'
+    );
   }
   return globalServiceFactory;
 }
@@ -223,8 +261,11 @@ export function getServices(): Services {
  * Convenience functions to get individual services
  */
 export const getTaskService = () => getServiceFactory().getTaskService();
-export const getCalendarService = () => getServiceFactory().getCalendarService();
+export const getCalendarService = () =>
+  getServiceFactory().getCalendarService();
 export const getEventService = () => getServiceFactory().getEventService();
-export const getTaskListService = () => getServiceFactory().getTaskListService();
+export const getTaskListService = () =>
+  getServiceFactory().getTaskListService();
 export const getTagService = () => getServiceFactory().getTagService();
-export const getAttachmentService = () => getServiceFactory().getAttachmentService();
+export const getAttachmentService = () =>
+  getServiceFactory().getAttachmentService();

@@ -61,7 +61,10 @@ export const toLocal = (utcDate: Date): Date => {
 /**
  * Format a date for display in the user's timezone
  */
-export const formatForDisplay = (date: Date, formatString: string = 'PPP p'): string => {
+export const formatForDisplay = (
+  date: Date,
+  formatString: string = 'PPP p'
+): string => {
   if (!isValid(date)) {
     return 'Invalid Date';
   }
@@ -94,16 +97,19 @@ export const formatRelative = (date: Date): string => {
   const daysDiff = differenceInDays(localDate, new Date());
 
   if (Math.abs(daysDiff) <= 7) {
-    return format(localDate, 'EEEE \'at\' p');
+    return format(localDate, "EEEE 'at' p");
   }
 
-  return format(localDate, 'PPP \'at\' p');
+  return format(localDate, "PPP 'at' p");
 };
 
 /**
  * Parse user input (date and time strings) to UTC
  */
-export const parseToUTC = (dateString: string, timeString: string = '00:00'): Date => {
+export const parseToUTC = (
+  dateString: string,
+  timeString: string = '00:00'
+): Date => {
   try {
     // Parse the date and time in the user's timezone
     const localDateTime = parse(
@@ -119,7 +125,9 @@ export const parseToUTC = (dateString: string, timeString: string = '00:00'): Da
     // For now, return as-is. In production, would convert to UTC
     return localDateTime;
   } catch (error) {
-    throw new Error(`Failed to parse date: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to parse date: ${error instanceof Error ? error.message : 'Unknown error'}`
+    );
   }
 };
 

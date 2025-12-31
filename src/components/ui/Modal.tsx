@@ -32,16 +32,16 @@ const Modal = ({
     if (isOpen) {
       // Store the currently focused element
       previousActiveElement.current = document.activeElement as HTMLElement;
-      
+
       // Focus the modal
       const focusableElements = modalRef.current?.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
-      
+
       if (focusableElements && focusableElements.length > 0) {
         (focusableElements[0] as HTMLElement).focus();
       }
-      
+
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
     } else {
@@ -49,7 +49,7 @@ const Modal = ({
       if (previousActiveElement.current) {
         previousActiveElement.current.focus();
       }
-      
+
       // Restore body scroll
       document.body.style.overflow = 'unset';
     }
@@ -77,7 +77,9 @@ const Modal = ({
 
         if (focusableElements && focusableElements.length > 0) {
           const firstElement = focusableElements[0] as HTMLElement;
-          const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+          const lastElement = focusableElements[
+            focusableElements.length - 1
+          ] as HTMLElement;
 
           if (event.shiftKey) {
             // Shift + Tab
@@ -128,7 +130,7 @@ const Modal = ({
         className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
         aria-hidden="true"
       />
-      
+
       {/* Modal panel */}
       <div
         ref={modalRef}
@@ -171,7 +173,7 @@ const Modal = ({
             </button>
           </div>
         )}
-        
+
         {/* Content */}
         <div className="overflow-y-auto max-h-[calc(90vh-8rem)]">
           {children}

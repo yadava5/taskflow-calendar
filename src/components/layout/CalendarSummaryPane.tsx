@@ -12,7 +12,7 @@ interface CalendarSummaryPaneProps {
 }
 
 export const CalendarSummaryPane: React.FC<CalendarSummaryPaneProps> = ({
-  className
+  className,
 }) => {
   const { currentView } = useUIStore();
 
@@ -40,31 +40,28 @@ export const CalendarSummaryPane: React.FC<CalendarSummaryPaneProps> = ({
   };
 
   // Main content with EventOverview only
-  const mainContent = (
-    <EventOverview 
-      maxEvents={7}
-    />
-  );
+  const mainContent = <EventOverview maxEvents={7} />;
 
   // Footer content with conditional lists
-  const footerListContent = currentView === 'task' ? (
-    <TaskGroupList
-      taskGroups={taskGroups}
-      activeTaskGroupId={activeTaskGroupId}
-      onAddTaskGroup={handleAddTaskGroup}
-      onEditTaskGroup={handleEditTaskGroup}
-      onDeleteTaskGroup={handleDeleteTaskGroup}
-      onSelectTaskGroup={handleSelectTaskGroup}
-    />
-  ) : (
-    <CalendarList
-      calendars={calendars}
-      onToggleCalendar={handleToggleCalendar}
-      onAddCalendar={handleAddCalendar}
-      onEditCalendar={handleEditCalendar}
-      onDeleteCalendar={handleDeleteCalendar}
-    />
-  );
+  const footerListContent =
+    currentView === 'task' ? (
+      <TaskGroupList
+        taskGroups={taskGroups}
+        activeTaskGroupId={activeTaskGroupId}
+        onAddTaskGroup={handleAddTaskGroup}
+        onEditTaskGroup={handleEditTaskGroup}
+        onDeleteTaskGroup={handleDeleteTaskGroup}
+        onSelectTaskGroup={handleSelectTaskGroup}
+      />
+    ) : (
+      <CalendarList
+        calendars={calendars}
+        onToggleCalendar={handleToggleCalendar}
+        onAddCalendar={handleAddCalendar}
+        onEditCalendar={handleEditCalendar}
+        onDeleteCalendar={handleDeleteCalendar}
+      />
+    );
 
   return (
     <BaseSidebarPane

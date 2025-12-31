@@ -46,7 +46,7 @@
   display: inline;
   padding: 1px 0;
   border-radius: 2px;
-  
+
   transition: all 0.2s ease-in-out;
   /* Fallback colors for older browsers */
   background-color: rgba(59, 130, 246, 0.1);
@@ -94,7 +94,7 @@
 /* Overlay highlighting spans - for proper overlay technique */
 .inline-highlight-span {
   display: inline;
-  
+
   border-radius: 2px;
   padding: 1px 0;
   transition: all 0.2s ease-in-out;
@@ -120,9 +120,10 @@
   position: relative;
   border-radius: 4px;
   padding: 1px 0;
-  
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.1), 
+
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
     rgba(59, 130, 246, 0.2)
   );
   border: 1px solid rgba(59, 130, 246, 0.3);
@@ -131,56 +132,63 @@
 
 /* Tag type specific styles */
 .smart-tag.tag-date {
-  background: linear-gradient(135deg, 
-    rgba(59, 130, 246, 0.1), 
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1),
     rgba(59, 130, 246, 0.2)
   );
   border-color: rgba(59, 130, 246, 0.3);
 }
 
 .smart-tag.tag-time {
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.1), 
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
     rgba(16, 185, 129, 0.2)
   );
   border-color: rgba(16, 185, 129, 0.3);
 }
 
 .smart-tag.tag-priority {
-  background: linear-gradient(135deg, 
-    rgba(239, 68, 68, 0.1), 
+  background: linear-gradient(
+    135deg,
+    rgba(239, 68, 68, 0.1),
     rgba(239, 68, 68, 0.2)
   );
   border-color: rgba(239, 68, 68, 0.3);
 }
 
 .smart-tag.tag-location {
-  background: linear-gradient(135deg, 
-    rgba(16, 185, 129, 0.1), 
+  background: linear-gradient(
+    135deg,
+    rgba(16, 185, 129, 0.1),
     rgba(16, 185, 129, 0.2)
   );
   border-color: rgba(16, 185, 129, 0.3);
 }
 
 .smart-tag.tag-person {
-  background: linear-gradient(135deg, 
-    rgba(139, 92, 246, 0.1), 
+  background: linear-gradient(
+    135deg,
+    rgba(139, 92, 246, 0.1),
     rgba(139, 92, 246, 0.2)
   );
   border-color: rgba(139, 92, 246, 0.3);
 }
 
 .smart-tag.tag-label {
-  background: linear-gradient(135deg, 
-    rgba(245, 158, 11, 0.1), 
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.1),
     rgba(245, 158, 11, 0.2)
   );
   border-color: rgba(245, 158, 11, 0.3);
 }
 
 .smart-tag.tag-project {
-  background: linear-gradient(135deg, 
-    rgba(245, 158, 11, 0.1), 
+  background: linear-gradient(
+    135deg,
+    rgba(245, 158, 11, 0.1),
     rgba(245, 158, 11, 0.2)
   );
   border-color: rgba(245, 158, 11, 0.3);
@@ -229,48 +237,54 @@
 /* Dark mode styles */
 @media (prefers-color-scheme: dark) {
   .smart-tag {
-    background: linear-gradient(135deg, 
-      rgba(59, 130, 246, 0.15), 
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.15),
       rgba(59, 130, 246, 0.25)
     );
     border-color: rgba(59, 130, 246, 0.4);
   }
 
   .smart-tag.tag-date {
-    background: linear-gradient(135deg, 
-      rgba(59, 130, 246, 0.15), 
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.15),
       rgba(59, 130, 246, 0.25)
     );
     border-color: rgba(59, 130, 246, 0.4);
   }
 
   .smart-tag.tag-time {
-    background: linear-gradient(135deg, 
-      rgba(16, 185, 129, 0.15), 
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.15),
       rgba(16, 185, 129, 0.25)
     );
     border-color: rgba(16, 185, 129, 0.4);
   }
 
   .smart-tag.tag-priority {
-    background: linear-gradient(135deg, 
-      rgba(239, 68, 68, 0.15), 
+    background: linear-gradient(
+      135deg,
+      rgba(239, 68, 68, 0.15),
       rgba(239, 68, 68, 0.25)
     );
     border-color: rgba(239, 68, 68, 0.4);
   }
 
   .smart-tag.tag-location {
-    background: linear-gradient(135deg, 
-      rgba(16, 185, 129, 0.15), 
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.15),
       rgba(16, 185, 129, 0.25)
     );
     border-color: rgba(16, 185, 129, 0.4);
   }
 
   .smart-tag.tag-person {
-    background: linear-gradient(135deg, 
-      rgba(139, 92, 246, 0.15), 
+    background: linear-gradient(
+      135deg,
+      rgba(139, 92, 246, 0.15),
       rgba(139, 92, 246, 0.25)
     );
     border-color: rgba(139, 92, 246, 0.4);
@@ -278,8 +292,9 @@
 
   .smart-tag.tag-label,
   .smart-tag.tag-project {
-    background: linear-gradient(135deg, 
-      rgba(245, 158, 11, 0.15), 
+    background: linear-gradient(
+      135deg,
+      rgba(245, 158, 11, 0.15),
       rgba(245, 158, 11, 0.25)
     );
     border-color: rgba(245, 158, 11, 0.4);

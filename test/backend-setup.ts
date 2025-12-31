@@ -26,7 +26,9 @@ process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-only';
 // Global test utilities
 // Provide explicit global declaration casts for Vitest
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-(global as any).createMockContext = (overrides: Record<string, unknown> = {}) => ({
+(global as any).createMockContext = (
+  overrides: Record<string, unknown> = {}
+) => ({
   userId: 'test-user-123',
   requestId: 'test-request-123',
   ...overrides,
@@ -103,7 +105,7 @@ expect.extend({
       pass,
     };
   },
-  
+
   toBeValidTaskListId(received) {
     const pass = typeof received === 'string' && received.startsWith('list-');
     return {
@@ -111,7 +113,7 @@ expect.extend({
       pass,
     };
   },
-  
+
   toBeValidUserId(received) {
     const pass = typeof received === 'string' && received.startsWith('user-');
     return {
@@ -119,14 +121,15 @@ expect.extend({
       pass,
     };
   },
-  
+
   toHaveValidTimestamps(received) {
     const hasCreatedAt = received.createdAt instanceof Date;
     const hasUpdatedAt = received.updatedAt instanceof Date;
     const pass = hasCreatedAt && hasUpdatedAt;
-    
+
     return {
-      message: () => `expected object to have valid createdAt and updatedAt timestamps`,
+      message: () =>
+        `expected object to have valid createdAt and updatedAt timestamps`,
       pass,
     };
   },
@@ -146,6 +149,10 @@ declare global {
   }
 
   // Global test utilities
-  function createMockContext(overrides?: Record<string, unknown>): Record<string, unknown>;
-  function createMockUser(overrides?: Record<string, unknown>): Record<string, unknown>;
+  function createMockContext(
+    overrides?: Record<string, unknown>
+  ): Record<string, unknown>;
+  function createMockUser(
+    overrides?: Record<string, unknown>
+  ): Record<string, unknown>;
 }

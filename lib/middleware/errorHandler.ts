@@ -4,7 +4,11 @@
 import type { VercelResponse } from '@vercel/node';
 import { ZodError } from 'zod';
 import type { AuthenticatedRequest, ApiResponse } from '../types/api.js';
-import { ApiError, ValidationError, InternalServerError } from '../types/api.js';
+import {
+  ApiError,
+  ValidationError,
+  InternalServerError,
+} from '../types/api.js';
 
 /**
  * Error handler middleware
@@ -46,7 +50,7 @@ export function errorHandler(
       formatZodErrors(error),
       'Request validation failed'
     );
-    
+
     return sendErrorResponse(res, validationError.statusCode, {
       success: false,
       error: {
@@ -65,9 +69,10 @@ export function errorHandler(
     success: false,
     error: {
       code: internalError.code,
-      message: process.env.NODE_ENV === 'production' 
-        ? 'An unexpected error occurred' 
-        : error.message,
+      message:
+        process.env.NODE_ENV === 'production'
+          ? 'An unexpected error occurred'
+          : error.message,
       timestamp,
       requestId,
     },
@@ -93,7 +98,7 @@ function formatZodErrors(error: ZodError): Array<{
   message: string;
   code: string;
 }> {
-  return error.errors.map(err => ({
+  return error.errors.map((err) => ({
     field: err.path.join('.'),
     message: err.message,
     code: err.code,

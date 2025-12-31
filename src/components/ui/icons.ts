@@ -24,7 +24,10 @@ import {
   ArrowUp,
 } from 'lucide-react';
 
-export type IconComponent = ComponentType<{ className?: string; size?: number }>;
+export type IconComponent = ComponentType<{
+  className?: string;
+  size?: number;
+}>;
 
 export const IconRegistry: Record<string, IconComponent> = {
   Home,
@@ -53,10 +56,11 @@ export const IconRegistry: Record<string, IconComponent> = {
 
 export type IconName = keyof typeof IconRegistry | string;
 
-export function getIconByName(name: string, fallback: IconComponent = CheckSquare): IconComponent {
+export function getIconByName(
+  name: string,
+  fallback: IconComponent = CheckSquare
+): IconComponent {
   return (IconRegistry as Record<string, IconComponent>)[name] || fallback;
 }
 
 export const iconNames: string[] = Object.keys(IconRegistry);
-
-

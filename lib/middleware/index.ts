@@ -20,7 +20,11 @@ import type { AuthenticatedRequest, Middleware } from '../types/api';
  * Compose multiple middleware functions
  */
 export function composeMiddleware(...middlewares: Middleware[]) {
-  return async (req: AuthenticatedRequest, res: VercelResponse, finalHandler: () => void) => {
+  return async (
+    req: AuthenticatedRequest,
+    res: VercelResponse,
+    finalHandler: () => void
+  ) => {
     let index = 0;
 
     async function next(): Promise<void> {
@@ -92,7 +96,7 @@ export function methodMiddleware(
   middleware: Middleware
 ): Middleware {
   const methods = Array.isArray(method) ? method : [method];
-  
+
   return conditionalMiddleware(
     (req) => methods.includes(req.method || ''),
     middleware

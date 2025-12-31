@@ -16,13 +16,13 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       try {
         // Initialize theme
         initializeTheme();
-        
+
         if (isMounted) {
           setIsInitialized(true);
         }
       } catch (error) {
         console.error('Failed to initialize theme:', error);
-        
+
         if (isMounted) {
           setIsInitialized(true); // Still set to true to prevent infinite loading
         }

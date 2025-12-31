@@ -11,8 +11,12 @@ interface ProtectedRouteProps {
 /**
  * Component that protects routes requiring authentication
  */
-export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRouteProps) {
-  const { isLoading, isAuthenticated, shouldRedirect, redirectPath } = useRequireAuth(redirectTo);
+export function ProtectedRoute({
+  children,
+  redirectTo = '/login',
+}: ProtectedRouteProps) {
+  const { isLoading, isAuthenticated, shouldRedirect, redirectPath } =
+    useRequireAuth(redirectTo);
 
   if (isLoading) {
     return (

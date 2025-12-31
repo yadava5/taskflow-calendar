@@ -131,7 +131,8 @@ const TagBadge: React.FC<TagBadgeProps> = ({
               backgroundColor: `${tag.color}1A`,
             }
           : {
-              backgroundColor: 'color-mix(in srgb, currentColor 10%, transparent)',
+              backgroundColor:
+                'color-mix(in srgb, currentColor 10%, transparent)',
             }
       }
       onClick={removable ? handleRemove : handleClick}
@@ -140,7 +141,10 @@ const TagBadge: React.FC<TagBadgeProps> = ({
     >
       {/* Icon that becomes X on hover when removable - same as TaskItem */}
       <div className="w-3 h-3 relative" aria-hidden="true">
-        <span className="absolute inset-0" style={tag.color ? { color: tag.color } : undefined}>
+        <span
+          className="absolute inset-0"
+          style={tag.color ? { color: tag.color } : undefined}
+        >
           <IconComponent className="w-3 h-3 transition-opacity duration-150 ease-out group-hover/tag:opacity-0" />
         </span>
         {removable && (

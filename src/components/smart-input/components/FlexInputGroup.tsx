@@ -1,9 +1,9 @@
 /**
  * FlexInputGroup - Proper flexbox input group implementation
- * 
+ *
  * Based on React Bootstrap Input Groups and industry best practices.
  * Uses flexbox layout instead of absolute positioning for proper inline layout.
- * 
+ *
  * Research sources:
  * - React Bootstrap Input Groups: https://react-bootstrap.github.io/docs/forms/input-group/
  * - Ant Design Input: https://github.com/ant-design/ant-design
@@ -32,7 +32,7 @@ export interface FlexInputGroupProps {
 
 /**
  * FlexInputGroup component implementing proper input group pattern
- * 
+ *
  * Structure:
  * <div className="input-group flex">
  *   <div className="prefix-container">
@@ -71,7 +71,8 @@ export const FlexInputGroup: React.FC<FlexInputGroupProps> = ({
         // Background and transitions
         'bg-background transition-[border-color,ring]',
         // Focus state - highlights entire group when any child is focused
-        !hideFocusOutline && 'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
+        !hideFocusOutline &&
+          'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
         // Disabled state
         disabled && 'opacity-50 cursor-not-allowed',
         // Size variants
@@ -81,44 +82,50 @@ export const FlexInputGroup: React.FC<FlexInputGroupProps> = ({
     >
       {/* Prefix container - appears before input */}
       {prefix && (
-        <div className={cn(
-          // Flex item that doesn't grow/shrink
-          'flex items-center shrink-0',
-          // Seamless styling - same background as input, no border, no padding
-          'bg-transparent',
-          // Ensure proper alignment
-          'text-muted-foreground',
-          // Disabled state
-          disabled && 'pointer-events-none'
-        )}>
+        <div
+          className={cn(
+            // Flex item that doesn't grow/shrink
+            'flex items-center shrink-0',
+            // Seamless styling - same background as input, no border, no padding
+            'bg-transparent',
+            // Ensure proper alignment
+            'text-muted-foreground',
+            // Disabled state
+            disabled && 'pointer-events-none'
+          )}
+        >
           {prefix}
         </div>
       )}
 
       {/* Input container - main content area */}
-      <div className={cn(
-        // Flex item that grows to fill space
-        'flex-1 relative',
-        // Allow shrinking for mobile responsiveness
-        'min-w-0',
-        // Center children vertically and use MARGINS for button spacing (not padding!)
-        'flex items-center mx-2'
-      )}>
+      <div
+        className={cn(
+          // Flex item that grows to fill space
+          'flex-1 relative',
+          // Allow shrinking for mobile responsiveness
+          'min-w-0',
+          // Center children vertically and use MARGINS for button spacing (not padding!)
+          'flex items-center mx-2'
+        )}
+      >
         {children}
       </div>
 
       {/* Suffix container - appears after input */}
       {suffix && (
-        <div className={cn(
-          // Flex item that doesn't grow/shrink
-          'flex items-center shrink-0',
-          // Seamless styling - same background as input, no border, no padding
-          'bg-transparent',
-          // Ensure proper alignment
-          'text-muted-foreground',
-          // Disabled state
-          disabled && 'pointer-events-none'
-        )}>
+        <div
+          className={cn(
+            // Flex item that doesn't grow/shrink
+            'flex items-center shrink-0',
+            // Seamless styling - same background as input, no border, no padding
+            'bg-transparent',
+            // Ensure proper alignment
+            'text-muted-foreground',
+            // Disabled state
+            disabled && 'pointer-events-none'
+          )}
+        >
           {suffix}
         </div>
       )}

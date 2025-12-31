@@ -7,7 +7,13 @@ import { sendSuccess, sendError } from '../../lib/middleware/errorHandler.js';
 import type { AuthenticatedRequest } from '../../lib/types/api.js';
 import type { VercelResponse } from '@vercel/node';
 import type { UpdateCalendarDTO } from '../../lib/services/CalendarService';
-import { UnauthorizedError, ValidationError, NotFoundError, ForbiddenError, InternalServerError } from '../../lib/types/api.js';
+import {
+  UnauthorizedError,
+  ValidationError,
+  NotFoundError,
+  ForbiddenError,
+  InternalServerError,
+} from '../../lib/types/api.js';
 
 export default createCrudHandler({
   get: async (req: AuthenticatedRequest, res: VercelResponse) => {
@@ -17,15 +23,25 @@ export default createCrudHandler({
       const calendarId = req.query.id as string;
 
       if (!userId) {
-        return sendError(res, new UnauthorizedError('User authentication required'));
+        return sendError(
+          res,
+          new UnauthorizedError('User authentication required')
+        );
       }
 
       if (!calendarId) {
         return sendError(
           res,
-          new ValidationError([
-            { field: 'id', message: 'Calendar ID is required', code: 'REQUIRED' },
-          ], 'Calendar ID is required')
+          new ValidationError(
+            [
+              {
+                field: 'id',
+                message: 'Calendar ID is required',
+                code: 'REQUIRED',
+              },
+            ],
+            'Calendar ID is required'
+          )
         );
       }
 
@@ -41,12 +57,15 @@ export default createCrudHandler({
       sendSuccess(res, calendar);
     } catch (error) {
       console.error(`GET /api/calendars/${req.query.id} error:`, error);
-      
+
       if (error.message?.includes('AUTHORIZATION_ERROR')) {
         return sendError(res, new ForbiddenError('Access denied'));
       }
 
-      sendError(res, new InternalServerError(error.message || 'Failed to fetch calendar'));
+      sendError(
+        res,
+        new InternalServerError(error.message || 'Failed to fetch calendar')
+      );
     }
   },
 
@@ -57,20 +76,30 @@ export default createCrudHandler({
       const calendarId = req.query.id as string;
 
       if (!userId) {
-        return sendError(res, new UnauthorizedError('User authentication required'));
+        return sendError(
+          res,
+          new UnauthorizedError('User authentication required')
+        );
       }
 
       if (!calendarId) {
         return sendError(
           res,
-          new ValidationError([
-            { field: 'id', message: 'Calendar ID is required', code: 'REQUIRED' },
-          ], 'Calendar ID is required')
+          new ValidationError(
+            [
+              {
+                field: 'id',
+                message: 'Calendar ID is required',
+                code: 'REQUIRED',
+              },
+            ],
+            'Calendar ID is required'
+          )
         );
       }
 
       const updateData: UpdateCalendarDTO = req.body;
-      
+
       const calendar = await calendarService.update(calendarId, updateData, {
         userId,
         requestId: req.headers['x-request-id'] as string,
@@ -83,17 +112,23 @@ export default createCrudHandler({
       sendSuccess(res, calendar);
     } catch (error) {
       console.error(`PUT /api/calendars/${req.query.id} error:`, error);
-      
+
       if (error.message?.startsWith('VALIDATION_ERROR:')) {
         const msg = error.message.replace('VALIDATION_ERROR: ', '');
-        return sendError(res, new ValidationError([{ message: msg, code: 'VALIDATION_ERROR' }], msg));
+        return sendError(
+          res,
+          new ValidationError([{ message: msg, code: 'VALIDATION_ERROR' }], msg)
+        );
       }
-      
+
       if (error.message?.includes('AUTHORIZATION_ERROR')) {
         return sendError(res, new ForbiddenError('Access denied'));
       }
 
-      sendError(res, new InternalServerError(error.message || 'Failed to update calendar'));
+      sendError(
+        res,
+        new InternalServerError(error.message || 'Failed to update calendar')
+      );
     }
   },
 
@@ -105,15 +140,25 @@ export default createCrudHandler({
       const { action } = req.query;
 
       if (!userId) {
-        return sendError(res, new UnauthorizedError('User authentication required'));
+        return sendError(
+          res,
+          new UnauthorizedError('User authentication required')
+        );
       }
 
       if (!calendarId) {
         return sendError(
           res,
-          new ValidationError([
-            { field: 'id', message: 'Calendar ID is required', code: 'REQUIRED' },
-          ], 'Calendar ID is required')
+          new ValidationError(
+            [
+              {
+                field: 'id',
+                message: 'Calendar ID is required',
+                code: 'REQUIRED',
+              },
+            ],
+            'Calendar ID is required'
+          )
         );
       }
 
@@ -153,17 +198,23 @@ export default createCrudHandler({
       sendSuccess(res, result);
     } catch (error) {
       console.error(`PATCH /api/calendars/${req.query.id} error:`, error);
-      
+
       if (error.message?.startsWith('VALIDATION_ERROR:')) {
         const msg = error.message.replace('VALIDATION_ERROR: ', '');
-        return sendError(res, new ValidationError([{ message: msg, code: 'VALIDATION_ERROR' }], msg));
+        return sendError(
+          res,
+          new ValidationError([{ message: msg, code: 'VALIDATION_ERROR' }], msg)
+        );
       }
-      
+
       if (error.message?.includes('AUTHORIZATION_ERROR')) {
         return sendError(res, new ForbiddenError('Access denied'));
       }
 
-      sendError(res, new InternalServerError(error.message || 'Failed to update calendar'));
+      sendError(
+        res,
+        new InternalServerError(error.message || 'Failed to update calendar')
+      );
     }
   },
 
@@ -174,15 +225,25 @@ export default createCrudHandler({
       const calendarId = req.query.id as string;
 
       if (!userId) {
-        return sendError(res, new UnauthorizedError('User authentication required'));
+        return sendError(
+          res,
+          new UnauthorizedError('User authentication required')
+        );
       }
 
       if (!calendarId) {
         return sendError(
           res,
-          new ValidationError([
-            { field: 'id', message: 'Calendar ID is required', code: 'REQUIRED' },
-          ], 'Calendar ID is required')
+          new ValidationError(
+            [
+              {
+                field: 'id',
+                message: 'Calendar ID is required',
+                code: 'REQUIRED',
+              },
+            ],
+            'Calendar ID is required'
+          )
         );
       }
 
@@ -198,12 +259,15 @@ export default createCrudHandler({
       sendSuccess(res, { deleted: true });
     } catch (error) {
       console.error(`DELETE /api/calendars/${req.query.id} error:`, error);
-      
+
       if (error.message?.includes('AUTHORIZATION_ERROR')) {
         return sendError(res, new ForbiddenError('Access denied'));
       }
 
-      sendError(res, new InternalServerError(error.message || 'Failed to delete calendar'));
+      sendError(
+        res,
+        new InternalServerError(error.message || 'Failed to delete calendar')
+      );
     }
   },
 

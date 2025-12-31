@@ -49,7 +49,7 @@ export function getCurrentUser(): { id: string; email: string } | undefined {
   if (context?.userId && context?.userEmail) {
     return {
       id: context.userId,
-      email: context.userEmail
+      email: context.userEmail,
     };
   }
   return undefined;
@@ -73,7 +73,10 @@ export function runWithContext<T>(context: RequestContext, fn: () => T): T {
 /**
  * Create request context from Express request
  */
-type RequestWithUser = Request & { user?: { id: string; email: string }; connection?: { remoteAddress?: string } };
+type RequestWithUser = Request & {
+  user?: { id: string; email: string };
+  connection?: { remoteAddress?: string };
+};
 
 export function createRequestContext(req: RequestWithUser): RequestContext {
   return {
@@ -84,7 +87,7 @@ export function createRequestContext(req: RequestWithUser): RequestContext {
     ip: req.ip || req.connection?.remoteAddress || 'unknown',
     userAgent: req.get('User-Agent'),
     method: req.method,
-    path: req.path
+    path: req.path,
   };
 }
 
@@ -101,13 +104,13 @@ function generateRequestId(): string {
 export function requestContextMiddleware() {
   return (req: Request, res: Response, next: NextFunction) => {
     const context = createRequestContext(req);
-    
+
     // Add request ID to response headers for debugging
     res.setHeader('X-Request-ID', context.requestId);
-    
+
     // Store context in request for later access
     (req as RequestWithContext).context = context;
-    
+
     // Run the rest of the request in this context
     runWithContext(context, () => {
       next();
@@ -140,7 +143,11 @@ export function getRequestDuration(): number {
 /**
  * Enhanced logging with request context
  */
-export function logWithContext(level: 'info' | 'warn' | 'error', message: string, data?: LogData): void {
+export function logWithContext(
+  level: 'info' | 'warn' | 'error',
+  message: string,
+  data?: LogData
+): void {
   const context = getRequestContext();
   const logData = {
     level,
@@ -149,8 +156,8 @@ export function logWithContext(level: 'info' | 'warn' | 'error', message: string
     requestId: context?.requestId,
     userId: context?.userId,
     duration: context ? Date.now() - context.startTime : undefined,
-    ...data
+    ...data,
   };
-  
+
   console.log(JSON.stringify(logData));
 }

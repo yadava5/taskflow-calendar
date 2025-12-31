@@ -1,8 +1,8 @@
-import * as React from "react"
-import { CaretSortIcon, CheckIcon } from "@radix-ui/react-icons"
+import * as React from 'react';
+import { CaretSortIcon, CheckIcon } from '@radix-ui/react-icons';
 
-import { cn } from "@/lib/utils"
-import { Button } from "./Button"
+import { cn } from '@/lib/utils';
+import { Button } from './Button';
 import {
   Command,
   CommandEmpty,
@@ -10,39 +10,39 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "./command"
-import { Popover, PopoverContent, PopoverTrigger } from "./popover"
+} from './command';
+import { Popover, PopoverContent, PopoverTrigger } from './popover';
 
 export interface ComboboxOption {
-  value: string
-  label: string
-  icon?: React.ReactNode
+  value: string;
+  label: string;
+  icon?: React.ReactNode;
 }
 
 interface ComboboxProps {
-  options: ComboboxOption[]
-  value?: string
-  onValueChange?: (value: string) => void
-  placeholder?: string
-  searchPlaceholder?: string
-  emptyText?: string
-  className?: string
-  disabled?: boolean
+  options: ComboboxOption[];
+  value?: string;
+  onValueChange?: (value: string) => void;
+  placeholder?: string;
+  searchPlaceholder?: string;
+  emptyText?: string;
+  className?: string;
+  disabled?: boolean;
 }
 
 export function Combobox({
   options,
   value,
   onValueChange,
-  placeholder = "Select option...",
-  searchPlaceholder = "Search...",
-  emptyText = "No results found.",
+  placeholder = 'Select option...',
+  searchPlaceholder = 'Search...',
+  emptyText = 'No results found.',
   className,
   disabled = false,
 }: ComboboxProps) {
-  const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
-  const selectedOption = options.find((option) => option.value === value)
+  const selectedOption = options.find((option) => option.value === value);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -51,12 +51,17 @@ export function Combobox({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className={cn("w-full justify-between", className)}
+          className={cn('w-full justify-between', className)}
           disabled={disabled}
         >
           <div className="flex items-center gap-2">
             {selectedOption?.icon}
-            <span className={cn("truncate", !selectedOption && "text-muted-foreground")}>
+            <span
+              className={cn(
+                'truncate',
+                !selectedOption && 'text-muted-foreground'
+              )}
+            >
               {selectedOption ? selectedOption.label : placeholder}
             </span>
           </div>
@@ -74,9 +79,9 @@ export function Combobox({
                   key={option.value}
                   value={option.value}
                   onSelect={(currentValue) => {
-                    const newValue = currentValue === value ? "" : currentValue
-                    onValueChange?.(newValue)
-                    setOpen(false)
+                    const newValue = currentValue === value ? '' : currentValue;
+                    onValueChange?.(newValue);
+                    setOpen(false);
                   }}
                 >
                   <div className="flex items-center gap-2 flex-1">
@@ -85,8 +90,8 @@ export function Combobox({
                   </div>
                   <CheckIcon
                     className={cn(
-                      "ml-auto h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
+                      'ml-auto h-4 w-4',
+                      value === option.value ? 'opacity-100' : 'opacity-0'
                     )}
                   />
                 </CommandItem>
@@ -96,5 +101,5 @@ export function Combobox({
         </Command>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

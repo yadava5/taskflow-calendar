@@ -3,7 +3,7 @@ import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { useCalendars } from '@/hooks/useCalendars';
-import { type CalendarEvent } from "@shared/types";
+import { type CalendarEvent } from '@shared/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { groupItemsByDate, filterUpcomingItems } from '@/utils/dateGrouping';
@@ -36,7 +36,10 @@ const EventOverviewComponent: React.FC<EventOverviewProps> = ({
     const visible = allEvents.filter((event) =>
       visibleCalendarNames.includes(event.calendarName || '')
     );
-    return filterUpcomingItems(visible, (e: CalendarEvent) => new Date(e.start));
+    return filterUpcomingItems(
+      visible,
+      (e: CalendarEvent) => new Date(e.start)
+    );
   }, [allEvents, visibleCalendarNames]);
 
   // Apply display limit for the overview list
@@ -52,7 +55,10 @@ const EventOverviewComponent: React.FC<EventOverviewProps> = ({
 
   // Group all upcoming events to compute accurate totals per day key
   const groupedEventTotals: Record<string, number> = React.useMemo(() => {
-    const totals = groupItemsByDate(upcomingEventsAll, (e) => new Date(e.start));
+    const totals = groupItemsByDate(
+      upcomingEventsAll,
+      (e) => new Date(e.start)
+    );
     return Object.keys(totals).reduce<Record<string, number>>((acc, key) => {
       acc[key] = totals[key].length;
       return acc;
@@ -116,7 +122,7 @@ const EventOverviewComponent: React.FC<EventOverviewProps> = ({
                 <div
                   key={event.id}
                   className={cn(
-                    'flex items-center gap-3 py-2 px-3 rounded-md shadow-sm hover:shadow-md transition-all duration-200 ease-out group cursor-pointer',
+                    'flex items-center gap-3 py-2 px-3 rounded-md shadow-sm hover:shadow-md transition-all duration-200 ease-out group cursor-pointer'
                   )}
                   style={{
                     backgroundColor: `${getEventColor(event.calendarName || '')}1A`,
@@ -130,7 +136,11 @@ const EventOverviewComponent: React.FC<EventOverviewProps> = ({
                   <div className="relative flex-shrink-0">
                     <div
                       className="w-2.5 h-2.5 rounded-full"
-                      style={{ backgroundColor: getEventColor(event.calendarName || '') }}
+                      style={{
+                        backgroundColor: getEventColor(
+                          event.calendarName || ''
+                        ),
+                      }}
                     />
                   </div>
 

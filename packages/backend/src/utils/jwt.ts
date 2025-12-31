@@ -6,7 +6,11 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
 // Promisified wrappers with correct generics
-function signAsync(payload: string | object | Buffer, secret: jwt.Secret, options?: jwt.SignOptions): Promise<string> {
+function signAsync(
+  payload: string | object | Buffer,
+  secret: jwt.Secret,
+  options?: jwt.SignOptions
+): Promise<string> {
   return new Promise((resolve, reject) => {
     jwt.sign(payload, secret, options || {}, (err, token) => {
       if (err || !token) return reject(err);
@@ -15,7 +19,11 @@ function signAsync(payload: string | object | Buffer, secret: jwt.Secret, option
   });
 }
 
-function verifyAsync<T = unknown>(token: string, secret: jwt.Secret, options?: jwt.VerifyOptions): Promise<T> {
+function verifyAsync<T = unknown>(
+  token: string,
+  secret: jwt.Secret,
+  options?: jwt.VerifyOptions
+): Promise<T> {
   return new Promise((resolve, reject) => {
     jwt.verify(token, secret, options || {}, (err, decoded) => {
       if (err) return reject(err);
@@ -41,44 +49,53 @@ export interface TokenPair {
 /**
  * Generate JWT access token with user information
  */
-export async function generateAccessToken(userId: string, email: string): Promise<string> {
+export async function generateAccessToken(
+  userId: string,
+  email: string
+): Promise<string> {
   const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
     userId,
     email,
-    type: 'access'
+    type: 'access',
   };
 
   return await signAsync(payload, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
     issuer: 'react-calendar-app',
-    audience: 'react-calendar-app-users'
+    audience: 'react-calendar-app-users',
   });
 }
 
 /**
  * Generate JWT refresh token
  */
-export async function generateRefreshToken(userId: string, email: string): Promise<string> {
+export async function generateRefreshToken(
+  userId: string,
+  email: string
+): Promise<string> {
   const payload: Omit<JWTPayload, 'iat' | 'exp'> = {
     userId,
     email,
-    type: 'refresh'
+    type: 'refresh',
   };
 
   return await signAsync(payload, JWT_SECRET, {
     expiresIn: JWT_REFRESH_EXPIRES_IN as jwt.SignOptions['expiresIn'],
     issuer: 'react-calendar-app',
-    audience: 'react-calendar-app-users'
+    audience: 'react-calendar-app-users',
   });
 }
 
 /**
  * Generate both access and refresh tokens
  */
-export async function generateTokenPair(userId: string, email: string): Promise<TokenPair> {
+export async function generateTokenPair(
+  userId: string,
+  email: string
+): Promise<TokenPair> {
   const [accessToken, refreshToken] = await Promise.all([
     generateAccessToken(userId, email),
-    generateRefreshToken(userId, email)
+    generateRefreshToken(userId, email),
   ]);
 
   // Calculate expiration time for access token
@@ -88,7 +105,7 @@ export async function generateTokenPair(userId: string, email: string): Promise<
   return {
     accessToken,
     refreshToken,
-    expiresAt
+    expiresAt,
   };
 }
 
@@ -115,7 +132,9 @@ export async function verifyToken(token: string): Promise<JWTPayload> {
 /**
  * Extract token from Authorization header
  */
-export function extractTokenFromHeader(authHeader: string | undefined): string | null {
+export function extractTokenFromHeader(
+  authHeader: string | undefined
+): string | null {
   if (!authHeader) {
     return null;
   }
@@ -137,7 +156,7 @@ export function isTokenExpired(token: string): boolean {
     if (!decoded || !decoded.exp) {
       return true;
     }
-    
+
     const currentTime = Math.floor(Date.now() / 1000);
     return decoded.exp < currentTime;
   } catch {
@@ -160,9 +179,11 @@ export function getTokenExpiration(token: string): number | null {
 /**
  * Refresh access token using refresh token
  */
-export async function refreshAccessToken(refreshToken: string): Promise<string> {
+export async function refreshAccessToken(
+  refreshToken: string
+): Promise<string> {
   const decoded = await verifyToken(refreshToken);
-  
+
   if (decoded.type !== 'refresh') {
     throw new Error('INVALID_REFRESH_TOKEN');
   }

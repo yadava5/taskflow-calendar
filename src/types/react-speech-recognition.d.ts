@@ -21,10 +21,16 @@ declare module 'react-speech-recognition' {
     isMicrophoneAvailable: boolean;
   }
 
-  const useSpeechRecognition: (options?: SpeechRecognitionOptions) => SpeechRecognitionResult;
-  
+  const useSpeechRecognition: (
+    options?: SpeechRecognitionOptions
+  ) => SpeechRecognitionResult;
+
   const SpeechRecognition: {
-    startListening: (options?: { continuous?: boolean; language?: string; interimResults?: boolean }) => Promise<void>;
+    startListening: (options?: {
+      continuous?: boolean;
+      language?: string;
+      interimResults?: boolean;
+    }) => Promise<void>;
     stopListening: () => void;
     abortListening: () => void;
     browserSupportsSpeechRecognition: () => boolean;

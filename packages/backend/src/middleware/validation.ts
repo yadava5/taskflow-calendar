@@ -12,10 +12,10 @@ export function validateBody(schema: ZodSchema) {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const validationErrors = error.errors.map(err => ({
+        const validationErrors = error.errors.map((err) => ({
           field: err.path.join('.'),
           message: err.message,
-          code: err.code
+          code: err.code,
         }));
 
         res.status(400).json({
@@ -24,8 +24,8 @@ export function validateBody(schema: ZodSchema) {
             code: 'VALIDATION_ERROR',
             message: 'Request validation failed',
             details: validationErrors,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
         return;
       }
@@ -36,8 +36,8 @@ export function validateBody(schema: ZodSchema) {
         error: {
           code: 'VALIDATION_PROCESSING_ERROR',
           message: 'Error processing validation',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
   };
@@ -54,10 +54,10 @@ export function validateQuery(schema: ZodSchema) {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const validationErrors = error.errors.map(err => ({
+        const validationErrors = error.errors.map((err) => ({
           field: err.path.join('.'),
           message: err.message,
-          code: err.code
+          code: err.code,
         }));
 
         res.status(400).json({
@@ -66,8 +66,8 @@ export function validateQuery(schema: ZodSchema) {
             code: 'QUERY_VALIDATION_ERROR',
             message: 'Query parameter validation failed',
             details: validationErrors,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
         return;
       }
@@ -77,8 +77,8 @@ export function validateQuery(schema: ZodSchema) {
         error: {
           code: 'QUERY_VALIDATION_PROCESSING_ERROR',
           message: 'Error processing query validation',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
   };
@@ -95,10 +95,10 @@ export function validateParams(schema: ZodSchema) {
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        const validationErrors = error.errors.map(err => ({
+        const validationErrors = error.errors.map((err) => ({
           field: err.path.join('.'),
           message: err.message,
-          code: err.code
+          code: err.code,
         }));
 
         res.status(400).json({
@@ -107,8 +107,8 @@ export function validateParams(schema: ZodSchema) {
             code: 'PARAMS_VALIDATION_ERROR',
             message: 'URL parameter validation failed',
             details: validationErrors,
-            timestamp: new Date().toISOString()
-          }
+            timestamp: new Date().toISOString(),
+          },
         });
         return;
       }
@@ -118,8 +118,8 @@ export function validateParams(schema: ZodSchema) {
         error: {
           code: 'PARAMS_VALIDATION_PROCESSING_ERROR',
           message: 'Error processing parameter validation',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     }
   };

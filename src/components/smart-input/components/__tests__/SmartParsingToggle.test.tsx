@@ -1,6 +1,6 @@
 /**
  * SmartParsingToggle Component Tests
- * 
+ *
  * Tests the SmartParsingToggle component functionality including:
  * - Rendering with correct icon and label
  * - Toggle state changes
@@ -14,47 +14,32 @@ import { SmartParsingToggle } from '../SmartParsingToggle';
 
 describe('SmartParsingToggle', () => {
   it('renders with Brain icon', () => {
-    render(
-      <SmartParsingToggle
-        pressed={false}
-        onPressedChange={vi.fn()}
-      />
-    );
+    render(<SmartParsingToggle pressed={false} onPressedChange={vi.fn()} />);
 
     // Check that the Brain icon is present
     const toggle = screen.getByRole('button');
     expect(toggle).toBeInTheDocument();
-    
+
     // Check for Brain icon (it should be an SVG)
     const icon = toggle.querySelector('svg');
     expect(icon).toBeInTheDocument();
   });
 
   it('shows "Autotag" label when pressed', () => {
-    render(
-      <SmartParsingToggle
-        pressed={true}
-        onPressedChange={vi.fn()}
-      />
-    );
+    render(<SmartParsingToggle pressed={true} onPressedChange={vi.fn()} />);
 
     expect(screen.getByText('Autotag')).toBeInTheDocument();
   });
 
   it('does not show "Autotag" label when not pressed', () => {
-    render(
-      <SmartParsingToggle
-        pressed={false}
-        onPressedChange={vi.fn()}
-      />
-    );
+    render(<SmartParsingToggle pressed={false} onPressedChange={vi.fn()} />);
 
     expect(screen.queryByText('Autotag')).not.toBeInTheDocument();
   });
 
   it('calls onPressedChange when clicked', () => {
     const handlePressedChange = vi.fn();
-    
+
     render(
       <SmartParsingToggle
         pressed={false}
@@ -69,12 +54,7 @@ describe('SmartParsingToggle', () => {
   });
 
   it('has correct accessibility attributes when not pressed', () => {
-    render(
-      <SmartParsingToggle
-        pressed={false}
-        onPressedChange={vi.fn()}
-      />
-    );
+    render(<SmartParsingToggle pressed={false} onPressedChange={vi.fn()} />);
 
     const toggle = screen.getByRole('button');
     expect(toggle).toHaveAttribute('aria-label', 'Enable smart parsing');
@@ -82,12 +62,7 @@ describe('SmartParsingToggle', () => {
   });
 
   it('has correct accessibility attributes when pressed', () => {
-    render(
-      <SmartParsingToggle
-        pressed={true}
-        onPressedChange={vi.fn()}
-      />
-    );
+    render(<SmartParsingToggle pressed={true} onPressedChange={vi.fn()} />);
 
     const toggle = screen.getByRole('button');
     expect(toggle).toHaveAttribute('aria-label', 'Disable smart parsing');
@@ -109,7 +84,7 @@ describe('SmartParsingToggle', () => {
 
   it('does not call onPressedChange when disabled and clicked', () => {
     const handlePressedChange = vi.fn();
-    
+
     render(
       <SmartParsingToggle
         pressed={false}

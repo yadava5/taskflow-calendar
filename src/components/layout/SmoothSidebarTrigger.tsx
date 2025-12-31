@@ -9,7 +9,7 @@ interface SmoothSidebarTriggerProps {
 
 export const SmoothSidebarTrigger: React.FC<SmoothSidebarTriggerProps> = ({
   position,
-  className = ''
+  className = '',
 }) => {
   const { state, isMobile } = useSidebar();
 
@@ -23,19 +23,22 @@ export const SmoothSidebarTrigger: React.FC<SmoothSidebarTriggerProps> = ({
   }
 
   // Desktop: show based on current sidebar state
-  const shouldShow = position === 'sidebar' ? state === 'expanded' : state === 'collapsed';
-  
+  const shouldShow =
+    position === 'sidebar' ? state === 'expanded' : state === 'collapsed';
+
   if (!shouldShow) return null;
 
   // Animation direction based on position - both slide in from left for smooth transition
   const slideDirection = 'slide-in-from-left-2';
 
   return (
-    <div className={cn(
-      'animate-in fade-in-0 duration-200 ease-linear',
-      slideDirection,
-      className
-    )}>
+    <div
+      className={cn(
+        'animate-in fade-in-0 duration-200 ease-linear',
+        slideDirection,
+        className
+      )}
+    >
       <SidebarTrigger />
     </div>
   );

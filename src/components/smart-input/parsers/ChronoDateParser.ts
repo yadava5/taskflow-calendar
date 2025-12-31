@@ -3,7 +3,7 @@
  */
 
 import * as chrono from 'chrono-node';
-import { Parser, ParsedTag } from "@shared/types";
+import { Parser, ParsedTag } from '@shared/types';
 import { v4 as uuidv4 } from 'uuid';
 
 interface ChronoParseComponent {

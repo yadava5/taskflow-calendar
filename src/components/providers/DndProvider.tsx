@@ -12,7 +12,8 @@ export const DndProvider: React.FC<DndProviderProps> = ({ children }) => {
   useEffect(() => {
     let mounted = true;
     import('react-dnd-html5-backend').then((m) => {
-      if (mounted) setBackend(() => m.HTML5Backend as unknown as BackendFactory);
+      if (mounted)
+        setBackend(() => m.HTML5Backend as unknown as BackendFactory);
     });
     return () => {
       mounted = false;

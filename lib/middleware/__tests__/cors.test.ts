@@ -220,7 +220,10 @@ describe('CORS Middleware', () => {
         'X-Content-Type-Options',
         'nosniff'
       );
-      expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith('X-Frame-Options', 'DENY');
+      expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith(
+        'X-Frame-Options',
+        'DENY'
+      );
       expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith(
         'X-XSS-Protection',
         '1; mode=block'
@@ -440,7 +443,7 @@ describe('CORS Middleware', () => {
         'Referrer-Policy',
       ];
 
-      securityHeaders.forEach(header => {
+      securityHeaders.forEach((header) => {
         const headerCall = setHeaderCalls.find(([name]) => name === header);
         expect(headerCall).toBeDefined();
       });

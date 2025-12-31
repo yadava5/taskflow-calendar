@@ -178,16 +178,19 @@ class AuthAPI {
     }
   }
 
-  async logout(accessToken: string, refreshToken?: string): Promise<{ success: boolean; message?: string }> {
+  async logout(
+    accessToken: string,
+    refreshToken?: string
+  ): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(`${this.baseURL}/logout`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          refreshToken 
+        body: JSON.stringify({
+          refreshToken,
         }),
       });
 
@@ -237,12 +240,15 @@ class AuthAPI {
     }
   }
 
-  async verifyToken(token: string): Promise<{ valid: boolean; user?: { id: string; email: string; name?: string; picture?: string } }> {
+  async verifyToken(token: string): Promise<{
+    valid: boolean;
+    user?: { id: string; email: string; name?: string; picture?: string };
+  }> {
     try {
       const response = await fetch(`${this.baseURL}/verify`, {
         method: 'GET',
         headers: {
-          'Authorization': `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 

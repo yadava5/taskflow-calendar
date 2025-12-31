@@ -24,11 +24,14 @@ export interface RecurrenceEditorOptions {
   count?: number | null; // used when ends='after'
 }
 
-export type ParsedRecurrence = RecurrenceEditorOptions
+export type ParsedRecurrence = RecurrenceEditorOptions;
 
 const WEEKDAY_CODES = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'] as const;
 
-export function generateRRule(options: RecurrenceEditorOptions, dtstart: Date): string {
+export function generateRRule(
+  options: RecurrenceEditorOptions,
+  dtstart: Date
+): string {
   // Keep dtstart for potential future use; currently not embedded in string
   void dtstart;
   const parts: string[] = [];
@@ -45,7 +48,11 @@ export function generateRRule(options: RecurrenceEditorOptions, dtstart: Date): 
   const interval = Math.max(1, Math.floor(options.interval || 1));
   parts.push(`INTERVAL=${interval}`);
 
-  if (options.frequency === 'weekly' && options.daysOfWeek && options.daysOfWeek.length > 0) {
+  if (
+    options.frequency === 'weekly' &&
+    options.daysOfWeek &&
+    options.daysOfWeek.length > 0
+  ) {
     const byday = options.daysOfWeek
       .sort((a, b) => a - b)
       .map((d) => WEEKDAY_CODES[(d + 7) % 7])
@@ -127,7 +134,9 @@ export function parseRRule(rruleString: string): ParsedRecurrence | null {
 
   if (map['BYDAY']) {
     const bydays = map['BYDAY'].split(',');
-    opts.daysOfWeek = bydays.map((code) => WEEKDAY_CODES.indexOf(code as typeof WEEKDAY_CODES[number]));
+    opts.daysOfWeek = bydays.map((code) =>
+      WEEKDAY_CODES.indexOf(code as (typeof WEEKDAY_CODES)[number])
+    );
   }
   if (map['BYMONTHDAY']) {
     const md = parseInt(map['BYMONTHDAY'], 10);
@@ -140,7 +149,9 @@ export function parseRRule(rruleString: string): ParsedRecurrence | null {
   if (map['BYDAY'] && map['BYSETPOS'] && opts.frequency === 'monthly') {
     // monthly nth weekday case
     const w = map['BYDAY'].split(',')[0];
-    opts.monthlyWeekday = WEEKDAY_CODES.indexOf(w as typeof WEEKDAY_CODES[number]);
+    opts.monthlyWeekday = WEEKDAY_CODES.indexOf(
+      w as (typeof WEEKDAY_CODES)[number]
+    );
   }
 
   if (map['BYMONTH'] && opts.frequency === 'yearly') {
@@ -210,12 +221,18 @@ function buildCacheKey(
 }
 
 export function expandOccurrences(
-  event: Pick<CalendarEvent, 'id' | 'start' | 'end' | 'recurrence' | 'exceptions' | 'allDay'>,
+  event: Pick<
+    CalendarEvent,
+    'id' | 'start' | 'end' | 'recurrence' | 'exceptions' | 'allDay'
+  >,
   rangeStart: Date,
   rangeEnd: Date
 ): ExpandedOccurrence[] {
   if (!event.recurrence) return [];
-  const durationMs = Math.max(0, new Date(event.end).getTime() - new Date(event.start).getTime());
+  const durationMs = Math.max(
+    0,
+    new Date(event.end).getTime() - new Date(event.start).getTime()
+  );
   const exceptions = event.exceptions ?? [];
   const cacheKey = buildCacheKey(
     event.id,
@@ -235,7 +252,11 @@ export function expandOccurrences(
     return [];
   }
 
-  const occStarts = (rule as RRule).between(new Date(rangeStart), new Date(rangeEnd), true);
+  const occStarts = (rule as RRule).between(
+    new Date(rangeStart),
+    new Date(rangeEnd),
+    true
+  );
   const exceptionSet = new Set(exceptions);
   const occurrences: ExpandedOccurrence[] = [];
   for (const start of occStarts) {
@@ -288,4 +309,3 @@ export function clampRRuleUntil(rruleString: string, untilDate: Date): string {
   }
   return `RRULE:${parts.join(';')}`;
 }
-

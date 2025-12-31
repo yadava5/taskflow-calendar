@@ -74,7 +74,9 @@ describe('Request ID Middleware', () => {
       middleware(req, res, mockNext);
 
       const setHeaderCalls = vi.mocked(res.setHeader).mock.calls;
-      const requestIdCall = setHeaderCalls.find(([header]) => header === 'X-Request-ID');
+      const requestIdCall = setHeaderCalls.find(
+        ([header]) => header === 'X-Request-ID'
+      );
       const responseId = requestIdCall?.[1];
 
       expect(req.requestId).toBe(responseId);

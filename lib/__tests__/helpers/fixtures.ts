@@ -237,7 +237,8 @@ export const testAttachments = {
     filename: 'budget.xlsx',
     fileUrl: 'https://blob.vercel-storage.com/budget-ghi789.xlsx',
     fileSize: 204800,
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    mimeType:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     createdAt: new Date('2024-01-14T12:00:00Z'),
   },
 };

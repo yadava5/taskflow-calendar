@@ -4,7 +4,7 @@
  */
 
 import nlp from 'compromise';
-import { Parser, ParsedTag } from "@shared/types";
+import { Parser, ParsedTag } from '@shared/types';
 import { v4 as uuidv4 } from 'uuid';
 
 // Using minimal interfaces for compromise objects we actually use
@@ -249,7 +249,9 @@ export class CompromiseNLPParser implements Parser {
       const matches = Array.from(text.matchAll(pattern)) as RegExpMatchArray[];
 
       if (matches.length > 0) {
-        const score = matches.length + (matches.some((m) => (m[0] || '').length > 5) ? 0.2 : 0);
+        const score =
+          matches.length +
+          (matches.some((m) => (m[0] || '').length > 5) ? 0.2 : 0);
 
         if (score > bestScore) {
           bestScore = score;
@@ -261,7 +263,8 @@ export class CompromiseNLPParser implements Parser {
 
     // Create semantic label tag
     if (bestCategory && bestMatch) {
-      const matchIndex = (bestMatch as RegExpMatchArray & { index?: number }).index ?? -1;
+      const matchIndex =
+        (bestMatch as RegExpMatchArray & { index?: number }).index ?? -1;
       const matchText: string = (bestMatch[0] as unknown as string) || '';
       if (matchIndex >= 0 && typeof matchText === 'string') {
         tags.push({

@@ -12,10 +12,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
-    include: [
-      'api/**/*.test.ts',
-      'lib/**/*.test.ts',
-    ],
+    include: ['api/**/*.test.ts', 'lib/**/*.test.ts'],
     exclude: [
       'node_modules/**',
       'dist/**',
@@ -24,16 +21,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: [
-        'api/**/*.ts',
-        'lib/**/*.ts',
-      ],
-      exclude: [
-        '**/*.test.ts',
-        '**/*.d.ts',
-        'node_modules/**',
-        'dist/**',
-      ],
+      include: ['api/**/*.ts', 'lib/**/*.ts'],
+      exclude: ['**/*.test.ts', '**/*.d.ts', 'node_modules/**', 'dist/**'],
     },
     setupFiles: ['./test/backend-setup.ts'],
   },

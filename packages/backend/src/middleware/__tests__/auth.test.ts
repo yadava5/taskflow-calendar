@@ -1,6 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
-import { authenticateToken, optionalAuth, validateRefreshToken } from '../auth.js';
+import {
+  authenticateToken,
+  optionalAuth,
+  validateRefreshToken,
+} from '../auth.js';
 import { generateAccessToken, generateRefreshToken } from '../../utils/jwt.js';
 import { tokenBlacklistService } from '../../services/TokenBlacklistService.js';
 
@@ -9,13 +13,13 @@ process.env.JWT_SECRET = 'test-secret-key-for-testing';
 
 // Mock request context
 vi.mock('../../utils/requestContext.js', () => ({
-  updateContextWithUser: vi.fn()
+  updateContextWithUser: vi.fn(),
 }));
 
 describe('Authentication Middleware', () => {
   const testUserId = 'user-123';
   const testEmail = 'test@example.com';
-  
+
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
@@ -24,16 +28,16 @@ describe('Authentication Middleware', () => {
     mockRequest = {
       headers: {},
       user: undefined,
-      token: undefined
+      token: undefined,
     };
-    
+
     mockResponse = {
       status: vi.fn().mockReturnThis(),
-      json: vi.fn().mockReturnThis()
+      json: vi.fn().mockReturnThis(),
     };
-    
+
     mockNext = vi.fn();
-    
+
     // Clear blacklist before each test
     tokenBlacklistService.clear();
   });
@@ -42,7 +46,7 @@ describe('Authentication Middleware', () => {
     it('should authenticate valid token', async () => {
       const token = await generateAccessToken(testUserId, testEmail);
       mockRequest.headers = {
-        authorization: `Bearer ${token}`
+        authorization: `Bearer ${token}`,
       };
 
       await authenticateToken(
@@ -53,7 +57,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRequest.user).toEqual({
         id: testUserId,
-        email: testEmail
+        email: testEmail,
       });
       expect(mockRequest.token).toBe(token);
       expect(mockNext).toHaveBeenCalled();
@@ -73,15 +77,15 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'MISSING_TOKEN',
           message: 'Authorization token is required',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
     it('should reject invalid authorization header format', async () => {
       mockRequest.headers = {
-        authorization: 'Invalid token-format'
+        authorization: 'Invalid token-format',
       };
 
       await authenticateToken(
@@ -96,8 +100,8 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'MISSING_TOKEN',
           message: 'Authorization token is required',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -105,9 +109,9 @@ describe('Authentication Middleware', () => {
     it('should reject blacklisted token', async () => {
       const token = await generateAccessToken(testUserId, testEmail);
       tokenBlacklistService.blacklistToken(token);
-      
+
       mockRequest.headers = {
-        authorization: `Bearer ${token}`
+        authorization: `Bearer ${token}`,
       };
 
       await authenticateToken(
@@ -122,8 +126,8 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'TOKEN_BLACKLISTED',
           message: 'Token has been invalidated',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -131,7 +135,7 @@ describe('Authentication Middleware', () => {
     it('should reject refresh token', async () => {
       const refreshToken = await generateRefreshToken(testUserId, testEmail);
       mockRequest.headers = {
-        authorization: `Bearer ${refreshToken}`
+        authorization: `Bearer ${refreshToken}`,
       };
 
       await authenticateToken(
@@ -146,15 +150,15 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'INVALID_TOKEN_TYPE',
           message: 'Access token required',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
     it('should reject invalid token', async () => {
       mockRequest.headers = {
-        authorization: 'Bearer invalid-token'
+        authorization: 'Bearer invalid-token',
       };
 
       await authenticateToken(
@@ -169,8 +173,8 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'TOKEN_INVALID',
           message: 'Invalid token format',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -180,7 +184,7 @@ describe('Authentication Middleware', () => {
     it('should authenticate valid token when provided', async () => {
       const token = await generateAccessToken(testUserId, testEmail);
       mockRequest.headers = {
-        authorization: `Bearer ${token}`
+        authorization: `Bearer ${token}`,
       };
 
       await optionalAuth(
@@ -191,7 +195,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRequest.user).toEqual({
         id: testUserId,
-        email: testEmail
+        email: testEmail,
       });
       expect(mockRequest.token).toBe(token);
       expect(mockNext).toHaveBeenCalled();
@@ -214,9 +218,9 @@ describe('Authentication Middleware', () => {
     it('should continue without authentication when token is blacklisted', async () => {
       const token = await generateAccessToken(testUserId, testEmail);
       tokenBlacklistService.blacklistToken(token);
-      
+
       mockRequest.headers = {
-        authorization: `Bearer ${token}`
+        authorization: `Bearer ${token}`,
       };
 
       await optionalAuth(
@@ -233,7 +237,7 @@ describe('Authentication Middleware', () => {
 
     it('should continue without authentication when token is invalid', async () => {
       mockRequest.headers = {
-        authorization: 'Bearer invalid-token'
+        authorization: 'Bearer invalid-token',
       };
 
       await optionalAuth(
@@ -262,7 +266,7 @@ describe('Authentication Middleware', () => {
 
       expect(mockRequest.user).toEqual({
         id: testUserId,
-        email: testEmail
+        email: testEmail,
       });
       expect(mockRequest.token).toBe(refreshToken);
       expect(mockNext).toHaveBeenCalled();
@@ -284,8 +288,8 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'MISSING_REFRESH_TOKEN',
           message: 'Refresh token is required',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -293,7 +297,7 @@ describe('Authentication Middleware', () => {
     it('should reject blacklisted refresh token', async () => {
       const refreshToken = await generateRefreshToken(testUserId, testEmail);
       tokenBlacklistService.blacklistToken(refreshToken);
-      
+
       mockRequest.body = { refreshToken };
 
       await validateRefreshToken(
@@ -308,8 +312,8 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'TOKEN_BLACKLISTED',
           message: 'Refresh token has been invalidated',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -330,8 +334,8 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'INVALID_TOKEN_TYPE',
           message: 'Refresh token required',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -351,8 +355,8 @@ describe('Authentication Middleware', () => {
         error: {
           code: 'REFRESH_TOKEN_INVALID',
           message: 'Invalid refresh token format',
-          timestamp: expect.any(String)
-        }
+          timestamp: expect.any(String),
+        },
       });
       expect(mockNext).not.toHaveBeenCalled();
     });

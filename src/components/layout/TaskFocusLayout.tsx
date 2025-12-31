@@ -12,13 +12,13 @@ interface TaskFocusLayoutProps {
 
 export const TaskFocusLayout: React.FC<TaskFocusLayoutProps> = ({
   children,
-  className
+  className,
 }) => {
   const { currentView, dragState } = useUIStore();
 
   return (
     <SidebarProvider defaultOpen={true}>
-      <div 
+      <div
         className={cn(
           'h-screen w-screen overflow-hidden bg-background flex',
           'transition-all duration-500 ease-out',
@@ -30,21 +30,21 @@ export const TaskFocusLayout: React.FC<TaskFocusLayoutProps> = ({
         style={{ overscrollBehavior: 'none' }}
       >
         {/* Calendar Summary Pane - Left Side */}
-        <CalendarSummaryPane 
+        <CalendarSummaryPane
           className={cn(
             'flex-shrink-0 transition-all duration-300 ease-out',
             'border-r border-border'
           )}
         />
-        
+
         {/* Task Focus Pane - Right Side */}
-        <TaskFocusPane 
+        <TaskFocusPane
           className={cn(
             'flex-1 min-w-0 transition-all duration-300 ease-out',
             'flex flex-col'
           )}
         />
-        
+
         {/* Optional children for modals, overlays, etc. */}
         {children}
       </div>

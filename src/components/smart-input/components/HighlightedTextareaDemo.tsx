@@ -5,13 +5,13 @@
 
 import React, { useState } from 'react';
 import { HighlightedTextareaField } from './HighlightedTextareaField';
-import { ParsedTag } from "@shared/types";
+import { ParsedTag } from '@shared/types';
 
 export const HighlightedTextareaDemo: React.FC = () => {
   const [value, setValue] = useState(
     'Line 1: high priority task\nLine 2: due tomorrow at 3pm\nLine 3: meet @john at office\nLine 4: #project-alpha milestone'
   );
-  
+
   const [showConfidence, setShowConfidence] = useState(true);
 
   // Mock tags for demonstration
@@ -27,7 +27,7 @@ export const HighlightedTextareaDemo: React.FC = () => {
       originalText: 'high',
       confidence: 0.9,
       source: 'priority-parser',
-      color: '#ef4444'
+      color: '#ef4444',
     },
     {
       id: '2',
@@ -40,7 +40,7 @@ export const HighlightedTextareaDemo: React.FC = () => {
       originalText: 'tomorrow',
       confidence: 0.8,
       source: 'date-parser',
-      color: '#3b82f6'
+      color: '#3b82f6',
     },
     {
       id: '3',
@@ -53,7 +53,7 @@ export const HighlightedTextareaDemo: React.FC = () => {
       originalText: '3pm',
       confidence: 0.85,
       source: 'time-parser',
-      color: '#10b981'
+      color: '#10b981',
     },
     {
       id: '4',
@@ -66,7 +66,7 @@ export const HighlightedTextareaDemo: React.FC = () => {
       originalText: '@john',
       confidence: 0.95,
       source: 'person-parser',
-      color: '#8b5cf6'
+      color: '#8b5cf6',
     },
     {
       id: '5',
@@ -79,16 +79,17 @@ export const HighlightedTextareaDemo: React.FC = () => {
       originalText: '#project-alpha',
       confidence: 0.7,
       source: 'project-parser',
-      color: '#f59e0b'
-    }
-  ].filter(tag => tag.startIndex !== -1); // Only include tags that exist in current text
+      color: '#f59e0b',
+    },
+  ].filter((tag) => tag.startIndex !== -1); // Only include tags that exist in current text
 
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div className="space-y-2">
         <h2 className="text-2xl font-bold">HighlightedTextareaField Demo</h2>
         <p className="text-muted-foreground">
-          Test multi-line text highlighting, scroll synchronization, and cursor positioning.
+          Test multi-line text highlighting, scroll synchronization, and cursor
+          positioning.
         </p>
       </div>
 
@@ -134,7 +135,7 @@ export const HighlightedTextareaDemo: React.FC = () => {
                 style={{
                   backgroundColor: `${tag.color}20`,
                   borderColor: `${tag.color}30`,
-                  color: tag.color
+                  color: tag.color,
                 }}
               >
                 {tag.displayText} ({Math.round(tag.confidence * 100)}%)
@@ -150,7 +151,10 @@ export const HighlightedTextareaDemo: React.FC = () => {
             <li>Add new lines to test multi-line functionality</li>
             <li>Scroll within the textarea to test scroll synchronization</li>
             <li>Select text to verify cursor positioning works correctly</li>
-            <li>Try typing: "urgent task due next friday at 2pm with @alice #project-beta"</li>
+            <li>
+              Try typing: "urgent task due next friday at 2pm with @alice
+              #project-beta"
+            </li>
             <li>Test auto-resizing by adding many lines of text</li>
           </ul>
         </div>

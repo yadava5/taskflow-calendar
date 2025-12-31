@@ -6,7 +6,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { EnhancedTaskInputLayout } from '../EnhancedTaskInputLayout';
-import { ParsedTag } from "@shared/types";
+import { ParsedTag } from '@shared/types';
 
 describe('EnhancedTaskInputLayout Integration', () => {
   const mockTags: ParsedTag[] = [
@@ -21,13 +21,13 @@ describe('EnhancedTaskInputLayout Integration', () => {
       originalText: 'high',
       confidence: 0.9,
       source: 'priority-parser',
-      color: '#ef4444'
-    }
+      color: '#ef4444',
+    },
   ];
 
   it('renders HighlightedTextareaField when smart parsing is enabled', () => {
     const onChange = vi.fn();
-    
+
     render(
       <EnhancedTaskInputLayout
         value="high priority task"
@@ -36,15 +36,18 @@ describe('EnhancedTaskInputLayout Integration', () => {
         enableSmartParsing={true}
       />
     );
-    
+
     const textarea = screen.getByRole('textbox');
     expect(textarea.tagName).toBe('TEXTAREA');
-    expect(textarea).toHaveAttribute('aria-label', 'Smart task input with highlighting');
+    expect(textarea).toHaveAttribute(
+      'aria-label',
+      'Smart task input with highlighting'
+    );
   });
 
   it('renders plain textarea when smart parsing is disabled', () => {
     const onChange = vi.fn();
-    
+
     render(
       <EnhancedTaskInputLayout
         value="plain task"
@@ -53,7 +56,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
         enableSmartParsing={false}
       />
     );
-    
+
     const textarea = screen.getByRole('textbox');
     expect(textarea.tagName).toBe('TEXTAREA');
     expect(textarea).toHaveAttribute('aria-label', 'Task input');
@@ -62,7 +65,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
   it('handles multi-line input correctly', () => {
     const onChange = vi.fn();
     const multiLineText = 'Line 1: high priority\nLine 2: due tomorrow';
-    
+
     render(
       <EnhancedTaskInputLayout
         value={multiLineText}
@@ -71,7 +74,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
         enableSmartParsing={true}
       />
     );
-    
+
     const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
     expect(textarea.value).toBe(multiLineText);
   });
@@ -81,7 +84,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
     const onKeyPress = vi.fn();
     const onFocus = vi.fn();
     const onBlur = vi.fn();
-    
+
     render(
       <EnhancedTaskInputLayout
         value="test task"
@@ -99,17 +102,17 @@ describe('EnhancedTaskInputLayout Integration', () => {
         maxHeight="400px"
       />
     );
-    
+
     const textarea = screen.getByRole('textbox');
     expect(textarea).toHaveAttribute('placeholder', 'Custom placeholder');
-    
+
     // Test event handlers
     fireEvent.change(textarea, { target: { value: 'new text' } });
     expect(onChange).toHaveBeenCalledWith('new text');
-    
+
     fireEvent.focus(textarea);
     expect(onFocus).toHaveBeenCalled();
-    
+
     fireEvent.blur(textarea);
     expect(onBlur).toHaveBeenCalled();
   });
@@ -118,7 +121,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
     const onChange = vi.fn();
     const leftControls = <button data-testid="left-control">Left</button>;
     const rightControls = <button data-testid="right-control">Right</button>;
-    
+
     render(
       <EnhancedTaskInputLayout
         value="test"
@@ -128,14 +131,14 @@ describe('EnhancedTaskInputLayout Integration', () => {
         rightControls={rightControls}
       />
     );
-    
+
     expect(screen.getByTestId('left-control')).toBeInTheDocument();
     expect(screen.getByTestId('right-control')).toBeInTheDocument();
   });
 
   it('applies disabled state correctly', () => {
     const onChange = vi.fn();
-    
+
     render(
       <EnhancedTaskInputLayout
         value="test"
@@ -144,7 +147,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
         disabled={true}
       />
     );
-    
+
     const textarea = screen.getByRole('textbox');
     expect(textarea).toBeDisabled();
   });
@@ -152,7 +155,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
   it('handles highlighting overlay correctly', () => {
     const onChange = vi.fn();
     const text = 'high priority task';
-    
+
     const { container } = render(
       <EnhancedTaskInputLayout
         value={text}
@@ -161,7 +164,7 @@ describe('EnhancedTaskInputLayout Integration', () => {
         enableSmartParsing={true}
       />
     );
-    
+
     // Check that overlay exists and has highlighting
     const overlay = container.querySelector('[aria-hidden="true"]');
     expect(overlay).toBeInTheDocument();

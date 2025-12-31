@@ -3,7 +3,11 @@ import { devtools, persist } from 'zustand/middleware';
 
 export type DateDisplayMode = 'relative' | 'absolute';
 export type AppViewMode = 'calendar' | 'task';
-export type CalendarSubView = 'dayGridMonth' | 'timeGridWeek' | 'timeGridDay' | 'listWeek';
+export type CalendarSubView =
+  | 'dayGridMonth'
+  | 'timeGridWeek'
+  | 'timeGridDay'
+  | 'listWeek';
 export type SavedTaskGrouping = 'taskList' | 'dueDate' | 'priority';
 export type TaskCompletionControl = 'checkbox' | 'status-tag';
 
@@ -86,9 +90,14 @@ export const useSettingsStore = create<SettingsState>()(
         taskCompletionControl: 'checkbox',
         showSidebarTaskAnalytics: true,
 
-        setDateDisplayMode: (mode) => set({ dateDisplayMode: mode }, false, 'setDateDisplayMode'),
+        setDateDisplayMode: (mode) =>
+          set({ dateDisplayMode: mode }, false, 'setDateDisplayMode'),
         setCalendarViewInputExpanded: (expanded) =>
-          set({ calendarViewInputExpanded: expanded }, false, 'setCalendarViewInputExpanded'),
+          set(
+            { calendarViewInputExpanded: expanded },
+            false,
+            'setCalendarViewInputExpanded'
+          ),
         toggleCalendarViewInput: () =>
           set(
             { calendarViewInputExpanded: !get().calendarViewInputExpanded },
@@ -96,26 +105,65 @@ export const useSettingsStore = create<SettingsState>()(
             'toggleCalendarViewInput'
           ),
         setTaskViewMiniCalendarExpanded: (expanded) =>
-          set({ taskViewMiniCalendarExpanded: expanded }, false, 'setTaskViewMiniCalendarExpanded'),
+          set(
+            { taskViewMiniCalendarExpanded: expanded },
+            false,
+            'setTaskViewMiniCalendarExpanded'
+          ),
         toggleTaskViewMiniCalendar: () =>
           set(
-            { taskViewMiniCalendarExpanded: !get().taskViewMiniCalendarExpanded },
+            {
+              taskViewMiniCalendarExpanded: !get().taskViewMiniCalendarExpanded,
+            },
             false,
             'toggleTaskViewMiniCalendar'
           ),
         setSidebarExpanded: (expanded) =>
           set({ sidebarExpanded: expanded }, false, 'setSidebarExpanded'),
         toggleSidebar: () =>
-          set({ sidebarExpanded: !get().sidebarExpanded }, false, 'toggleSidebar'),
-        setAppViewMode: (view) => set({ appViewMode: view }, false, 'setAppViewMode'),
-        setCalendarSubView: (view) => set({ calendarSubView: view }, false, 'setCalendarSubView'),
-        setTaskPaneSetup: (setup) => set({ taskPaneSetup: setup }, false, 'setTaskPaneSetup'),
-        setTaskPaneLayoutSizes: (sizes) => set({ taskPaneLayoutSizes: sizes }, false, 'setTaskPaneLayoutSizes'),
-        setEnhancedInputVisible: (visible) => set({ enhancedInputVisible: visible }, false, 'setEnhancedInputVisible'),
-        setEnhancedInputTaskListId: (taskListId) => set({ enhancedInputTaskListId: taskListId }, false, 'setEnhancedInputTaskListId'),
-        setLeftSmartInputTaskListId: (taskListId) => set({ leftSmartInputTaskListId: taskListId }, false, 'setLeftSmartInputTaskListId'),
-        setTaskCompletionControl: (mode) => set({ taskCompletionControl: mode }, false, 'setTaskCompletionControl'),
-        setShowSidebarTaskAnalytics: (visible) => set({ showSidebarTaskAnalytics: visible }, false, 'setShowSidebarTaskAnalytics'),
+          set(
+            { sidebarExpanded: !get().sidebarExpanded },
+            false,
+            'toggleSidebar'
+          ),
+        setAppViewMode: (view) =>
+          set({ appViewMode: view }, false, 'setAppViewMode'),
+        setCalendarSubView: (view) =>
+          set({ calendarSubView: view }, false, 'setCalendarSubView'),
+        setTaskPaneSetup: (setup) =>
+          set({ taskPaneSetup: setup }, false, 'setTaskPaneSetup'),
+        setTaskPaneLayoutSizes: (sizes) =>
+          set({ taskPaneLayoutSizes: sizes }, false, 'setTaskPaneLayoutSizes'),
+        setEnhancedInputVisible: (visible) =>
+          set(
+            { enhancedInputVisible: visible },
+            false,
+            'setEnhancedInputVisible'
+          ),
+        setEnhancedInputTaskListId: (taskListId) =>
+          set(
+            { enhancedInputTaskListId: taskListId },
+            false,
+            'setEnhancedInputTaskListId'
+          ),
+        setLeftSmartInputTaskListId: (taskListId) =>
+          set(
+            { leftSmartInputTaskListId: taskListId },
+            false,
+            'setLeftSmartInputTaskListId'
+          ),
+        setTaskCompletionControl: (mode) =>
+          set(
+            { taskCompletionControl: mode },
+            false,
+            'setTaskCompletionControl'
+          ),
+        setShowSidebarTaskAnalytics: (visible) =>
+          set(
+            { showSidebarTaskAnalytics: visible },
+            false,
+            'setShowSidebarTaskAnalytics'
+          ),
       }),
       {
         name: 'settings-store',
@@ -139,5 +187,3 @@ export const useSettingsStore = create<SettingsState>()(
     { name: 'settings-store' }
   )
 );
-
-

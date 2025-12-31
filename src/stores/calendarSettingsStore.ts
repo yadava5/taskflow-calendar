@@ -6,7 +6,7 @@ export type TimeRangeMode = 'default' | 'fullDay' | 'custom';
 interface CalendarSettingsState {
   timeRangeMode: TimeRangeMode;
   customStartHour: number; // 0-24
-  customEndHour: number;   // 0-24
+  customEndHour: number; // 0-24
 
   setTimeRangeMode: (mode: TimeRangeMode) => void;
   setCustomRange: (startHour: number, endHour: number) => void;
@@ -31,14 +31,19 @@ export const useCalendarSettingsStore = create<CalendarSettingsState>()(
         customStartHour: 6,
         customEndHour: 22,
 
-        setTimeRangeMode: (mode) => set({ timeRangeMode: mode }, false, 'setTimeRangeMode'),
+        setTimeRangeMode: (mode) =>
+          set({ timeRangeMode: mode }, false, 'setTimeRangeMode'),
 
         setCustomRange: (start, end) => {
           const startHour = clampHour(start);
           const endHour = clampHour(end);
           const adjustedStart = Math.min(startHour, endHour - 1);
           const adjustedEnd = Math.max(endHour, startHour + 1);
-          set({ customStartHour: adjustedStart, customEndHour: adjustedEnd }, false, 'setCustomRange');
+          set(
+            { customStartHour: adjustedStart, customEndHour: adjustedEnd },
+            false,
+            'setCustomRange'
+          );
         },
 
         getEffectiveRange: () => {
@@ -76,4 +81,3 @@ export const useCalendarSettingsStore = create<CalendarSettingsState>()(
     { name: 'calendar-settings-store' }
   )
 );
-

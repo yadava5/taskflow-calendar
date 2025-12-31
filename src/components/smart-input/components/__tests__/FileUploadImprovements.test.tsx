@@ -1,6 +1,6 @@
 /**
  * File Upload Improvements Test
- * 
+ *
  * Tests the specific improvements made to the file upload functionality:
  * 1. Error message simplification
  * 2. Removed file count text
@@ -41,10 +41,7 @@ describe('File Upload Improvements', () => {
 
   it('does not show file count text', () => {
     render(
-      <CompactFilePreview
-        files={mockFiles}
-        onFileRemove={mockOnFileRemove}
-      />
+      <CompactFilePreview files={mockFiles} onFileRemove={mockOnFileRemove} />
     );
 
     // Should not show file count text
@@ -54,24 +51,23 @@ describe('File Upload Improvements', () => {
 
   it('uses horizontal scrolling layout', () => {
     const { container } = render(
-      <CompactFilePreview
-        files={mockFiles}
-        onFileRemove={mockOnFileRemove}
-      />
+      <CompactFilePreview files={mockFiles} onFileRemove={mockOnFileRemove} />
     );
 
     // Should have overflow-x-auto class for horizontal scrolling
     const filesContainer = container.querySelector('.overflow-x-auto');
     expect(filesContainer).toBeInTheDocument();
-    expect(filesContainer).toHaveClass('flex', 'gap-2', 'overflow-x-auto', 'pb-1');
+    expect(filesContainer).toHaveClass(
+      'flex',
+      'gap-2',
+      'overflow-x-auto',
+      'pb-1'
+    );
   });
 
   it('prevents file items from shrinking', () => {
     const { container } = render(
-      <CompactFilePreview
-        files={mockFiles}
-        onFileRemove={mockOnFileRemove}
-      />
+      <CompactFilePreview files={mockFiles} onFileRemove={mockOnFileRemove} />
     );
 
     // File items should have flex-shrink-0 to prevent shrinking
@@ -81,16 +77,13 @@ describe('File Upload Improvements', () => {
 
   it('renders files correctly without wrapping', () => {
     render(
-      <CompactFilePreview
-        files={mockFiles}
-        onFileRemove={mockOnFileRemove}
-      />
+      <CompactFilePreview files={mockFiles} onFileRemove={mockOnFileRemove} />
     );
 
     // Files should be rendered
     expect(screen.getByText('test.txt')).toBeInTheDocument();
     expect(screen.getByText('image.png')).toBeInTheDocument();
-    
+
     // Should show file sizes
     expect(screen.getByText('1 KB')).toBeInTheDocument();
     expect(screen.getByText('2 KB')).toBeInTheDocument();

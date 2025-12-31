@@ -21,7 +21,7 @@ export const ResizableDivider = ({
   const handleMouseDown = useCallback((event: React.MouseEvent) => {
     event.preventDefault();
     setIsDragging(true);
-    
+
     // Add cursor style to body during drag
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
@@ -39,7 +39,7 @@ export const ResizableDivider = ({
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
-    
+
     // Remove cursor style from body
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
@@ -50,7 +50,7 @@ export const ResizableDivider = ({
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
-      
+
       return () => {
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
@@ -66,11 +66,17 @@ export const ResizableDivider = ({
     switch (event.key) {
       case 'ArrowLeft':
         event.preventDefault();
-        newWidth = Math.max(minWidth, (dividerRef.current?.offsetLeft || 300) - step);
+        newWidth = Math.max(
+          minWidth,
+          (dividerRef.current?.offsetLeft || 300) - step
+        );
         break;
       case 'ArrowRight':
         event.preventDefault();
-        newWidth = Math.min(maxWidth, (dividerRef.current?.offsetLeft || 300) + step);
+        newWidth = Math.min(
+          maxWidth,
+          (dividerRef.current?.offsetLeft || 300) + step
+        );
         break;
       case 'Home':
         event.preventDefault();
@@ -95,7 +101,8 @@ export const ResizableDivider = ({
         'hover:bg-gradient-to-r hover:from-green-500/80 hover:via-green-400 hover:to-green-500/80',
         'transition-all duration-300 ease-out cursor-col-resize group',
         'shadow-2xl shadow-black/20',
-        isDragging && 'bg-gradient-to-r from-green-400 via-green-300 to-green-400 shadow-2xl shadow-green-400/50 scale-x-150',
+        isDragging &&
+          'bg-gradient-to-r from-green-400 via-green-300 to-green-400 shadow-2xl shadow-green-400/50 scale-x-150',
         // Professional depth and material design
         'backdrop-blur-sm border-l border-r border-gray-600/30',
         className
@@ -118,41 +125,50 @@ export const ResizableDivider = ({
           'absolute inset-y-0 left-1/2 transform -translate-x-1/2',
           'w-px bg-gradient-to-b from-transparent via-green-400 to-transparent',
           'opacity-0 transition-all duration-300 ease-out',
-          (isHovered || isDragging) && 'opacity-100 w-0.5 shadow-2xl shadow-green-400/60'
+          (isHovered || isDragging) &&
+            'opacity-100 w-0.5 shadow-2xl shadow-green-400/60'
         )}
       />
-      
+
       {/* Enhanced hover area for better UX */}
       <div className="absolute inset-y-0 -left-4 -right-4" />
-      
+
       {/* Premium drag indicator dots with glow effect */}
-      <div className={clsx(
-        'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
-        'opacity-0 transition-all duration-300 ease-out',
-        (isHovered || isDragging) && 'opacity-100 scale-125'
-      )}>
+      <div
+        className={clsx(
+          'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2',
+          'opacity-0 transition-all duration-300 ease-out',
+          (isHovered || isDragging) && 'opacity-100 scale-125'
+        )}
+      >
         <div className="flex flex-col space-y-2 items-center">
-          <div className={clsx(
-            'w-1.5 h-1.5 rounded-full transition-all duration-300',
-            (isHovered || isDragging) 
-              ? 'bg-green-300 shadow-lg shadow-green-400/60' 
-              : 'bg-green-400'
-          )} />
-          <div className={clsx(
-            'w-1.5 h-1.5 rounded-full transition-all duration-300',
-            (isHovered || isDragging) 
-              ? 'bg-green-300 shadow-lg shadow-green-400/60' 
-              : 'bg-green-400'
-          )} />
-          <div className={clsx(
-            'w-1.5 h-1.5 rounded-full transition-all duration-300',
-            (isHovered || isDragging) 
-              ? 'bg-green-300 shadow-lg shadow-green-400/60' 
-              : 'bg-green-400'
-          )} />
+          <div
+            className={clsx(
+              'w-1.5 h-1.5 rounded-full transition-all duration-300',
+              isHovered || isDragging
+                ? 'bg-green-300 shadow-lg shadow-green-400/60'
+                : 'bg-green-400'
+            )}
+          />
+          <div
+            className={clsx(
+              'w-1.5 h-1.5 rounded-full transition-all duration-300',
+              isHovered || isDragging
+                ? 'bg-green-300 shadow-lg shadow-green-400/60'
+                : 'bg-green-400'
+            )}
+          />
+          <div
+            className={clsx(
+              'w-1.5 h-1.5 rounded-full transition-all duration-300',
+              isHovered || isDragging
+                ? 'bg-green-300 shadow-lg shadow-green-400/60'
+                : 'bg-green-400'
+            )}
+          />
         </div>
       </div>
-      
+
       {/* Professional focus indicator with ring effects */}
       <div
         className={clsx(

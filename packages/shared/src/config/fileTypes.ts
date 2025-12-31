@@ -1,15 +1,19 @@
 /**
  * Shared File Types Configuration
- * 
+ *
  * Centralized configuration for all supported file types across frontend and backend.
  * Includes MIME types, file extensions, size limits, preview capabilities, and icon mappings.
  */
 
-
 /**
  * File type categories
  */
-export type FileTypeCategory = 'images' | 'documents' | 'audio' | 'video' | 'archives';
+export type FileTypeCategory =
+  | 'images'
+  | 'documents'
+  | 'audio'
+  | 'video'
+  | 'archives';
 
 /**
  * Preview capability types
@@ -57,11 +61,15 @@ export const FILE_TYPE_CONFIGS: Record<FileTypeCategory, FileTypeConfig> = {
     accept: {
       'application/pdf': ['.pdf'],
       'application/msword': ['.doc'],
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+        ['.docx'],
       'application/vnd.ms-excel': ['.xls'],
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
+      ],
       'application/vnd.ms-powerpoint': ['.ppt'],
-      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+        ['.pptx'],
       'text/plain': ['.txt'],
       'text/csv': ['.csv'],
       // Developer and markup text types
@@ -87,8 +95,34 @@ export const FILE_TYPE_CONFIGS: Record<FileTypeCategory, FileTypeConfig> = {
     color: 'text-green-500',
     displayName: 'Documents',
     extensions: [
-      'pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv',
-      'md','java','py','c','cpp','cxx','cc','go','kt','rb','php','scss','css','html','htm','json','sh','ts','js'
+      'pdf',
+      'doc',
+      'docx',
+      'xls',
+      'xlsx',
+      'ppt',
+      'pptx',
+      'txt',
+      'csv',
+      'md',
+      'java',
+      'py',
+      'c',
+      'cpp',
+      'cxx',
+      'cc',
+      'go',
+      'kt',
+      'rb',
+      'php',
+      'scss',
+      'css',
+      'html',
+      'htm',
+      'json',
+      'sh',
+      'ts',
+      'js',
     ],
   },
   audio: {
@@ -155,12 +189,12 @@ export const FILE_TYPE_ICONS = {
   doc: 'FileText',
   docx: 'FileText',
   xls: 'FileSpreadsheet',
-  xlsx: 'FileSpreadsheet', 
+  xlsx: 'FileSpreadsheet',
   ppt: 'Presentation',
   pptx: 'Presentation',
   txt: 'FileText',
   csv: 'FileSpreadsheet',
-  
+
   // Images
   jpg: 'Image',
   jpeg: 'Image',
@@ -168,25 +202,25 @@ export const FILE_TYPE_ICONS = {
   gif: 'Image',
   webp: 'Image',
   svg: 'Image',
-  
+
   // Audio
   mp3: 'Music',
   m4a: 'Music',
   wav: 'Music',
   webm: 'Music',
   ogg: 'Music',
-  
+
   // Video
   mp4: 'Video',
   mov: 'Video',
   avi: 'Video',
   mkv: 'Video',
-  
+
   // Archives
   zip: 'Archive',
   rar: 'Archive',
   '7z': 'Archive',
-  
+
   // Fallback
   default: 'File',
 } as const;
@@ -205,14 +239,16 @@ export const ALL_ACCEPTED_FILES = Object.values(FILE_TYPE_CONFIGS).reduce(
 /**
  * Array of all supported MIME types
  */
-export const ALL_SUPPORTED_MIME_TYPES = Object.values(FILE_TYPE_CONFIGS)
-  .flatMap(config => Object.keys(config.accept));
+export const ALL_SUPPORTED_MIME_TYPES = Object.values(
+  FILE_TYPE_CONFIGS
+).flatMap((config) => Object.keys(config.accept));
 
 /**
  * Array of all supported file extensions (without dots)
  */
-export const ALL_SUPPORTED_EXTENSIONS = Object.values(FILE_TYPE_CONFIGS)
-  .flatMap(config => config.extensions);
+export const ALL_SUPPORTED_EXTENSIONS = Object.values(
+  FILE_TYPE_CONFIGS
+).flatMap((config) => config.extensions);
 
 /**
  * Get file type category from MIME type
@@ -240,10 +276,12 @@ export function getFileTypeCategory(mimeType: string): FileTypeCategory | null {
 /**
  * Get file type category from file extension
  */
-export function getFileTypeCategoryByExtension(filename: string): FileTypeCategory | null {
+export function getFileTypeCategoryByExtension(
+  filename: string
+): FileTypeCategory | null {
   const extension = filename.toLowerCase().split('.').pop();
   if (!extension) return null;
-  
+
   for (const [category, config] of Object.entries(FILE_TYPE_CONFIGS)) {
     if (config.extensions.includes(extension)) {
       return category as FileTypeCategory;
@@ -272,7 +310,9 @@ export function isSupportedExtension(filename: string): boolean {
  */
 export function getMaxFileSize(mimeType: string): number {
   const category = getFileTypeCategory(mimeType);
-  return category ? FILE_TYPE_CONFIGS[category].maxSize : FILE_UPLOAD_LIMITS.absoluteMaxSize;
+  return category
+    ? FILE_TYPE_CONFIGS[category].maxSize
+    : FILE_UPLOAD_LIMITS.absoluteMaxSize;
 }
 
 /**
@@ -281,17 +321,17 @@ export function getMaxFileSize(mimeType: string): number {
 export function getPreviewType(file: File): PreviewType {
   const category = getFileTypeCategory(file.type);
   if (!category) return 'icon';
-  
+
   // Special handling for PDFs - they get thumbnail previews
   if (file.type === 'application/pdf') {
     return 'pdf';
   }
-  
+
   // For images, use thumbnail previews
   if (category === 'images') {
     return 'thumbnail';
   }
-  
+
   // All other document types (docx, xlsx, pptx) get enhanced icons
   return 'icon';
 }
@@ -301,7 +341,7 @@ export function getPreviewType(file: File): PreviewType {
  */
 export function getFileIcon(filename: string): keyof typeof FILE_TYPE_ICONS {
   const extension = filename.toLowerCase().split('.').pop();
-  return extension && extension in FILE_TYPE_ICONS 
+  return extension && extension in FILE_TYPE_ICONS
     ? (extension as keyof typeof FILE_TYPE_ICONS)
     : 'default';
 }
@@ -311,7 +351,7 @@ export function getFileIcon(filename: string): keyof typeof FILE_TYPE_ICONS {
  */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes';
-  
+
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   let i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -329,9 +369,9 @@ export function formatFileSize(bytes: number): string {
 /**
  * Validate file against constraints
  */
-export function validateFile(file: File): { 
-  isValid: boolean; 
-  error?: string; 
+export function validateFile(file: File): {
+  isValid: boolean;
+  error?: string;
   category?: FileTypeCategory;
 } {
   // Determine category by MIME type; fall back to extension when MIME is missing or unknown
@@ -346,7 +386,7 @@ export function validateFile(file: File): {
       error: `File type "${file.type || file.name.split('.').pop() || 'unknown'}" is not supported`,
     };
   }
-  
+
   // Check size limits for determined category
   const maxSize = FILE_TYPE_CONFIGS[category].maxSize;
   if (file.size > maxSize) {
@@ -356,7 +396,7 @@ export function validateFile(file: File): {
       category,
     };
   }
-  
+
   return {
     isValid: true,
     category,
@@ -378,7 +418,7 @@ export function getFileDisplayInfo(file: File) {
   const config = category ? FILE_TYPE_CONFIGS[category] : null;
   const icon = getFileIcon(file.name);
   const previewType = getPreviewType(file);
-  
+
   return {
     category,
     config,

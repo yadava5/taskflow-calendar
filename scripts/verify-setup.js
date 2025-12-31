@@ -12,50 +12,57 @@ const checks = [
     check: () => {
       const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
       return pkg.workspaces && pkg.workspaces.includes('packages/*');
-    }
+    },
   },
   {
     name: 'Shared package exists',
-    check: () => fs.existsSync('packages/shared/package.json')
+    check: () => fs.existsSync('packages/shared/package.json'),
   },
   {
     name: 'Backend package exists',
-    check: () => fs.existsSync('packages/backend/package.json')
+    check: () => fs.existsSync('packages/backend/package.json'),
   },
   {
     name: 'API routes directory exists',
-    check: () => fs.existsSync('api')
+    check: () => fs.existsSync('api'),
   },
   {
     name: 'Lib directory exists',
-    check: () => fs.existsSync('lib')
+    check: () => fs.existsSync('lib'),
   },
   {
     name: 'Docker Compose configuration exists',
-    check: () => fs.existsSync('docker-compose.yml')
+    check: () => fs.existsSync('docker-compose.yml'),
   },
   {
     name: 'Environment configuration exists',
-    check: () => fs.existsSync('.env.example') && fs.existsSync('lib/config/env.ts')
+    check: () =>
+      fs.existsSync('.env.example') && fs.existsSync('lib/config/env.ts'),
   },
   {
     name: 'Vercel configuration exists',
-    check: () => fs.existsSync('vercel.json')
+    check: () => fs.existsSync('vercel.json'),
   },
   {
     name: 'TypeScript configuration updated',
     check: () => {
       const tsconfig = JSON.parse(fs.readFileSync('tsconfig.json', 'utf8'));
-      return tsconfig.references && tsconfig.references.some(ref => ref.path === './packages/shared');
-    }
+      return (
+        tsconfig.references &&
+        tsconfig.references.some((ref) => ref.path === './packages/shared')
+      );
+    },
   },
   {
     name: 'ESLint configuration supports monorepo',
     check: () => {
       const eslintConfig = fs.readFileSync('eslint.config.js', 'utf8');
-      return eslintConfig.includes('packages/backend') && eslintConfig.includes('packages/shared');
-    }
-  }
+      return (
+        eslintConfig.includes('packages/backend') &&
+        eslintConfig.includes('packages/shared')
+      );
+    },
+  },
 ];
 
 let passed = 0;

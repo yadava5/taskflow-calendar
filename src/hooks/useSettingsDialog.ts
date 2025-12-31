@@ -11,7 +11,8 @@ interface UseSettingsDialogReturn {
 
 export function useSettingsDialog(): UseSettingsDialogReturn {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentSection, setCurrentSection] = useState<SettingsSection>('general');
+  const [currentSection, setCurrentSection] =
+    useState<SettingsSection>('general');
 
   const openSettings = useCallback((section: SettingsSection = 'general') => {
     setCurrentSection(section);

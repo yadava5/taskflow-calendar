@@ -86,11 +86,18 @@ export const useCalendars = () => {
   });
 
   // Add calendar mutation (optimistic)
-  const addCalendar = useMutation<Calendar, Error, Parameters<typeof calendarApi.createCalendar>[0], { previousCalendars?: Calendar[]; tempId?: string}>({
+  const addCalendar = useMutation<
+    Calendar,
+    Error,
+    Parameters<typeof calendarApi.createCalendar>[0],
+    { previousCalendars?: Calendar[]; tempId?: string }
+  >({
     mutationFn: calendarApi.createCalendar,
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: calendarQueryKeys.all });
-      const previousCalendars = queryClient.getQueryData<Calendar[]>(calendarQueryKeys.all);
+      const previousCalendars = queryClient.getQueryData<Calendar[]>(
+        calendarQueryKeys.all
+      );
       const tempId = `temp-${Date.now()}`;
       const temp: Calendar = {
         id: tempId,
@@ -115,7 +122,10 @@ export const useCalendars = () => {
     },
     onError: (error, _vars, context) => {
       if (context?.previousCalendars) {
-        queryClient.setQueryData(calendarQueryKeys.all, context.previousCalendars);
+        queryClient.setQueryData(
+          calendarQueryKeys.all,
+          context.previousCalendars
+        );
       }
       toast.error(error.message || 'Failed to create calendar');
     },

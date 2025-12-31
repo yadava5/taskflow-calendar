@@ -10,11 +10,13 @@ interface SpeechRecognitionEvent extends Event {
   results: SpeechRecognitionResultList;
 }
 
-interface SpeechRecognitionResultList extends ArrayLike<SpeechRecognitionResult> {
+interface SpeechRecognitionResultList
+  extends ArrayLike<SpeechRecognitionResult> {
   item(index: number): SpeechRecognitionResult;
 }
 
-interface SpeechRecognitionResult extends ArrayLike<SpeechRecognitionAlternative> {
+interface SpeechRecognitionResult
+  extends ArrayLike<SpeechRecognitionAlternative> {
   isFinal: boolean;
   item(index: number): SpeechRecognitionAlternative;
 }
@@ -33,7 +35,9 @@ interface SpeechRecognitionErrorEvent extends Event {
 import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers';
 
 declare module 'vitest' {
-  interface Assertion<T = unknown> extends jest.Matchers<void, T>, TestingLibraryMatchers<T, void> { }
+  interface Assertion<T = unknown>
+    extends jest.Matchers<void, T>,
+      TestingLibraryMatchers<T, void> {}
 }
 
 // Web Speech API type declarations

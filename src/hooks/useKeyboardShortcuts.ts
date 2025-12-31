@@ -24,7 +24,7 @@ export function useKeyboardShortcuts({
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check if Cmd (Mac) or Ctrl (Windows/Linux) is pressed
       const isModifierPressed = event.metaKey || event.ctrlKey;
-      
+
       if (!isModifierPressed) return;
 
       // Prevent default browser shortcuts when our shortcuts are used
@@ -39,13 +39,13 @@ export function useKeyboardShortcuts({
           preventDefault();
           onOpenProfile();
           break;
-        
+
         case ',':
           // ⌘, / Ctrl+, - Open Settings (common pattern)
           preventDefault();
           onOpenSettings();
           break;
-        
+
         case '/':
           // ⌘/ / Ctrl+/ - Show keyboard shortcuts help
           if (event.shiftKey) {
@@ -53,13 +53,13 @@ export function useKeyboardShortcuts({
             onOpenHelp();
           }
           break;
-        
+
         case '?':
           // ⌘? / Ctrl+? - Help (alternative)
           preventDefault();
           onOpenHelp();
           break;
-        
+
         case 'q':
           // ⌘Q / Ctrl+Q - Logout (with confirmation)
           preventDefault();
@@ -67,7 +67,7 @@ export function useKeyboardShortcuts({
             onLogout();
           }
           break;
-        
+
         default:
           // No matching shortcut, don't prevent default
           break;

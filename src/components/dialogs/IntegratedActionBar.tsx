@@ -1,18 +1,18 @@
-import * as React from "react"
-import { Pencil, Trash2, PanelRight, PictureInPicture2, X } from "lucide-react"
+import * as React from 'react';
+import { Pencil, Trash2, PanelRight, PictureInPicture2, X } from 'lucide-react';
 
-import { Button } from "@/components/ui/Button"
-import { cn } from "@/lib/utils"
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
 
 interface IntegratedActionBarProps {
-  peekMode: 'center' | 'right'
-  onPeekModeToggle: () => void
-  onEdit?: () => void
-  onDelete?: () => void
-  onClose?: () => void
-  isDeleting?: boolean
-  className?: string
-  showPeekToggle?: boolean
+  peekMode: 'center' | 'right';
+  onPeekModeToggle: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onClose?: () => void;
+  isDeleting?: boolean;
+  className?: string;
+  showPeekToggle?: boolean;
 }
 
 export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
@@ -23,10 +23,10 @@ export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
   onClose,
   isDeleting = false,
   className,
-  showPeekToggle = true
+  showPeekToggle = true,
 }) => {
   return (
-    <div className={cn("flex items-center gap-1", className)}>
+    <div className={cn('flex items-center gap-1', className)}>
       {onEdit && (
         <Button
           variant="ghost"
@@ -38,7 +38,7 @@ export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
           <Pencil className="h-4 w-4" />
         </Button>
       )}
-      
+
       {onDelete && (
         <Button
           variant="ghost"
@@ -51,7 +51,7 @@ export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
           <Trash2 className="h-4 w-4" />
         </Button>
       )}
-      
+
       {showPeekToggle && (
         <Button
           variant="ghost"
@@ -80,5 +80,5 @@ export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
         </Button>
       )}
     </div>
-  )
-}
+  );
+};

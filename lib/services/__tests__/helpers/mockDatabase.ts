@@ -11,9 +11,11 @@ export const mockQuery = vi.fn();
 /**
  * Create a mock withTransaction function
  */
-export const mockWithTransaction = vi.fn().mockImplementation(async (callback) => {
-  return callback(mockQuery);
-});
+export const mockWithTransaction = vi
+  .fn()
+  .mockImplementation(async (callback) => {
+    return callback(mockQuery);
+  });
 
 /**
  * Mock pool object
@@ -30,7 +32,9 @@ export const mockPool = {
 export function resetDatabaseMocks() {
   mockQuery.mockReset();
   mockWithTransaction.mockReset();
-  mockWithTransaction.mockImplementation(async (callback) => callback(mockQuery));
+  mockWithTransaction.mockImplementation(async (callback) =>
+    callback(mockQuery)
+  );
 }
 
 /**
@@ -60,14 +64,20 @@ export function setupTaskMocks(options: {
   // Default implementation chains for common queries
   mockQuery.mockImplementation(async (sql: string, params?: any[]) => {
     const sqlLower = sql.toLowerCase();
-    
+
     if (sqlLower.includes('from tasks') && sqlLower.includes('select')) {
       return createQueryResult(tasks);
     }
-    if (sqlLower.includes('from task_lists') || sqlLower.includes('from "task_lists"')) {
+    if (
+      sqlLower.includes('from task_lists') ||
+      sqlLower.includes('from "task_lists"')
+    ) {
       return createQueryResult(taskLists);
     }
-    if (sqlLower.includes('from task_tags') || sqlLower.includes('from "task_tags"')) {
+    if (
+      sqlLower.includes('from task_tags') ||
+      sqlLower.includes('from "task_tags"')
+    ) {
       return createQueryResult(tags);
     }
     if (sqlLower.includes('from attachments')) {
@@ -85,7 +95,7 @@ export function setupTaskMocks(options: {
     if (sqlLower.includes('count')) {
       return createQueryResult([{ count: '0' }]);
     }
-    
+
     return createQueryResult([]);
   });
 }

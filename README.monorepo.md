@@ -29,15 +29,17 @@ react-calendar-app/
 ### Getting Started
 
 1. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 2. **Start local development environment:**
+
    ```bash
    # Start PostgreSQL and Redis
    npm run docker:up
-   
+
    # In another terminal, start the development servers
    npm run dev
    ```
@@ -74,39 +76,47 @@ react-calendar-app/
 ## Package Structure
 
 ### Frontend (`src/`)
+
 The existing React application with minimal changes. Updated to use shared types and call backend APIs.
 
 ### Shared Package (`packages/shared/`)
+
 - **Types**: TypeScript interfaces shared between frontend and backend
 - **Validation**: Zod schemas for request/response validation
 - **Utils**: Common utility functions
 
 ### Backend Package (`packages/backend/`)
+
 - **Services**: Business logic and data access
 - **Routes**: Express route handlers
 - **Middleware**: Authentication, validation, error handling
 - **Config**: Environment and database configuration
 
 ### API Routes (`api/`)
+
 Vercel serverless functions that import logic from the backend package.
 
 ### Lib (`lib/`)
+
 Backend utilities and services that can be imported by API routes.
 
 ## Deployment
 
 ### Development
+
 ```bash
 npm run dev
 ```
 
 ### Production (Vercel)
+
 ```bash
 npm run build
 vercel deploy --prod
 ```
 
 The application is configured for deployment on Vercel with:
+
 - Frontend served as static files
 - API routes as serverless functions
 - Database on PlanetScale or Supabase
@@ -125,6 +135,7 @@ See `.env.example` for all required environment variables. Key variables:
 ## Next Steps
 
 This setup provides the foundation for implementing:
+
 1. Shared types and validation (Task 2)
 2. Database schema with Prisma (Task 3)
 3. Authentication system (Task 4)

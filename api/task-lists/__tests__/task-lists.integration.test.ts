@@ -6,7 +6,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import taskListsHandler from '../index';
 import taskListHandler from '../[id]';
 import { getAllServices } from '../../../lib/services/index.js';
-import type { CreateTaskListDTO, UpdateTaskListDTO } from '../../../lib/services/TaskListService';
+import type {
+  CreateTaskListDTO,
+  UpdateTaskListDTO,
+} from '../../../lib/services/TaskListService';
 import {
   createMockAuthRequest,
   createMockResponse,
@@ -52,10 +55,14 @@ const mockServices = {
 const mockSendSuccess = vi.fn();
 const mockSendError = vi.fn();
 
-vi.mocked(getAllServices).mockReturnValue(mockServices as unknown as ReturnType<typeof getAllServices>);
+vi.mocked(getAllServices).mockReturnValue(
+  mockServices as unknown as ReturnType<typeof getAllServices>
+);
 
 // Import mocked functions
-const { sendSuccess, sendError } = await import('../../../lib/middleware/errorHandler.js');
+const { sendSuccess, sendError } = await import(
+  '../../../lib/middleware/errorHandler.js'
+);
 vi.mocked(sendSuccess).mockImplementation(mockSendSuccess);
 vi.mocked(sendError).mockImplementation((res, error) => {
   mockSendError(res, {
@@ -109,7 +116,9 @@ describe('Task Lists API Integration Tests', () => {
       });
       const res = createMockResponse();
 
-      mockTaskListService.getWithTaskCount.mockResolvedValue([mockTaskListWithCounts]);
+      mockTaskListService.getWithTaskCount.mockResolvedValue([
+        mockTaskListWithCounts,
+      ]);
 
       await taskListsHandler(req, res);
 
@@ -117,7 +126,9 @@ describe('Task Lists API Integration Tests', () => {
         userId: 'user-123',
         requestId: 'test-request-123',
       });
-      expect(mockSendSuccess).toHaveBeenCalledWith(res, [mockTaskListWithCounts]);
+      expect(mockSendSuccess).toHaveBeenCalledWith(res, [
+        mockTaskListWithCounts,
+      ]);
     });
 
     it('should apply search filter from query parameters', async () => {
@@ -160,7 +171,9 @@ describe('Task Lists API Integration Tests', () => {
       const req = createMockAuthRequest(mockUser, { method: 'GET' });
       const res = createMockResponse();
 
-      mockTaskListService.findAll.mockRejectedValue(new Error('Database connection failed'));
+      mockTaskListService.findAll.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       await taskListsHandler(req, res);
 
@@ -187,7 +200,11 @@ describe('Task Lists API Integration Tests', () => {
       });
       const res = createMockResponse();
 
-      const createdTaskList = { ...mockTaskList, ...createTaskListData, id: 'new-list-123' };
+      const createdTaskList = {
+        ...mockTaskList,
+        ...createTaskListData,
+        id: 'new-list-123',
+      };
       mockTaskListService.create.mockResolvedValue(createdTaskList);
 
       await taskListsHandler(req, res);
@@ -284,13 +301,10 @@ describe('Task Lists API Integration Tests', () => {
 
       await taskListHandler(req, res);
 
-      expect(mockTaskListService.findById).toHaveBeenCalledWith(
-        'list-123',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockTaskListService.findById).toHaveBeenCalledWith('list-123', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, mockTaskList);
     });
 
@@ -435,13 +449,10 @@ describe('Task Lists API Integration Tests', () => {
 
       await taskListHandler(req, res);
 
-      expect(mockTaskListService.setDefault).toHaveBeenCalledWith(
-        'list-123',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockTaskListService.setDefault).toHaveBeenCalledWith('list-123', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, defaultTaskList);
     });
 
@@ -501,13 +512,10 @@ describe('Task Lists API Integration Tests', () => {
 
       await taskListHandler(req, res);
 
-      expect(mockTaskListService.delete).toHaveBeenCalledWith(
-        'list-123',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockTaskListService.delete).toHaveBeenCalledWith('list-123', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, { deleted: true });
     });
 

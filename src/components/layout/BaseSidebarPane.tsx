@@ -1,11 +1,11 @@
 import React, { ReactNode } from 'react';
-import { 
+import {
   Sidebar,
-  SidebarHeader, 
-  SidebarContent, 
+  SidebarHeader,
+  SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarSeparator 
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { ViewToggle, type ViewMode } from '@/components/ui/ViewToggle';
 import { useUIStore } from '@/stores/uiStore';
@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 export interface BaseSidebarPaneProps {
   // Core layout props
   className?: string;
-  
+
   // Header content
   headerContent?: ReactNode;
   additionalHeaderContent?: ReactNode; // Additional content to append after default header
@@ -25,22 +25,22 @@ export interface BaseSidebarPaneProps {
   showSidebarTrigger?: boolean;
   // Optional right-side header controls rendered before the sidebar trigger
   rightHeaderControls?: ReactNode;
-  
+
   // Main content
   mainContent?: ReactNode;
-  
+
   // Footer content - lists section
   footerListContent?: ReactNode;
-  
+
   // Footer content - user profile (can be overridden)
   userProfileContent?: ReactNode;
-  
+
   // Settings dialog handler
   onOpenSettings?: (section: 'general' | 'profile' | 'help') => void;
-  
+
   // Event handlers
   onViewToggle?: (view: ViewMode) => void;
-  
+
   // Styling options
   useMinimalMode?: boolean; // For CalendarSummaryPane-style layout without full Sidebar wrapper
 }
@@ -57,7 +57,7 @@ export const BaseSidebarPane: React.FC<BaseSidebarPaneProps> = ({
   userProfileContent,
   onViewToggle,
   onOpenSettings,
-  useMinimalMode = false
+  useMinimalMode = false,
 }) => {
   const { currentView, setCurrentView } = useUIStore();
 
@@ -71,28 +71,25 @@ export const BaseSidebarPane: React.FC<BaseSidebarPaneProps> = ({
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2 relative">
         {showViewToggle && (
-          <ViewToggle
-            currentView={currentView}
-            onToggle={handleViewToggle}
-          />
+          <ViewToggle currentView={currentView} onToggle={handleViewToggle} />
         )}
       </div>
       <div className="flex items-center gap-2">
         {rightHeaderControls}
-        {showSidebarTrigger && (
-          <SmoothSidebarTrigger position="sidebar" />
-        )}
+        {showSidebarTrigger && <SmoothSidebarTrigger position="sidebar" />}
       </div>
     </div>
   );
 
   // Default user profile content
-  const defaultUserProfileContent = <UserDropdown onOpenSettings={onOpenSettings} />;
+  const defaultUserProfileContent = (
+    <UserDropdown onOpenSettings={onOpenSettings} />
+  );
 
   // Minimal mode (for CalendarSummaryPane)
   if (useMinimalMode) {
     return (
-      <div 
+      <div
         className={cn(
           'bg-sidebar text-sidebar-foreground',
           'flex flex-col h-full',
@@ -118,12 +115,10 @@ export const BaseSidebarPane: React.FC<BaseSidebarPaneProps> = ({
           {footerListContent && (
             <>
               <Separator />
-              <SidebarGroup>
-                {footerListContent}
-              </SidebarGroup>
+              <SidebarGroup>{footerListContent}</SidebarGroup>
             </>
           )}
-          
+
           {/* User Profile */}
           {userProfileContent || defaultUserProfileContent}
         </SidebarFooter>
@@ -142,9 +137,7 @@ export const BaseSidebarPane: React.FC<BaseSidebarPaneProps> = ({
 
       {/* Main Content */}
       <SidebarContent>
-        <SidebarGroup>
-          {mainContent}
-        </SidebarGroup>
+        <SidebarGroup>{mainContent}</SidebarGroup>
       </SidebarContent>
 
       {/* Footer */}
@@ -152,12 +145,10 @@ export const BaseSidebarPane: React.FC<BaseSidebarPaneProps> = ({
         {footerListContent && (
           <>
             <Separator />
-            <SidebarGroup>
-              {footerListContent}
-            </SidebarGroup>
+            <SidebarGroup>{footerListContent}</SidebarGroup>
           </>
         )}
-        
+
         {/* User Profile */}
         {userProfileContent || defaultUserProfileContent}
       </SidebarFooter>

@@ -49,7 +49,7 @@ describe('Validation Utilities', () => {
         field: 'field',
         message: 'field is required',
       });
-      
+
       expect(validateRequired(undefined, 'field')).toEqual({
         field: 'field',
         message: 'field is required',
@@ -85,7 +85,9 @@ describe('Validation Utilities', () => {
 
     it('should work with only max constraint', () => {
       expect(validateLength('hello', 'field', undefined, 10)).toBeNull();
-      expect(validateLength('this is too long', 'field', undefined, 10)).not.toBeNull();
+      expect(
+        validateLength('this is too long', 'field', undefined, 10)
+      ).not.toBeNull();
     });
   });
 
@@ -163,14 +165,14 @@ describe('Validation Utilities', () => {
     it('should return empty array for valid date range', () => {
       const start = new Date('2024-01-15T10:00:00Z');
       const end = new Date('2024-01-15T12:00:00Z');
-      
+
       expect(validateDateRange(start, end)).toEqual([]);
     });
 
     it('should return error when end is before start', () => {
       const start = new Date('2024-01-15T12:00:00Z');
       const end = new Date('2024-01-15T10:00:00Z');
-      
+
       const errors = validateDateRange(start, end);
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toBe('End date must be after start date');
@@ -178,7 +180,7 @@ describe('Validation Utilities', () => {
 
     it('should return error when end equals start', () => {
       const date = new Date('2024-01-15T10:00:00Z');
-      
+
       const errors = validateDateRange(date, date);
       expect(errors).toHaveLength(1);
       expect(errors[0].message).toBe('End date must be after start date');
@@ -187,7 +189,7 @@ describe('Validation Utilities', () => {
     it('should return errors for invalid dates', () => {
       const validDate = new Date('2024-01-15T10:00:00Z');
       const invalidDate = new Date('invalid');
-      
+
       const errors = validateDateRange(invalidDate, validDate);
       expect(errors).toHaveLength(1);
       expect(errors[0].field).toBe('Start date');
@@ -294,7 +296,7 @@ describe('Validation Utilities', () => {
 
       const result = validateEvent(eventWithLongLocation);
       expect(result.isValid).toBe(false);
-      expect(result.errors.some(e => e.field === 'Location')).toBe(true);
+      expect(result.errors.some((e) => e.field === 'Location')).toBe(true);
     });
   });
 
@@ -369,8 +371,11 @@ describe('Validation Utilities', () => {
   describe('combineValidationResults', () => {
     it('should combine multiple validation results', () => {
       const result1 = { isValid: true, errors: [] };
-      const result2 = { isValid: false, errors: [{ field: 'test', message: 'error' }] };
-      
+      const result2 = {
+        isValid: false,
+        errors: [{ field: 'test', message: 'error' }],
+      };
+
       const combined = combineValidationResults(result1, result2);
       expect(combined.isValid).toBe(false);
       expect(combined.errors).toHaveLength(1);
@@ -379,7 +384,7 @@ describe('Validation Utilities', () => {
     it('should return valid when all results are valid', () => {
       const result1 = { isValid: true, errors: [] };
       const result2 = { isValid: true, errors: [] };
-      
+
       const combined = combineValidationResults(result1, result2);
       expect(combined.isValid).toBe(true);
       expect(combined.errors).toEqual([]);

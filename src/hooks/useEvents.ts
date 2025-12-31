@@ -15,11 +15,19 @@ import { toUTC } from '../utils/date';
 export const eventQueryKeys = {
   all: ['events'] as const,
   lists: () => [...eventQueryKeys.all, 'list'] as const,
-  list: (filters: EventFilters) => [...eventQueryKeys.lists(), filters] as const,
+  list: (filters: EventFilters) =>
+    [...eventQueryKeys.lists(), filters] as const,
   details: () => [...eventQueryKeys.all, 'detail'] as const,
   detail: (id: string) => [...eventQueryKeys.details(), id] as const,
-  byCalendar: (calendarName: string) => [...eventQueryKeys.all, 'calendar', calendarName] as const,
-  byDateRange: (start: Date, end: Date) => [...eventQueryKeys.all, 'dateRange', start.toISOString(), end.toISOString()] as const,
+  byCalendar: (calendarName: string) =>
+    [...eventQueryKeys.all, 'calendar', calendarName] as const,
+  byDateRange: (start: Date, end: Date) =>
+    [
+      ...eventQueryKeys.all,
+      'dateRange',
+      start.toISOString(),
+      end.toISOString(),
+    ] as const,
 };
 
 /**
@@ -33,16 +41,18 @@ export interface EventFilters {
   allDay?: boolean;
 }
 
-
 /**
  * Filter events based on criteria
  */
-const filterEvents = (events: CalendarEvent[], filters: EventFilters): CalendarEvent[] => {
+const filterEvents = (
+  events: CalendarEvent[],
+  filters: EventFilters
+): CalendarEvent[] => {
   let filtered = [...events];
 
   // Filter by calendar names
   if (filters.calendarNames && filters.calendarNames.length > 0) {
-    filtered = filtered.filter(event => 
+    filtered = filtered.filter((event) =>
       filters.calendarNames!.includes(event.calendarName || '')
     );
   }
@@ -51,8 +61,8 @@ const filterEvents = (events: CalendarEvent[], filters: EventFilters): CalendarE
   if (filters.startDate && filters.endDate) {
     const startUTC = toUTC(filters.startDate);
     const endUTC = toUTC(filters.endDate);
-    
-    filtered = filtered.filter(event => {
+
+    filtered = filtered.filter((event) => {
       const eventStart = new Date(event.start);
       const eventEnd = new Date(event.end);
       return eventStart < endUTC && eventEnd > startUTC;
@@ -62,16 +72,17 @@ const filterEvents = (events: CalendarEvent[], filters: EventFilters): CalendarE
   // Filter by search term
   if (filters.search && filters.search.trim()) {
     const searchTerm = filters.search.toLowerCase().trim();
-    filtered = filtered.filter(event =>
-      event.title.toLowerCase().includes(searchTerm) ||
-      event.description?.toLowerCase().includes(searchTerm) ||
-      event.location?.toLowerCase().includes(searchTerm)
+    filtered = filtered.filter(
+      (event) =>
+        event.title.toLowerCase().includes(searchTerm) ||
+        event.description?.toLowerCase().includes(searchTerm) ||
+        event.location?.toLowerCase().includes(searchTerm)
     );
   }
 
   // Filter by all-day status
   if (filters.allDay !== undefined) {
-    filtered = filtered.filter(event => event.allDay === filters.allDay);
+    filtered = filtered.filter((event) => event.allDay === filters.allDay);
   }
 
   // Sort by start date (earliest first)
@@ -138,7 +149,7 @@ export const useEvent = (id: string) => {
         staleTime: 2 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
       });
-      const event = allEvents.find(e => e.id === id);
+      const event = allEvents.find((e) => e.id === id);
       if (!event) {
         throw new Error('Event not found');
       }
@@ -163,7 +174,7 @@ export const useEventsByCalendar = (calendarName: string) => {
         staleTime: 2 * 60 * 1000,
         gcTime: 10 * 60 * 1000,
       });
-      return allEvents.filter(e => e.calendarName === calendarName);
+      return allEvents.filter((e) => e.calendarName === calendarName);
     },
     enabled: !!calendarName,
     staleTime: 2 * 60 * 1000,
@@ -186,7 +197,7 @@ export const useEventsByDateRange = (start: Date, end: Date) => {
       });
       const startUTC = toUTC(start);
       const endUTC = toUTC(end);
-      return allEvents.filter(event => {
+      return allEvents.filter((event) => {
         const eventStart = new Date(event.start);
         const eventEnd = new Date(event.end);
         return eventStart < endUTC && eventEnd > startUTC;
@@ -203,11 +214,18 @@ export const useEventsByDateRange = (start: Date, end: Date) => {
 export const useCreateEvent = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<CalendarEvent, Error, Parameters<typeof eventApi.createEvent>[0], { previousEvents?: CalendarEvent[]; tempId?: string}>({
+  return useMutation<
+    CalendarEvent,
+    Error,
+    Parameters<typeof eventApi.createEvent>[0],
+    { previousEvents?: CalendarEvent[]; tempId?: string }
+  >({
     mutationFn: eventApi.createEvent,
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: eventQueryKeys.all });
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(eventQueryKeys.all);
+      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(
+        eventQueryKeys.all
+      );
       const tempId = `temp-${Date.now()}`;
       const tempEvent: CalendarEvent = {
         id: tempId,
@@ -227,7 +245,9 @@ export const useCreateEvent = () => {
         { queryKey: eventQueryKeys.all },
         (oldData: CalendarEvent[] | undefined) => {
           const list = [...(oldData || []), tempEvent];
-          return list.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+          return list.sort(
+            (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+          );
         }
       );
       return { previousEvents, tempId };
@@ -248,7 +268,9 @@ export const useCreateEvent = () => {
           if (idx === -1) return [...list, newEvent];
           const copy = [...list];
           copy[idx] = newEvent;
-          return copy.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+          return copy.sort(
+            (a, b) => new Date(a.start).getTime() - new Date(b.start).getTime()
+          );
         }
       );
     },
@@ -270,14 +292,16 @@ export const useUpdateEvent = () => {
       await queryClient.cancelQueries({ queryKey: eventQueryKeys.all });
 
       // Snapshot the previous value
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(eventQueryKeys.all);
+      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(
+        eventQueryKeys.all
+      );
 
       // Optimistically update the event
       queryClient.setQueriesData(
         { queryKey: eventQueryKeys.all },
         (oldData: CalendarEvent[] | undefined) => {
           if (!oldData) return [];
-          return oldData.map(event =>
+          return oldData.map((event) =>
             event.id === id ? { ...event, ...data } : event
           );
         }
@@ -309,14 +333,16 @@ export const useDeleteEvent = () => {
       await queryClient.cancelQueries({ queryKey: eventQueryKeys.all });
 
       // Snapshot the previous value
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(eventQueryKeys.all);
+      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(
+        eventQueryKeys.all
+      );
 
       // Optimistically remove the event
       queryClient.setQueriesData(
         { queryKey: eventQueryKeys.all },
         (oldData: CalendarEvent[] | undefined) => {
           if (!oldData) return [];
-          return oldData.filter(event => event.id !== eventId);
+          return oldData.filter((event) => event.id !== eventId);
         }
       );
 

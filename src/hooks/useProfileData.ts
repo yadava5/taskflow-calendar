@@ -25,7 +25,7 @@ export interface ProfileFormData {
  */
 export function useProfileData(): NormalizedProfileData {
   const { user, googleUser, authMethod } = useAuthStore();
-  
+
   return useMemo(() => {
     // Handle case where no auth method is set
     if (!authMethod) {
@@ -58,11 +58,15 @@ export function useProfileData(): NormalizedProfileData {
       email: currentUser.email || 'user@example.com',
       // These fields are only available for JWT users in our store typing
       bio: isJWT ? (user as unknown as { bio?: string })?.bio : undefined,
-      timezone: isJWT ? (user as unknown as { timezone?: string })?.timezone : undefined,
+      timezone: isJWT
+        ? (user as unknown as { timezone?: string })?.timezone
+        : undefined,
       picture: currentUser.picture,
       canEditEmail: isJWT, // Google users can't edit email
       authMethod,
-      joinedAt: isJWT ? (user as unknown as { createdAt?: string })?.createdAt : undefined,
+      joinedAt: isJWT
+        ? (user as unknown as { createdAt?: string })?.createdAt
+        : undefined,
     };
   }, [user, googleUser, authMethod]);
 }
@@ -73,12 +77,15 @@ export function useProfileData(): NormalizedProfileData {
  */
 export function useProfileFormData(): ProfileFormData {
   const profileData = useProfileData();
-  
-  return useMemo(() => ({
-    name: profileData.name,
-    bio: profileData.bio || '',
-    timezone: profileData.timezone || '',
-  }), [profileData]);
+
+  return useMemo(
+    () => ({
+      name: profileData.name,
+      bio: profileData.bio || '',
+      timezone: profileData.timezone || '',
+    }),
+    [profileData]
+  );
 }
 
 /**

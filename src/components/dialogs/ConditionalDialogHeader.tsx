@@ -1,29 +1,27 @@
-import * as React from "react"
-import { PanelRight, PictureInPicture2 } from "lucide-react"
+import * as React from 'react';
+import { PanelRight, PictureInPicture2 } from 'lucide-react';
 
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs"
-import { Button } from "@/components/ui/Button"
-import { cn } from "@/lib/utils"
-import { IntegratedActionBar } from "./IntegratedActionBar"
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/Button';
+import { cn } from '@/lib/utils';
+import { IntegratedActionBar } from './IntegratedActionBar';
 
 interface ConditionalDialogHeaderProps {
-  isEditing: boolean
-  activeTab: string
-  onTabChange: (tab: string) => void
-  peekMode: 'center' | 'right'
-  onPeekModeToggle: () => void
-  onEdit?: () => void
-  onDelete?: () => void
-  onClose?: () => void
-  isDeleting?: boolean
-  className?: string
+  isEditing: boolean;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  peekMode: 'center' | 'right';
+  onPeekModeToggle: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
+  onClose?: () => void;
+  isDeleting?: boolean;
+  className?: string;
 }
 
-export const ConditionalDialogHeader: React.FC<ConditionalDialogHeaderProps> = ({
+export const ConditionalDialogHeader: React.FC<
+  ConditionalDialogHeaderProps
+> = ({
   isEditing,
   activeTab,
   onTabChange,
@@ -33,12 +31,12 @@ export const ConditionalDialogHeader: React.FC<ConditionalDialogHeaderProps> = (
   onDelete,
   onClose,
   isDeleting,
-  className
+  className,
 }) => {
   if (isEditing) {
     // Edit mode: Show IntegratedActionBar with proper button positioning
     return (
-      <div className={cn("flex items-center justify-end mb-4", className)}>
+      <div className={cn('flex items-center justify-end mb-4', className)}>
         <IntegratedActionBar
           peekMode={peekMode}
           onPeekModeToggle={onPeekModeToggle}
@@ -48,12 +46,12 @@ export const ConditionalDialogHeader: React.FC<ConditionalDialogHeaderProps> = (
           isDeleting={isDeleting}
         />
       </div>
-    )
+    );
   }
 
   // Create mode: Show tabs with peek mode switcher
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
         <Tabs value={activeTab} onValueChange={onTabChange} className="flex-1">
           <TabsList className="grid w-full grid-cols-2">
@@ -80,5 +78,5 @@ export const ConditionalDialogHeader: React.FC<ConditionalDialogHeaderProps> = (
         </Button>
       </div>
     </div>
-  )
-}
+  );
+};

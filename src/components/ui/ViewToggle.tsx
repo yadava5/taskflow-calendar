@@ -1,6 +1,9 @@
 import React from 'react';
 import { Calendar, CheckSquare } from 'lucide-react';
-import { SharedToggleButton, type ToggleOption } from '@/components/ui/SharedToggleButton';
+import {
+  SharedToggleButton,
+  type ToggleOption,
+} from '@/components/ui/SharedToggleButton';
 
 export type ViewMode = 'calendar' | 'task';
 
@@ -29,7 +32,7 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
   currentView,
   onToggle,
   className,
-  disabled = false
+  disabled = false,
 }) => {
   return (
     <SharedToggleButton

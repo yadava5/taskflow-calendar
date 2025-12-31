@@ -7,34 +7,54 @@ async function main() {
   // Create sample users
   const hashedPassword = await bcrypt.hash('password123', 10);
   const user1 = await withTransaction(async (tx) => {
-    const upsert = await query<{ id: string; email: string; name: string | null }>(
+    const upsert = await query<{
+      id: string;
+      email: string;
+      name: string | null;
+    }>(
       `INSERT INTO users (id, email, name, password, "createdAt", "updatedAt")
        VALUES (gen_random_uuid()::text, $1, $2, $3, NOW(), NOW())
        ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
        RETURNING id, email, name`,
-      ['john@example.com', 'John Doe', hashedPassword], tx);
+      ['john@example.com', 'John Doe', hashedPassword],
+      tx
+    );
     const u = upsert.rows[0];
     await query(
       `INSERT INTO user_profiles (id, "userId", bio, timezone)
        VALUES (gen_random_uuid()::text, $1, $2, $3)
        ON CONFLICT ("userId") DO NOTHING`,
-      [u.id, 'Software developer and productivity enthusiast', 'America/New_York'], tx);
+      [
+        u.id,
+        'Software developer and productivity enthusiast',
+        'America/New_York',
+      ],
+      tx
+    );
     return u;
   });
 
   const user2 = await withTransaction(async (tx) => {
-    const upsert = await query<{ id: string; email: string; name: string | null }>(
+    const upsert = await query<{
+      id: string;
+      email: string;
+      name: string | null;
+    }>(
       `INSERT INTO users (id, email, name, password, "createdAt", "updatedAt")
        VALUES (gen_random_uuid()::text, $1, $2, $3, NOW(), NOW())
        ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
        RETURNING id, email, name`,
-      ['jane@example.com', 'Jane Smith', hashedPassword], tx);
+      ['jane@example.com', 'Jane Smith', hashedPassword],
+      tx
+    );
     const u = upsert.rows[0];
     await query(
       `INSERT INTO user_profiles (id, "userId", bio, timezone)
        VALUES (gen_random_uuid()::text, $1, $2, $3)
        ON CONFLICT ("userId") DO NOTHING`,
-      [u.id, 'Project manager and team lead', 'America/Los_Angeles'], tx);
+      [u.id, 'Project manager and team lead', 'America/Los_Angeles'],
+      tx
+    );
     return u;
   });
 
@@ -46,14 +66,14 @@ async function main() {
      VALUES (gen_random_uuid()::text, 'Personal', '#3B82F6', 'Personal events and appointments', true, $1, NOW(), NOW())
      RETURNING id`,
     [user1.id]
-  ).then(r => r.rows[0]);
+  ).then((r) => r.rows[0]);
 
   const workCalendar = await query<{ id: string }>(
     `INSERT INTO calendars (id, name, color, description, "isDefault", "userId", "createdAt", "updatedAt")
      VALUES (gen_random_uuid()::text, 'Work', '#EF4444', 'Work meetings and deadlines', false, $1, NOW(), NOW())
      RETURNING id`,
     [user1.id]
-  ).then(r => r.rows[0]);
+  ).then((r) => r.rows[0]);
 
   console.log('✅ Created calendars');
 
@@ -61,7 +81,7 @@ async function main() {
   const now = new Date();
   const tomorrow = new Date(now);
   tomorrow.setDate(tomorrow.getDate() + 1);
-  
+
   const nextWeek = new Date(now);
   nextWeek.setDate(nextWeek.getDate() + 7);
 
@@ -90,13 +110,13 @@ async function main() {
     `INSERT INTO task_lists (id, name, color, icon, description, "userId", "createdAt", "updatedAt")
      VALUES (gen_random_uuid()::text, 'Personal', '#8B5CF6', 'user', 'Personal tasks and reminders', $1, NOW(), NOW()) RETURNING id`,
     [user1.id]
-  ).then(r => r.rows[0]);
+  ).then((r) => r.rows[0]);
 
   const workTasks = await query<{ id: string }>(
     `INSERT INTO task_lists (id, name, color, icon, description, "userId", "createdAt", "updatedAt")
      VALUES (gen_random_uuid()::text, 'Work Projects', '#F59E0B', 'briefcase', 'Work-related tasks and projects', $1, NOW(), NOW()) RETURNING id`,
     [user1.id]
-  ).then(r => r.rows[0]);
+  ).then((r) => r.rows[0]);
 
   console.log('✅ Created task lists');
 
@@ -112,11 +132,23 @@ async function main() {
      ON CONFLICT (name) DO NOTHING`
   );
 
-  const createdTags = await query<{ id: string; name: string }>(`SELECT id, name FROM tags`);
+  const createdTags = await query<{ id: string; name: string }>(
+    `SELECT id, name FROM tags`
+  );
   console.log('✅ Created tags');
 
   // Create sample tasks
-  const sampleTasks: Array<{ title: string; priority: 'LOW' | 'MEDIUM' | 'HIGH'; scheduledDate?: Date; taskListId: string; userId: string; originalInput: string; cleanTitle: string; completed?: boolean; completedAt?: Date }> = [
+  const sampleTasks: Array<{
+    title: string;
+    priority: 'LOW' | 'MEDIUM' | 'HIGH';
+    scheduledDate?: Date;
+    taskListId: string;
+    userId: string;
+    originalInput: string;
+    cleanTitle: string;
+    completed?: boolean;
+    completedAt?: Date;
+  }> = [
     {
       title: 'Review project proposal',
       priority: 'HIGH',
@@ -129,7 +161,11 @@ async function main() {
     {
       title: 'Buy groceries',
       priority: 'MEDIUM',
-      scheduledDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2),
+      scheduledDate: new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 2
+      ),
       taskListId: personalTasks.id,
       userId: user1.id,
       originalInput: 'Buy groceries day after tomorrow',
@@ -146,7 +182,11 @@ async function main() {
     {
       title: 'Prepare presentation slides',
       priority: 'HIGH',
-      scheduledDate: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 5),
+      scheduledDate: new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate() + 5
+      ),
       taskListId: workTasks.id,
       userId: user1.id,
       originalInput: 'Prepare presentation slides for next week high priority',
@@ -168,29 +208,55 @@ async function main() {
     const taskRes = await query<{ id: string }>(
       `INSERT INTO tasks (id, title, priority, "scheduledDate", "taskListId", "userId", "originalInput", "cleanTitle", completed, "createdAt", "updatedAt")
        VALUES (gen_random_uuid()::text, $1, $2, $3, $4, $5, $6, $7, COALESCE($8, false), NOW(), NOW()) RETURNING id`,
-      [taskData.title, taskData.priority, taskData.scheduledDate ?? null, taskData.taskListId, taskData.userId, taskData.originalInput, taskData.cleanTitle, taskData.completed ?? false]
+      [
+        taskData.title,
+        taskData.priority,
+        taskData.scheduledDate ?? null,
+        taskData.taskListId,
+        taskData.userId,
+        taskData.originalInput,
+        taskData.cleanTitle,
+        taskData.completed ?? false,
+      ]
     );
     const task = taskRes.rows[0];
 
     // Add some tags to tasks
-    if (taskData.title.includes('project') || taskData.title.includes('presentation')) {
+    if (
+      taskData.title.includes('project') ||
+      taskData.title.includes('presentation')
+    ) {
       const workTag = createdTags.rows.find((tag) => tag.name === 'work');
       if (workTag) {
-        await query(`INSERT INTO task_tags ("taskId", "tagId", value, "displayText", "iconName") VALUES ($1, $2, 'work', 'Work', 'briefcase')`, [task.id, workTag.id]);
+        await query(
+          `INSERT INTO task_tags ("taskId", "tagId", value, "displayText", "iconName") VALUES ($1, $2, 'work', 'Work', 'briefcase')`,
+          [task.id, workTag.id]
+        );
       }
     }
 
     if (taskData.priority === 'HIGH') {
       const urgentTag = createdTags.rows.find((tag) => tag.name === 'urgent');
       if (urgentTag) {
-        await query(`INSERT INTO task_tags ("taskId", "tagId", value, "displayText", "iconName") VALUES ($1, $2, 'urgent', 'Urgent', 'alert-triangle')`, [task.id, urgentTag.id]);
+        await query(
+          `INSERT INTO task_tags ("taskId", "tagId", value, "displayText", "iconName") VALUES ($1, $2, 'urgent', 'Urgent', 'alert-triangle')`,
+          [task.id, urgentTag.id]
+        );
       }
     }
 
-    if (taskData.title.includes('groceries') || taskData.title.includes('dentist')) {
-      const personalTag = createdTags.rows.find((tag) => tag.name === 'personal');
+    if (
+      taskData.title.includes('groceries') ||
+      taskData.title.includes('dentist')
+    ) {
+      const personalTag = createdTags.rows.find(
+        (tag) => tag.name === 'personal'
+      );
       if (personalTag) {
-        await query(`INSERT INTO task_tags ("taskId", "tagId", value, "displayText", "iconName") VALUES ($1, $2, 'personal', 'Personal', 'user')`, [task.id, personalTag.id]);
+        await query(
+          `INSERT INTO task_tags ("taskId", "tagId", value, "displayText", "iconName") VALUES ($1, $2, 'personal', 'Personal', 'user')`,
+          [task.id, personalTag.id]
+        );
       }
     }
   }
@@ -208,12 +274,16 @@ async function main() {
     `INSERT INTO task_lists (id, name, color, icon, description, "userId", "createdAt", "updatedAt")
      VALUES (gen_random_uuid()::text, 'To Do', '#6366F1', 'check-square', 'General task list', $1, NOW(), NOW()) RETURNING id`,
     [user2.id]
-  ).then(r => r.rows[0]);
+  ).then((r) => r.rows[0]);
 
   await query(
     `INSERT INTO tasks (id, title, priority, "scheduledDate", "taskListId", "userId", "originalInput", "cleanTitle", completed, "createdAt", "updatedAt")
      VALUES (gen_random_uuid()::text, 'Plan team building event', 'MEDIUM', $1, $2, $3, 'Plan team building event next week', 'Plan team building event', false, NOW(), NOW())`,
-    [new Date(now.getFullYear(), now.getMonth(), now.getDate() + 10), user2TaskList.id, user2.id]
+    [
+      new Date(now.getFullYear(), now.getMonth(), now.getDate() + 10),
+      user2TaskList.id,
+      user2.id,
+    ]
   );
 
   console.log('✅ Created sample data for second user');

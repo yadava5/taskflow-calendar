@@ -47,11 +47,11 @@ export const CircularCheckbox: React.FC<CircularCheckboxProps> = ({
       )}
     >
       {checked && (
-        <Check 
+        <Check
           className={cn(
             'w-3 h-3 text-primary-foreground',
             'animate-in zoom-in-50 duration-200'
-          )} 
+          )}
           strokeWidth={2.5}
         />
       )}
@@ -59,4 +59,4 @@ export const CircularCheckbox: React.FC<CircularCheckboxProps> = ({
   );
 };
 
-export default CircularCheckbox; 
+export default CircularCheckbox;

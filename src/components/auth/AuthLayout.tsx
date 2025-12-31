@@ -37,9 +37,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   }, []);
 
   return (
-    <div ref={containerRef} className="auth-gradient-bg min-h-svh w-full flex items-center justify-center p-4 sm:p-6 md:p-10">
+    <div
+      ref={containerRef}
+      className="auth-gradient-bg min-h-svh w-full flex items-center justify-center p-4 sm:p-6 md:p-10"
+    >
       {children}
     </div>
   );
 }
-

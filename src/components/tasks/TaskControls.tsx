@@ -25,7 +25,10 @@ import {
   Columns3,
   ArrowDownToDot,
 } from 'lucide-react';
-import { SharedToggleButton, type ToggleOption } from '@/components/ui/SharedToggleButton';
+import {
+  SharedToggleButton,
+  type ToggleOption,
+} from '@/components/ui/SharedToggleButton';
 import { SmoothSidebarTrigger } from '@/components/layout/SmoothSidebarTrigger';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
@@ -358,22 +361,33 @@ export const TaskControls: React.FC<TaskControlsProps> = ({
       document.removeEventListener('visibilitychange', onVis);
     };
   }, [today]);
-  const todayTitle = useMemo(() => format(toLocal(today), 'MMMM d, yyyy'), [today]);
+  const todayTitle = useMemo(
+    () => format(toLocal(today), 'MMMM d, yyyy'),
+    [today]
+  );
 
   return (
-    <div className={cn('grid grid-cols-[1fr_auto_1fr] items-center gap-4', className)}>
+    <div
+      className={cn(
+        'grid grid-cols-[1fr_auto_1fr] items-center gap-4',
+        className
+      )}
+    >
       {/* Left Section - Sidebar Trigger + Today title */}
       <div className="flex items-center gap-3 justify-self-start">
         <SmoothSidebarTrigger position="rightPane" />
         <h2 className="text-lg font-semibold text-foreground">
-          {todayTitle.includes(' ')
-            ? (
-                <>
-                  <span className="font-bold">{todayTitle.split(' ')[0]}</span>
-                  <span className="font-normal"> {todayTitle.split(' ').slice(1).join(' ')}</span>
-                </>
-              )
-            : todayTitle}
+          {todayTitle.includes(' ') ? (
+            <>
+              <span className="font-bold">{todayTitle.split(' ')[0]}</span>
+              <span className="font-normal">
+                {' '}
+                {todayTitle.split(' ').slice(1).join(' ')}
+              </span>
+            </>
+          ) : (
+            todayTitle
+          )}
         </h2>
       </div>
 
@@ -517,7 +531,6 @@ export const TaskControls: React.FC<TaskControlsProps> = ({
             )}
           </div>
 
-
           {/* Add Pane Button (columns icon based on count) */}
           {onAddPane && taskViewMode === 'list' && (
             <Tooltip>
@@ -551,17 +564,17 @@ export const TaskControls: React.FC<TaskControlsProps> = ({
                   onClick={onToggleAddTaskInput}
                   size="sm"
                   className={cn(
-                    "h-7 w-7 p-0 relative overflow-hidden transition-all duration-300 ease-out",
-                    "bg-gradient-to-br from-secondary/98 via-secondary to-secondary/95",
-                    "text-secondary-foreground shadow-xs border border-border/20",
-                    "hover:scale-105 hover:shadow-lg hover:shadow-secondary/20",
-                    "hover:from-secondary/95 hover:via-secondary/98 hover:to-secondary/90",
-                    "before:absolute before:inset-0 before:bg-gradient-to-r",
-                    "before:from-transparent before:via-black/15 before:to-transparent",
-                    "dark:before:via-white/15",
-                    "before:translate-x-[-150%] before:skew-x-12 before:transition-transform before:duration-[480ms]",
-                    "hover:before:translate-x-[150%]",
-                    "active:scale-[1.02] active:shadow-md"
+                    'h-7 w-7 p-0 relative overflow-hidden transition-all duration-300 ease-out',
+                    'bg-gradient-to-br from-secondary/98 via-secondary to-secondary/95',
+                    'text-secondary-foreground shadow-xs border border-border/20',
+                    'hover:scale-105 hover:shadow-lg hover:shadow-secondary/20',
+                    'hover:from-secondary/95 hover:via-secondary/98 hover:to-secondary/90',
+                    'before:absolute before:inset-0 before:bg-gradient-to-r',
+                    'before:from-transparent before:via-black/15 before:to-transparent',
+                    'dark:before:via-white/15',
+                    'before:translate-x-[-150%] before:skew-x-12 before:transition-transform before:duration-[480ms]',
+                    'hover:before:translate-x-[150%]',
+                    'active:scale-[1.02] active:shadow-md'
                   )}
                   aria-label="Add task"
                 >

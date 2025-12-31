@@ -55,7 +55,8 @@ const TaskGroupListComponent: React.FC<TaskGroupListProps> = ({
   onDeleteTaskGroup,
 }) => {
   const [showCreateDialog, setShowCreateDialog] = React.useState(false);
-  const [editingItem, setEditingItem] = React.useState<SelectionModeItem | null>(null);
+  const [editingItem, setEditingItem] =
+    React.useState<SelectionModeItem | null>(null);
 
   // Convert task groups to base list items
   const baseItems = taskGroups.map(taskGroupToBaseItem);
@@ -98,7 +99,7 @@ const TaskGroupListComponent: React.FC<TaskGroupListProps> = ({
     emoji?: string;
     color: string;
   }) => {
-    const selectedEmoji = (data.emoji || data.iconId || '📁');
+    const selectedEmoji = data.emoji || data.iconId || '📁';
     if (editingItem) {
       onEditTaskGroup(editingItem.id, {
         name: data.name,
@@ -118,7 +119,9 @@ const TaskGroupListComponent: React.FC<TaskGroupListProps> = ({
     }
   };
 
-  const currentGroup = editingItem ? taskGroups.find(g => g.id === editingItem.id) : undefined;
+  const currentGroup = editingItem
+    ? taskGroups.find((g) => g.id === editingItem.id)
+    : undefined;
 
   return (
     <BaseList<SelectionModeItem>
@@ -142,14 +145,18 @@ const TaskGroupListComponent: React.FC<TaskGroupListProps> = ({
       }}
       onCreateDialogSubmit={handleCreateFromDialog}
       CreateDialogComponent={CreateTaskDialog}
-      createDialogInitialData={editingItem ? {
-        name: currentGroup?.name || '',
-        description: currentGroup?.description || '',
-        emoji: currentGroup?.emoji || '📁',
-        color: currentGroup?.color,
-        submitLabel: 'Save Changes',
-        titleLabel: 'Edit Task List',
-      } : undefined}
+      createDialogInitialData={
+        editingItem
+          ? {
+              name: currentGroup?.name || '',
+              description: currentGroup?.description || '',
+              emoji: currentGroup?.emoji || '📁',
+              color: currentGroup?.color,
+              submitLabel: 'Save Changes',
+              titleLabel: 'Edit Task List',
+            }
+          : undefined
+      }
       addButtonLabel="Task List"
       emptyStateText="No task lists yet"
       createFirstItemText="Create your first task list"

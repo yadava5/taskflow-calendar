@@ -44,8 +44,8 @@ export async function authenticateToken(
         error: {
           code: 'MISSING_TOKEN',
           message: 'Authorization token is required',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -57,8 +57,8 @@ export async function authenticateToken(
         error: {
           code: 'TOKEN_BLACKLISTED',
           message: 'Token has been invalidated',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -73,8 +73,8 @@ export async function authenticateToken(
         error: {
           code: 'INVALID_TOKEN_TYPE',
           message: 'Access token required',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -82,7 +82,7 @@ export async function authenticateToken(
     // Add user info to request
     req.user = {
       id: decoded.userId,
-      email: decoded.email
+      email: decoded.email,
     };
     req.token = token;
 
@@ -116,8 +116,8 @@ export async function authenticateToken(
       error: {
         code: errorCode,
         message: errorMessage,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 }
@@ -153,10 +153,10 @@ export async function optionalAuth(
     if (decoded.type === 'access') {
       req.user = {
         id: decoded.userId,
-        email: decoded.email
+        email: decoded.email,
       };
       req.token = token;
-      
+
       // Update request context with user information
       updateContextWithUser(decoded.userId, decoded.email);
     }
@@ -171,8 +171,14 @@ export async function optionalAuth(
 /**
  * Middleware to check if user owns a resource
  */
-export function requireResourceOwnership(resourceUserIdField: string = 'userId') {
-  return (req: AuthRequest & RequestWithResource, res: Response, next: NextFunction): void => {
+export function requireResourceOwnership(
+  resourceUserIdField: string = 'userId'
+) {
+  return (
+    req: AuthRequest & RequestWithResource,
+    res: Response,
+    next: NextFunction
+  ): void => {
     const user = req.user;
     if (!user) {
       res.status(401).json({
@@ -180,8 +186,8 @@ export function requireResourceOwnership(resourceUserIdField: string = 'userId')
         error: {
           code: 'AUTHENTICATION_REQUIRED',
           message: 'Authentication required',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -195,8 +201,8 @@ export function requireResourceOwnership(resourceUserIdField: string = 'userId')
         error: {
           code: 'INSUFFICIENT_PERMISSIONS',
           message: 'You do not have permission to access this resource',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -222,8 +228,8 @@ export async function validateRefreshToken(
         error: {
           code: 'MISSING_REFRESH_TOKEN',
           message: 'Refresh token is required',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -235,8 +241,8 @@ export async function validateRefreshToken(
         error: {
           code: 'TOKEN_BLACKLISTED',
           message: 'Refresh token has been invalidated',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -250,8 +256,8 @@ export async function validateRefreshToken(
         error: {
           code: 'INVALID_TOKEN_TYPE',
           message: 'Refresh token required',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
       return;
     }
@@ -259,7 +265,7 @@ export async function validateRefreshToken(
     // Add decoded token info to request
     req.user = {
       id: decoded.userId,
-      email: decoded.email
+      email: decoded.email,
     };
     req.token = refreshToken;
 
@@ -286,8 +292,8 @@ export async function validateRefreshToken(
       error: {
         code: errorCode,
         message: errorMessage,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     });
   }
 }

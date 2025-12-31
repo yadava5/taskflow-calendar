@@ -2,11 +2,10 @@
  * Tests for HighlightedTextareaField component
  */
 
-
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { HighlightedTextareaField } from '../HighlightedTextareaField';
-import { ParsedTag } from "@shared/types";
+import { ParsedTag } from '@shared/types';
 
 describe('HighlightedTextareaField', () => {
   const mockTags: ParsedTag[] = [
@@ -21,20 +20,14 @@ describe('HighlightedTextareaField', () => {
       endIndex: 4,
       originalText: 'high',
       confidence: 0.9,
-      source: 'test-parser'
-    }
+      source: 'test-parser',
+    },
   ];
 
   it('renders without crashing', () => {
     const onChange = vi.fn();
-    render(
-      <HighlightedTextareaField
-        value=""
-        onChange={onChange}
-        tags={[]}
-      />
-    );
-    
+    render(<HighlightedTextareaField value="" onChange={onChange} tags={[]} />);
+
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 
@@ -48,23 +41,17 @@ describe('HighlightedTextareaField', () => {
         placeholder="Enter task..."
       />
     );
-    
+
     expect(screen.getByPlaceholderText('Enter task...')).toBeInTheDocument();
   });
 
   it('calls onChange when text is input', () => {
     const onChange = vi.fn();
-    render(
-      <HighlightedTextareaField
-        value=""
-        onChange={onChange}
-        tags={[]}
-      />
-    );
-    
+    render(<HighlightedTextareaField value="" onChange={onChange} tags={[]} />);
+
     const textarea = screen.getByRole('textbox');
     fireEvent.change(textarea, { target: { value: 'test task' } });
-    
+
     expect(onChange).toHaveBeenCalledWith('test task');
   });
 
@@ -72,7 +59,7 @@ describe('HighlightedTextareaField', () => {
     const onFocus = vi.fn();
     const onBlur = vi.fn();
     const onChange = vi.fn();
-    
+
     render(
       <HighlightedTextareaField
         value=""
@@ -82,12 +69,12 @@ describe('HighlightedTextareaField', () => {
         onBlur={onBlur}
       />
     );
-    
+
     const textarea = screen.getByRole('textbox');
-    
+
     fireEvent.focus(textarea);
     expect(onFocus).toHaveBeenCalled();
-    
+
     fireEvent.blur(textarea);
     expect(onBlur).toHaveBeenCalled();
   });
@@ -102,7 +89,7 @@ describe('HighlightedTextareaField', () => {
         disabled={true}
       />
     );
-    
+
     const textarea = screen.getByRole('textbox');
     expect(textarea).toBeDisabled();
   });
@@ -110,7 +97,7 @@ describe('HighlightedTextareaField', () => {
   it('supports multi-line text', () => {
     const onChange = vi.fn();
     const multiLineText = 'Line 1\nLine 2\nLine 3';
-    
+
     render(
       <HighlightedTextareaField
         value={multiLineText}
@@ -118,23 +105,20 @@ describe('HighlightedTextareaField', () => {
         tags={[]}
       />
     );
-    
+
     const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
     expect(textarea.value).toBe(multiLineText);
   });
 
   it('has proper accessibility attributes', () => {
     const onChange = vi.fn();
-    render(
-      <HighlightedTextareaField
-        value=""
-        onChange={onChange}
-        tags={[]}
-      />
-    );
-    
+    render(<HighlightedTextareaField value="" onChange={onChange} tags={[]} />);
+
     const textarea = screen.getByRole('textbox');
-    expect(textarea).toHaveAttribute('aria-label', 'Smart task input with highlighting');
+    expect(textarea).toHaveAttribute(
+      'aria-label',
+      'Smart task input with highlighting'
+    );
   });
 
   it('shows confidence indicator when enabled and confidence is low', () => {
@@ -148,7 +132,7 @@ describe('HighlightedTextareaField', () => {
         showConfidence={true}
       />
     );
-    
+
     const indicator = container.querySelector('[title*="Parsing confidence"]');
     expect(indicator).toBeInTheDocument();
   });

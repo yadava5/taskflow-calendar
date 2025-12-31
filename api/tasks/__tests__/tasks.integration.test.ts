@@ -11,7 +11,10 @@ import {
   createMockResponse,
   mockUser,
 } from '../../../lib/__tests__/helpers';
-import type { CreateTaskDTO, UpdateTaskDTO } from '../../../lib/services/TaskService';
+import type {
+  CreateTaskDTO,
+  UpdateTaskDTO,
+} from '../../../lib/services/TaskService';
 
 // Mock the services
 vi.mock('../../../lib/services/index.js');
@@ -51,10 +54,14 @@ const mockServices = {
 const mockSendSuccess = vi.fn();
 const mockSendError = vi.fn();
 
-vi.mocked(getAllServices).mockReturnValue(mockServices as unknown as ReturnType<typeof getAllServices>);
+vi.mocked(getAllServices).mockReturnValue(
+  mockServices as unknown as ReturnType<typeof getAllServices>
+);
 
 // Import mocked functions
-const { sendSuccess, sendError } = await import('../../../lib/middleware/errorHandler.js');
+const { sendSuccess, sendError } = await import(
+  '../../../lib/middleware/errorHandler.js'
+);
 vi.mocked(sendSuccess).mockImplementation(mockSendSuccess);
 vi.mocked(sendError).mockImplementation((res, error) => {
   mockSendError(res, {
@@ -183,15 +190,10 @@ describe('Tasks API Integration Tests', () => {
 
       await tasksHandler(req, res);
 
-      expect(mockTaskService.findPaginated).toHaveBeenCalledWith(
-        {},
-        2,
-        10,
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockTaskService.findPaginated).toHaveBeenCalledWith({}, 2, 10, {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, paginatedResult);
     });
 
@@ -215,7 +217,9 @@ describe('Tasks API Integration Tests', () => {
       const req = createMockAuthRequest(mockUser, { method: 'GET' });
       const res = createMockResponse();
 
-      mockTaskService.findAll.mockRejectedValue(new Error('Database connection failed'));
+      mockTaskService.findAll.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       await tasksHandler(req, res);
 
@@ -254,18 +258,19 @@ describe('Tasks API Integration Tests', () => {
       });
       const res = createMockResponse();
 
-      const createdTask = { ...mockTask, ...createTaskData, id: 'new-task-123' };
+      const createdTask = {
+        ...mockTask,
+        ...createTaskData,
+        id: 'new-task-123',
+      };
       mockTaskService.create.mockResolvedValue(createdTask);
 
       await tasksHandler(req, res);
 
-      expect(mockTaskService.create).toHaveBeenCalledWith(
-        createTaskData,
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockTaskService.create).toHaveBeenCalledWith(createTaskData, {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, createdTask, 201);
     });
 
@@ -335,13 +340,10 @@ describe('Tasks API Integration Tests', () => {
 
       await taskHandler(req, res);
 
-      expect(mockTaskService.findById).toHaveBeenCalledWith(
-        'task-123',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockTaskService.findById).toHaveBeenCalledWith('task-123', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, mockTask);
     });
 
@@ -481,7 +483,11 @@ describe('Tasks API Integration Tests', () => {
       });
       const res = createMockResponse();
 
-      const toggledTask = { ...mockTask, completed: true, completedAt: new Date() };
+      const toggledTask = {
+        ...mockTask,
+        completed: true,
+        completedAt: new Date(),
+      };
       mockTaskService.toggleCompletion.mockResolvedValue(toggledTask);
 
       await taskHandler(req, res);
@@ -534,13 +540,10 @@ describe('Tasks API Integration Tests', () => {
 
       await taskHandler(req, res);
 
-      expect(mockTaskService.delete).toHaveBeenCalledWith(
-        'task-123',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockTaskService.delete).toHaveBeenCalledWith('task-123', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, { deleted: true });
     });
 

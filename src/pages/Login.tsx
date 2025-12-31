@@ -35,7 +35,10 @@ export function LoginPage() {
   }, []);
 
   return (
-    <div ref={containerRef} className="flex min-h-svh w-full items-center justify-center p-4 sm:p-6 md:p-10">
+    <div
+      ref={containerRef}
+      className="flex min-h-svh w-full items-center justify-center p-4 sm:p-6 md:p-10"
+    >
       <div className="w-full max-w-md rounded-xl frosted-panel p-4 sm:p-6 md:p-8">
         <LoginForm />
       </div>

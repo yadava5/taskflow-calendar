@@ -11,7 +11,9 @@ export interface PasswordStrengthResult {
   };
 }
 
-export function calculatePasswordStrength(password: string): PasswordStrengthResult {
+export function calculatePasswordStrength(
+  password: string
+): PasswordStrengthResult {
   const checks = {
     length: password.length >= 8,
     lowercase: /[a-z]/.test(password),
@@ -28,7 +30,8 @@ export function calculatePasswordStrength(password: string): PasswordStrengthRes
   else feedback.push('Use at least 8 characters');
 
   if (password.length >= 12) score += 1;
-  else if (password.length >= 8) feedback.push('Consider using 12+ characters for better security');
+  else if (password.length >= 8)
+    feedback.push('Consider using 12+ characters for better security');
 
   // Character variety
   if (checks.lowercase && checks.uppercase) score += 1;
@@ -76,7 +79,9 @@ export function calculatePasswordStrength(password: string): PasswordStrengthRes
   };
 }
 
-export function getStrengthColor(strength: PasswordStrengthResult['strength']): string {
+export function getStrengthColor(
+  strength: PasswordStrengthResult['strength']
+): string {
   switch (strength) {
     case 'very-weak':
       return 'bg-red-500';
@@ -91,7 +96,9 @@ export function getStrengthColor(strength: PasswordStrengthResult['strength']): 
   }
 }
 
-export function getStrengthText(strength: PasswordStrengthResult['strength']): string {
+export function getStrengthText(
+  strength: PasswordStrengthResult['strength']
+): string {
   switch (strength) {
     case 'very-weak':
       return 'Very Weak';

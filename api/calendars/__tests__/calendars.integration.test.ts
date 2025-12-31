@@ -8,7 +8,10 @@ import {
   createMockResponse,
   mockUser,
 } from '../../../lib/__tests__/helpers';
-import type { CreateCalendarDTO, UpdateCalendarDTO } from '../../../lib/services/CalendarService';
+import type {
+  CreateCalendarDTO,
+  UpdateCalendarDTO,
+} from '../../../lib/services/CalendarService';
 
 const {
   mockCalendarService,
@@ -113,7 +116,10 @@ describe('Calendar API Integration Tests', () => {
       });
       const res = createMockResponse();
 
-      mockCalendarService.findAll.mockResolvedValue([mockCalendar, mockCalendar2]);
+      mockCalendarService.findAll.mockResolvedValue([
+        mockCalendar,
+        mockCalendar2,
+      ]);
 
       await calendarsHandler(req, res);
 
@@ -124,7 +130,10 @@ describe('Calendar API Integration Tests', () => {
           requestId: 'test-request-123',
         }
       );
-      expect(mockSendSuccess).toHaveBeenCalledWith(res, [mockCalendar, mockCalendar2]);
+      expect(mockSendSuccess).toHaveBeenCalledWith(res, [
+        mockCalendar,
+        mockCalendar2,
+      ]);
     });
 
     it('should filter calendars by visibility', async () => {
@@ -179,7 +188,9 @@ describe('Calendar API Integration Tests', () => {
         { ...mockCalendar2, eventCount: 3 },
       ];
 
-      mockCalendarService.getWithEventCounts.mockResolvedValue(calendarsWithCounts);
+      mockCalendarService.getWithEventCounts.mockResolvedValue(
+        calendarsWithCounts
+      );
 
       await calendarsHandler(req, res);
 
@@ -212,7 +223,9 @@ describe('Calendar API Integration Tests', () => {
       });
       const res = createMockResponse();
 
-      mockCalendarService.findAll.mockRejectedValue(new Error('Database connection failed'));
+      mockCalendarService.findAll.mockRejectedValue(
+        new Error('Database connection failed')
+      );
 
       await calendarsHandler(req, res);
 
@@ -247,13 +260,10 @@ describe('Calendar API Integration Tests', () => {
 
       await calendarsHandler(req, res);
 
-      expect(mockCalendarService.create).toHaveBeenCalledWith(
-        createDTO,
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockCalendarService.create).toHaveBeenCalledWith(createDTO, {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, createdCalendar, 201);
     });
 
@@ -354,13 +364,10 @@ describe('Calendar API Integration Tests', () => {
 
       await calendarHandler(req, res);
 
-      expect(mockCalendarService.findById).toHaveBeenCalledWith(
-        'cal-123',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockCalendarService.findById).toHaveBeenCalledWith('cal-123', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, mockCalendar);
     });
 
@@ -591,13 +598,10 @@ describe('Calendar API Integration Tests', () => {
 
       await calendarHandler(req, res);
 
-      expect(mockCalendarService.setDefault).toHaveBeenCalledWith(
-        'cal-456',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockCalendarService.setDefault).toHaveBeenCalledWith('cal-456', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, defaultCalendar);
     });
 
@@ -661,13 +665,10 @@ describe('Calendar API Integration Tests', () => {
 
       await calendarHandler(req, res);
 
-      expect(mockCalendarService.delete).toHaveBeenCalledWith(
-        'cal-123',
-        {
-          userId: 'user-123',
-          requestId: 'test-request-123',
-        }
-      );
+      expect(mockCalendarService.delete).toHaveBeenCalledWith('cal-123', {
+        userId: 'user-123',
+        requestId: 'test-request-123',
+      });
       expect(mockSendSuccess).toHaveBeenCalledWith(res, { deleted: true });
     });
 

@@ -1,6 +1,6 @@
 /**
  * Demo component showing the EnhancedLayoutWrapper in action
- * 
+ *
  * This demonstrates the Claude AI-inspired layout with:
  * - Large textarea at the top
  * - Controls positioned below the input
@@ -19,11 +19,7 @@ export const EnhancedLayoutDemo: React.FC = () => {
   const [enableSmartParsing, setEnableSmartParsing] = useState(true);
 
   // Initialize text parser
-  const {
-    tags,
-    confidence,
-    clear,
-  } = useTextParser(inputText, {
+  const { tags, confidence, clear } = useTextParser(inputText, {
     enabled: enableSmartParsing,
     debounceMs: 100,
     minLength: 2,
@@ -42,7 +38,7 @@ export const EnhancedLayoutDemo: React.FC = () => {
         tags,
         confidence,
       });
-      
+
       // Clear input
       setInputText('');
       clear();
@@ -74,7 +70,7 @@ export const EnhancedLayoutDemo: React.FC = () => {
       {/* Smart Parsing Toggle */}
       <Button
         type="button"
-        variant={enableSmartParsing ? "default" : "ghost"}
+        variant={enableSmartParsing ? 'default' : 'ghost'}
         size="sm"
         className="h-7 px-2"
         onClick={() => setEnableSmartParsing(!enableSmartParsing)}
@@ -128,7 +124,9 @@ export const EnhancedLayoutDemo: React.FC = () => {
 
         {/* Demo info */}
         <div className="text-sm text-muted-foreground space-y-2">
-          <p><strong>Features demonstrated:</strong></p>
+          <p>
+            <strong>Features demonstrated:</strong>
+          </p>
           <ul className="list-disc list-inside space-y-1 ml-4">
             <li>Multi-line textarea with auto-resize</li>
             <li>Text highlighting for parsed tags (dates, priorities, etc.)</li>
@@ -137,17 +135,23 @@ export const EnhancedLayoutDemo: React.FC = () => {
             <li>Smart parsing toggle with visual feedback</li>
             <li>Submit with Cmd/Ctrl + Enter</li>
           </ul>
-          
+
           {tags.length > 0 && (
             <div className="mt-4 p-3 bg-muted/50 rounded-md">
-              <p><strong>Parsed tags:</strong></p>
+              <p>
+                <strong>Parsed tags:</strong>
+              </p>
               <pre className="text-xs mt-1 overflow-x-auto">
-                {JSON.stringify(tags.map(tag => ({
-                  type: tag.type,
-                  value: tag.value,
-                  // text: tag.text, // ParsedTag doesn't have text property
-                  confidence: Math.round(tag.confidence * 100) + '%'
-                })), null, 2)}
+                {JSON.stringify(
+                  tags.map((tag) => ({
+                    type: tag.type,
+                    value: tag.value,
+                    // text: tag.text, // ParsedTag doesn't have text property
+                    confidence: Math.round(tag.confidence * 100) + '%',
+                  })),
+                  null,
+                  2
+                )}
               </pre>
             </div>
           )}

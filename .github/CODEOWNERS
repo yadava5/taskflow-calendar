@@ -1,0 +1,27 @@
+# CODEOWNERS file for Taskflow Calendar
+# These owners will be requested for review when someone opens a pull request
+
+# Default owners for everything in the repo
+* @yadava5
+
+# Frontend
+/src/ @yadava5
+
+# Backend API
+/api/ @yadava5
+/lib/ @yadava5
+
+# Packages
+/packages/ @yadava5
+
+# Configuration
+/*.json @yadava5
+/*.js @yadava5
+/*.ts @yadava5
+
+# Documentation
+*.md @yadava5
+/docs/ @yadava5
+
+# GitHub configuration
+/.github/ @yadava5

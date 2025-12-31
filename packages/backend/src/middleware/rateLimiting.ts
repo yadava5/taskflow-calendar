@@ -12,8 +12,8 @@ export const authRateLimit = rateLimit({
     error: {
       code: 'RATE_LIMIT_EXCEEDED',
       message: 'Too many authentication attempts. Please try again later.',
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -24,10 +24,10 @@ export const authRateLimit = rateLimit({
         code: 'RATE_LIMIT_EXCEEDED',
         message: 'Too many authentication attempts. Please try again later.',
         timestamp: new Date().toISOString(),
-        retryAfter: Math.round((900000 + Date.now()) / 1000) // 15 minutes in seconds
-      }
+        retryAfter: Math.round((900000 + Date.now()) / 1000), // 15 minutes in seconds
+      },
     });
-  }
+  },
 });
 
 /**
@@ -41,8 +41,8 @@ export const loginRateLimit = rateLimit({
     error: {
       code: 'LOGIN_RATE_LIMIT_EXCEEDED',
       message: 'Too many login attempts. Please try again later.',
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -53,10 +53,10 @@ export const loginRateLimit = rateLimit({
         code: 'LOGIN_RATE_LIMIT_EXCEEDED',
         message: 'Too many login attempts. Please try again later.',
         timestamp: new Date().toISOString(),
-        retryAfter: Math.round((900000 + Date.now()) / 1000)
-      }
+        retryAfter: Math.round((900000 + Date.now()) / 1000),
+      },
     });
-  }
+  },
 });
 
 /**
@@ -70,8 +70,8 @@ export const passwordResetRateLimit = rateLimit({
     error: {
       code: 'PASSWORD_RESET_RATE_LIMIT_EXCEEDED',
       message: 'Too many password reset requests. Please try again later.',
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -82,10 +82,10 @@ export const passwordResetRateLimit = rateLimit({
         code: 'PASSWORD_RESET_RATE_LIMIT_EXCEEDED',
         message: 'Too many password reset requests. Please try again later.',
         timestamp: new Date().toISOString(),
-        retryAfter: Math.round((3600000 + Date.now()) / 1000)
-      }
+        retryAfter: Math.round((3600000 + Date.now()) / 1000),
+      },
     });
-  }
+  },
 });
 
 /**
@@ -99,8 +99,8 @@ export const refreshTokenRateLimit = rateLimit({
     error: {
       code: 'REFRESH_RATE_LIMIT_EXCEEDED',
       message: 'Too many token refresh attempts. Please try again later.',
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -111,10 +111,10 @@ export const refreshTokenRateLimit = rateLimit({
         code: 'REFRESH_RATE_LIMIT_EXCEEDED',
         message: 'Too many token refresh attempts. Please try again later.',
         timestamp: new Date().toISOString(),
-        retryAfter: Math.round((300000 + Date.now()) / 1000)
-      }
+        retryAfter: Math.round((300000 + Date.now()) / 1000),
+      },
     });
-  }
+  },
 });
 
 /**
@@ -128,8 +128,8 @@ export const apiRateLimit = rateLimit({
     error: {
       code: 'API_RATE_LIMIT_EXCEEDED',
       message: 'Too many requests. Please try again later.',
-      timestamp: new Date().toISOString()
-    }
+      timestamp: new Date().toISOString(),
+    },
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -140,10 +140,10 @@ export const apiRateLimit = rateLimit({
         code: 'API_RATE_LIMIT_EXCEEDED',
         message: 'Too many requests. Please try again later.',
         timestamp: new Date().toISOString(),
-        retryAfter: Math.round((900000 + Date.now()) / 1000)
-      }
+        retryAfter: Math.round((900000 + Date.now()) / 1000),
+      },
     });
-  }
+  },
 });
 
 /**
@@ -163,8 +163,8 @@ export function createRateLimit(options: {
       error: {
         code: options.code,
         message: options.message,
-        timestamp: new Date().toISOString()
-      }
+        timestamp: new Date().toISOString(),
+      },
     },
     standardHeaders: true,
     legacyHeaders: false,
@@ -175,9 +175,9 @@ export function createRateLimit(options: {
           code: options.code,
           message: options.message,
           timestamp: new Date().toISOString(),
-          retryAfter: Math.round((options.windowMs + Date.now()) / 1000)
-        }
+          retryAfter: Math.round((options.windowMs + Date.now()) / 1000),
+        },
       });
-    }
+    },
   });
 }

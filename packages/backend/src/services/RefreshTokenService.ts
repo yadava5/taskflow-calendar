@@ -6,12 +6,15 @@ import { tokenBlacklistService } from './TokenBlacklistService.js';
  * In production, this should use a database to store refresh tokens
  */
 class RefreshTokenService {
-  private validRefreshTokens: Map<string, {
-    userId: string;
-    email: string;
-    issuedAt: number;
-    family: string; // Token family for rotation detection
-  }> = new Map();
+  private validRefreshTokens: Map<
+    string,
+    {
+      userId: string;
+      email: string;
+      issuedAt: number;
+      family: string; // Token family for rotation detection
+    }
+  > = new Map();
 
   /**
    * Store refresh token information
@@ -23,12 +26,12 @@ class RefreshTokenService {
     family?: string
   ): void {
     const tokenFamily = family || this.generateTokenFamily();
-    
+
     this.validRefreshTokens.set(refreshToken, {
       userId,
       email,
       issuedAt: Date.now(),
-      family: tokenFamily
+      family: tokenFamily,
     });
   }
 
@@ -48,7 +51,7 @@ class RefreshTokenService {
 
     // Verify JWT signature and expiration
     const decoded = await verifyToken(refreshToken);
-    
+
     if (decoded.type !== 'refresh') {
       throw new Error('INVALID_TOKEN_TYPE');
     }
@@ -60,7 +63,7 @@ class RefreshTokenService {
     return {
       userId: tokenInfo.userId,
       email: tokenInfo.email,
-      family: tokenInfo.family
+      family: tokenInfo.family,
     };
   }
 
@@ -69,10 +72,13 @@ class RefreshTokenService {
    */
   async rotateRefreshToken(oldRefreshToken: string): Promise<TokenPair> {
     const tokenInfo = await this.validateRefreshToken(oldRefreshToken);
-    
+
     // Generate new token pair
-    const newTokenPair = await generateTokenPair(tokenInfo.userId, tokenInfo.email);
-    
+    const newTokenPair = await generateTokenPair(
+      tokenInfo.userId,
+      tokenInfo.email
+    );
+
     // Store new refresh token with same family
     this.storeRefreshToken(
       newTokenPair.refreshToken,
@@ -80,10 +86,10 @@ class RefreshTokenService {
       tokenInfo.email,
       tokenInfo.family
     );
-    
+
     // Invalidate old refresh token
     this.invalidateRefreshToken(oldRefreshToken);
-    
+
     return newTokenPair;
   }
 
@@ -100,13 +106,13 @@ class RefreshTokenService {
    */
   invalidateAllUserTokens(userId: string): void {
     const tokensToInvalidate: string[] = [];
-    
+
     for (const [token, tokenInfo] of this.validRefreshTokens.entries()) {
       if (tokenInfo.userId === userId) {
         tokensToInvalidate.push(token);
       }
     }
-    
+
     for (const token of tokensToInvalidate) {
       this.invalidateRefreshToken(token);
     }
@@ -117,13 +123,13 @@ class RefreshTokenService {
    */
   invalidateTokenFamily(family: string): void {
     const tokensToInvalidate: string[] = [];
-    
+
     for (const [token, tokenInfo] of this.validRefreshTokens.entries()) {
       if (tokenInfo.family === family) {
         tokensToInvalidate.push(token);
       }
     }
-    
+
     for (const token of tokensToInvalidate) {
       this.invalidateRefreshToken(token);
     }
@@ -138,7 +144,7 @@ class RefreshTokenService {
       if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
         // Try to find the token family and invalidate all tokens in that family
         const decoded = await verifyToken(refreshToken);
-        
+
         // Find any token with the same user to get the family
         for (const [, tokenInfo] of this.validRefreshTokens.entries()) {
           if (tokenInfo.userId === decoded.userId) {
@@ -146,10 +152,10 @@ class RefreshTokenService {
             break;
           }
         }
-        
+
         return true;
       }
-      
+
       return false;
     } catch {
       return false;
@@ -162,17 +168,17 @@ class RefreshTokenService {
   cleanupExpiredTokens(): void {
     const now = Date.now();
     const expiredTokens: string[] = [];
-    
+
     for (const [token, tokenInfo] of this.validRefreshTokens.entries()) {
       // Check if token is expired (7 days by default)
       const tokenAge = now - tokenInfo.issuedAt;
       const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
-      
+
       if (tokenAge > maxAge) {
         expiredTokens.push(token);
       }
     }
-    
+
     for (const token of expiredTokens) {
       this.invalidateRefreshToken(token);
     }
@@ -195,19 +201,20 @@ class RefreshTokenService {
   } {
     const tokensByUser: Record<string, number> = {};
     let oldestToken: number | null = null;
-    
+
     for (const [, tokenInfo] of this.validRefreshTokens.entries()) {
-      tokensByUser[tokenInfo.userId] = (tokensByUser[tokenInfo.userId] || 0) + 1;
-      
+      tokensByUser[tokenInfo.userId] =
+        (tokensByUser[tokenInfo.userId] || 0) + 1;
+
       if (oldestToken === null || tokenInfo.issuedAt < oldestToken) {
         oldestToken = tokenInfo.issuedAt;
       }
     }
-    
+
     return {
       totalActiveTokens: this.validRefreshTokens.size,
       tokensByUser,
-      oldestToken
+      oldestToken,
     };
   }
 
@@ -223,8 +230,11 @@ class RefreshTokenService {
 export const refreshTokenService = new RefreshTokenService();
 
 // Clean up expired tokens every hour
-setInterval(() => {
-  refreshTokenService.cleanupExpiredTokens();
-}, 60 * 60 * 1000);
+setInterval(
+  () => {
+    refreshTokenService.cleanupExpiredTokens();
+  },
+  60 * 60 * 1000
+);
 
 export default RefreshTokenService;

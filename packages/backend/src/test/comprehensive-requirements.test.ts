@@ -8,7 +8,15 @@
  * - Requirement 4: Event Management API (schema only)
  */
 
-import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  beforeAll,
+  afterAll,
+  beforeEach,
+  vi,
+} from 'vitest';
 import { randomUUID } from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -20,19 +28,25 @@ import { query } from '../config/database.js';
 vi.mock('../services/GoogleOAuthService.js', () => ({
   GoogleOAuthService: vi.fn().mockImplementation(() => ({
     isConfigured: vi.fn().mockReturnValue(true),
-    getAuthUrl: vi.fn().mockReturnValue('https://accounts.google.com/oauth/authorize?mock=true'),
+    getAuthUrl: vi
+      .fn()
+      .mockReturnValue('https://accounts.google.com/oauth/authorize?mock=true'),
     handleCallback: vi.fn().mockResolvedValue({
       user: { id: 'test-user', email: 'test@example.com', name: 'Test User' },
-      tokens: { accessToken: 'mock-token', refreshToken: 'mock-refresh', expiresAt: Date.now() + 3600000 }
+      tokens: {
+        accessToken: 'mock-token',
+        refreshToken: 'mock-refresh',
+        expiresAt: Date.now() + 3600000,
+      },
     }),
     verifyIdToken: vi.fn().mockResolvedValue({
       id: 'google-123',
       email: 'oauth@example.com',
       name: 'OAuth User',
-      picture: 'https://example.com/avatar.jpg'
+      picture: 'https://example.com/avatar.jpg',
     }),
-    unlinkAccount: vi.fn().mockResolvedValue(undefined)
-  }))
+    unlinkAccount: vi.fn().mockResolvedValue(undefined),
+  })),
 }));
 
 const toIso = (value: Date | string) => new Date(value).toISOString();
@@ -41,12 +55,14 @@ const expectValidDate = (value: Date | string) => {
   expect(Number.isNaN(date.getTime())).toBe(false);
 };
 
-async function createUser(overrides: {
-  id?: string;
-  email?: string;
-  name?: string | null;
-  password?: string | null;
-} = {}) {
+async function createUser(
+  overrides: {
+    id?: string;
+    email?: string;
+    name?: string | null;
+    password?: string | null;
+  } = {}
+) {
   const id = overrides.id ?? randomUUID();
   const email = overrides.email ?? `user-${randomUUID()}@example.com`;
   const name = overrides.name ?? 'Test User';
@@ -71,11 +87,14 @@ async function createUser(overrides: {
   return result.rows[0];
 }
 
-async function createUserProfile(userId: string, overrides: {
-  id?: string;
-  bio?: string | null;
-  timezone?: string;
-} = {}) {
+async function createUserProfile(
+  userId: string,
+  overrides: {
+    id?: string;
+    bio?: string | null;
+    timezone?: string;
+  } = {}
+) {
   const id = overrides.id ?? randomUUID();
   const bio = overrides.bio ?? null;
   const timezone = overrides.timezone ?? 'UTC';
@@ -95,13 +114,16 @@ async function createUserProfile(userId: string, overrides: {
   return result.rows[0];
 }
 
-async function createTaskList(userId: string, overrides: {
-  id?: string;
-  name?: string;
-  color?: string | null;
-  icon?: string | null;
-  description?: string | null;
-} = {}) {
+async function createTaskList(
+  userId: string,
+  overrides: {
+    id?: string;
+    name?: string;
+    color?: string | null;
+    icon?: string | null;
+    description?: string | null;
+  } = {}
+) {
   const id = overrides.id ?? randomUUID();
   const name = overrides.name ?? 'Test List';
   const color = overrides.color ?? '#8B5CF6';
@@ -125,12 +147,16 @@ async function createTaskList(userId: string, overrides: {
   return result.rows[0];
 }
 
-async function createTask(userId: string, taskListId: string, overrides: {
-  id?: string;
-  title?: string;
-  completed?: boolean;
-  priority?: string;
-} = {}) {
+async function createTask(
+  userId: string,
+  taskListId: string,
+  overrides: {
+    id?: string;
+    title?: string;
+    completed?: boolean;
+    priority?: string;
+  } = {}
+) {
   const id = overrides.id ?? randomUUID();
   const title = overrides.title ?? 'Test Task';
   const completed = overrides.completed ?? false;
@@ -153,12 +179,14 @@ async function createTask(userId: string, taskListId: string, overrides: {
   return result.rows[0];
 }
 
-async function createTag(overrides: {
-  id?: string;
-  name?: string;
-  type?: string;
-  color?: string | null;
-} = {}) {
+async function createTag(
+  overrides: {
+    id?: string;
+    name?: string;
+    type?: string;
+    color?: string | null;
+  } = {}
+) {
   const id = overrides.id ?? randomUUID();
   const name = overrides.name ?? 'urgent';
   const type = overrides.type ?? 'PRIORITY';
@@ -206,14 +234,17 @@ async function createTaskTag(overrides: {
   return result.rows[0];
 }
 
-async function createCalendar(userId: string, overrides: {
-  id?: string;
-  name?: string;
-  color?: string | null;
-  description?: string | null;
-  isVisible?: boolean;
-  isDefault?: boolean;
-} = {}) {
+async function createCalendar(
+  userId: string,
+  overrides: {
+    id?: string;
+    name?: string;
+    color?: string | null;
+    description?: string | null;
+    isVisible?: boolean;
+    isDefault?: boolean;
+  } = {}
+) {
   const id = overrides.id ?? randomUUID();
   const name = overrides.name ?? 'Test Calendar';
   const color = overrides.color ?? '#3B82F6';
@@ -241,17 +272,21 @@ async function createCalendar(userId: string, overrides: {
   return result.rows[0];
 }
 
-async function createEvent(userId: string, calendarId: string, overrides: {
-  id?: string;
-  title?: string;
-  description?: string | null;
-  start?: Date;
-  end?: Date;
-  allDay?: boolean;
-  location?: string | null;
-  notes?: string | null;
-  recurrence?: string | null;
-} = {}) {
+async function createEvent(
+  userId: string,
+  calendarId: string,
+  overrides: {
+    id?: string;
+    title?: string;
+    description?: string | null;
+    start?: Date;
+    end?: Date;
+    allDay?: boolean;
+    location?: string | null;
+    notes?: string | null;
+    recurrence?: string | null;
+  } = {}
+) {
   const id = overrides.id ?? randomUUID();
   const title = overrides.title ?? 'Test Event';
   const description = overrides.description ?? null;
@@ -278,7 +313,19 @@ async function createEvent(userId: string, calendarId: string, overrides: {
     `INSERT INTO events (id, title, description, start, "end", "allDay", location, notes, recurrence, "userId", "calendarId", "createdAt", "updatedAt")
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
      RETURNING id, title, description, start, "end", "allDay", location, notes, recurrence, "userId", "calendarId"`,
-    [id, title, description, start, end, allDay, location, notes, recurrence, userId, calendarId]
+    [
+      id,
+      title,
+      description,
+      start,
+      end,
+      allDay,
+      location,
+      notes,
+      recurrence,
+      userId,
+      calendarId,
+    ]
   );
 
   return result.rows[0];
@@ -319,7 +366,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         const userData = {
           email: `test-${Date.now()}@example.com`,
           password: 'SecurePassword123!',
-          name: 'Test User'
+          name: 'Test User',
         };
 
         const result = await authService.registerUser(userData);
@@ -331,15 +378,20 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         expect(result.tokens.refreshToken).toBeDefined();
 
         // Verify password is hashed in database
-        const dbUser = await query<{ id: string; email: string; password: string | null }>(
-          'SELECT id, email, password FROM users WHERE email = $1 LIMIT 1',
-          [userData.email.toLowerCase()]
-        );
+        const dbUser = await query<{
+          id: string;
+          email: string;
+          password: string | null;
+        }>('SELECT id, email, password FROM users WHERE email = $1 LIMIT 1', [
+          userData.email.toLowerCase(),
+        ]);
 
         expect(dbUser.rows[0]).toBeDefined();
         expect(dbUser.rows[0].password).toBeDefined();
         expect(dbUser.rows[0].password).not.toBe('SecurePassword123!');
-        expect(await bcrypt.compare('SecurePassword123!', dbUser.rows[0].password!)).toBe(true);
+        expect(
+          await bcrypt.compare('SecurePassword123!', dbUser.rows[0].password!)
+        ).toBe(true);
       });
 
       it('should prevent duplicate email registration', async () => {
@@ -347,15 +399,17 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         const userData = {
           email: `duplicate-${Date.now()}@example.com`,
           password: 'Password123!',
-          name: 'First User'
+          name: 'First User',
         };
 
         await authService.registerUser(userData);
 
-        await expect(authService.registerUser({
-          ...userData,
-          name: 'Second User'
-        })).rejects.toThrow('USER_ALREADY_EXISTS');
+        await expect(
+          authService.registerUser({
+            ...userData,
+            name: 'Second User',
+          })
+        ).rejects.toThrow('USER_ALREADY_EXISTS');
       });
 
       it('should convert email to lowercase during registration', async () => {
@@ -363,7 +417,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         const userData = {
           email: `UPPERCASE-${Date.now()}@EXAMPLE.COM`,
           password: 'Password123!',
-          name: 'Test User'
+          name: 'Test User',
         };
 
         const result = await authService.registerUser(userData);
@@ -417,13 +471,17 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
 
     describe('1.4 & 1.5: Google OAuth2 Integration', () => {
       it('should be properly configured for OAuth', async () => {
-        const { GoogleOAuthService } = await import('../services/GoogleOAuthService.js');
+        const { GoogleOAuthService } = await import(
+          '../services/GoogleOAuthService.js'
+        );
         const googleOAuthService = new GoogleOAuthService();
         expect(googleOAuthService.isConfigured()).toBe(true);
       });
 
       it('should generate OAuth authorization URL', async () => {
-        const { GoogleOAuthService } = await import('../services/GoogleOAuthService.js');
+        const { GoogleOAuthService } = await import(
+          '../services/GoogleOAuthService.js'
+        );
         const googleOAuthService = new GoogleOAuthService();
         const authUrl = googleOAuthService.getAuthUrl();
 
@@ -433,10 +491,13 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       });
 
       it('should handle OAuth callback flow', async () => {
-        const { GoogleOAuthService } = await import('../services/GoogleOAuthService.js');
+        const { GoogleOAuthService } = await import(
+          '../services/GoogleOAuthService.js'
+        );
         const googleOAuthService = new GoogleOAuthService();
 
-        const result = await googleOAuthService.handleCallback('mock-auth-code');
+        const result =
+          await googleOAuthService.handleCallback('mock-auth-code');
 
         expect(result.user.email).toBe('test@example.com');
         expect(result.tokens.accessToken).toBe('mock-token');
@@ -445,17 +506,23 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
 
     describe('1.6: Token Expiration and Refresh', () => {
       it('should handle token refresh flow', async () => {
-        const originalTokens = await generateTokenPair('user-id', 'test@example.com');
+        const originalTokens = await generateTokenPair(
+          'user-id',
+          'test@example.com'
+        );
 
         // Verify refresh token is valid
         const refreshDecoded = await verifyToken(originalTokens.refreshToken);
         expect(refreshDecoded.type).toBe('refresh');
 
         // Wait a moment to ensure different timestamps
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Generate new tokens using refresh token
-        const newTokens = await generateTokenPair(refreshDecoded.userId, refreshDecoded.email);
+        const newTokens = await generateTokenPair(
+          refreshDecoded.userId,
+          refreshDecoded.email
+        );
         expect(newTokens.accessToken).toBeDefined();
         expect(newTokens.refreshToken).toBeDefined();
         expect(newTokens.accessToken).not.toBe(originalTokens.accessToken);
@@ -469,13 +536,13 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         const result1 = await authService.registerUser({
           email: `user1-${Date.now()}@example.com`,
           password: 'Password123!',
-          name: 'User One'
+          name: 'User One',
         });
 
         const result2 = await authService.registerUser({
           email: `user2-${Date.now()}@example.com`,
           password: 'Password123!',
-          name: 'User Two'
+          name: 'User Two',
         });
 
         // Verify users can access their own data
@@ -496,7 +563,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         const user = await createUser({
           email: 'schema-test@example.com',
           name: 'Schema Test User',
-          password: 'Password123!'
+          password: 'Password123!',
         });
 
         expect(user.id).toBeDefined();
@@ -508,12 +575,12 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should create UserProfile with User relationship', async () => {
         const user = await createUser({
           email: 'profile-test@example.com',
-          name: 'Profile Test User'
+          name: 'Profile Test User',
         });
 
         const profile = await createUserProfile(user.id, {
           bio: 'Test bio',
-          timezone: 'America/New_York'
+          timezone: 'America/New_York',
         });
 
         expect(profile.userId).toBe(user.id);
@@ -537,43 +604,52 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should cascade delete user profile when user is deleted', async () => {
         const user = await createUser({
           email: 'cascade-test@example.com',
-          name: 'Cascade Test User'
+          name: 'Cascade Test User',
         });
 
         await createUserProfile(user.id, {
-          bio: 'Will be deleted'
+          bio: 'Will be deleted',
         });
 
         // Delete user
         await query('DELETE FROM users WHERE id = $1', [user.id]);
 
         // Verify profile was cascade deleted
-        const profile = await query('SELECT id FROM user_profiles WHERE "userId" = $1', [user.id]);
+        const profile = await query(
+          'SELECT id FROM user_profiles WHERE "userId" = $1',
+          [user.id]
+        );
         expect(profile.rows.length).toBe(0);
       });
 
       it('should cascade delete calendars and events when user is deleted', async () => {
         const user = await createUser({
           email: 'calendar-cascade@example.com',
-          name: 'Calendar Cascade User'
+          name: 'Calendar Cascade User',
         });
 
         const calendar = await createCalendar(user.id, {
-          name: 'Test Calendar'
+          name: 'Test Calendar',
         });
 
         const event = await createEvent(user.id, calendar.id, {
           title: 'Test Event',
           start: new Date(),
-          end: new Date(Date.now() + 3600000)
+          end: new Date(Date.now() + 3600000),
         });
 
         // Delete user
         await query('DELETE FROM users WHERE id = $1', [user.id]);
 
         // Verify cascade deletion
-        const deletedCalendar = await query('SELECT id FROM calendars WHERE id = $1', [calendar.id]);
-        const deletedEvent = await query('SELECT id FROM events WHERE id = $1', [event.id]);
+        const deletedCalendar = await query(
+          'SELECT id FROM calendars WHERE id = $1',
+          [calendar.id]
+        );
+        const deletedEvent = await query(
+          'SELECT id FROM events WHERE id = $1',
+          [event.id]
+        );
 
         expect(deletedCalendar.rows.length).toBe(0);
         expect(deletedEvent.rows.length).toBe(0);
@@ -584,20 +660,20 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should create tasks with tag relationships', async () => {
         const user = await createUser({
           email: 'task-tag-test@example.com',
-          name: 'Task Tag User'
+          name: 'Task Tag User',
         });
 
         const taskList = await createTaskList(user.id, {
-          name: 'Test List'
+          name: 'Test List',
         });
 
         const tag = await createTag({
           name: 'urgent',
-          type: 'PRIORITY'
+          type: 'PRIORITY',
         });
 
         const task = await createTask(user.id, taskList.id, {
-          title: 'Test Task'
+          title: 'Test Task',
         });
 
         await createTaskTag({
@@ -605,7 +681,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
           tagId: tag.id,
           value: 'high',
           displayText: 'High Priority',
-          iconName: 'alert'
+          iconName: 'alert',
         });
 
         const taskTags = await query<{ tagName: string; displayText: string }>(
@@ -626,11 +702,11 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should store event dates in UTC format', async () => {
         const user = await createUser({
           email: 'date-test@example.com',
-          name: 'Date Test User'
+          name: 'Date Test User',
         });
 
         const calendar = await createCalendar(user.id, {
-          name: 'Date Test Calendar'
+          name: 'Date Test Calendar',
         });
 
         const startDate = new Date('2024-12-25T10:00:00.000Z');
@@ -639,7 +715,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         const event = await createEvent(user.id, calendar.id, {
           title: 'UTC Test Event',
           start: startDate,
-          end: endDate
+          end: endDate,
         });
 
         expect(toIso(event.start)).toBe('2024-12-25T10:00:00.000Z');
@@ -651,38 +727,40 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should enforce unique calendar names per user', async () => {
         const user = await createUser({
           email: 'unique-test@example.com',
-          name: 'Unique Test User'
+          name: 'Unique Test User',
         });
 
         await createCalendar(user.id, {
-          name: 'Work Calendar'
+          name: 'Work Calendar',
         });
 
         // Should fail due to unique constraint
-        await expect(query(
-          `INSERT INTO calendars (id, name, "userId", "createdAt", "updatedAt")
+        await expect(
+          query(
+            `INSERT INTO calendars (id, name, "userId", "createdAt", "updatedAt")
            VALUES ($1, $2, $3, NOW(), NOW())`,
-          [randomUUID(), 'Work Calendar', user.id]
-        )).rejects.toThrow();
+            [randomUUID(), 'Work Calendar', user.id]
+          )
+        ).rejects.toThrow();
       });
 
       it('should allow same calendar name for different users', async () => {
         const user1 = await createUser({
           email: 'user1-unique@example.com',
-          name: 'User One'
+          name: 'User One',
         });
 
         const user2 = await createUser({
           email: 'user2-unique@example.com',
-          name: 'User Two'
+          name: 'User Two',
         });
 
         const calendar1 = await createCalendar(user1.id, {
-          name: 'Personal'
+          name: 'Personal',
         });
 
         const calendar2 = await createCalendar(user2.id, {
-          name: 'Personal'
+          name: 'Personal',
         });
 
         expect(calendar1.name).toBe('Personal');
@@ -695,27 +773,27 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should efficiently query tasks by user and completion status', async () => {
         const user = await createUser({
           email: 'performance-test@example.com',
-          name: 'Performance Test User'
+          name: 'Performance Test User',
         });
 
         const taskList = await createTaskList(user.id, {
-          name: 'Performance List'
+          name: 'Performance List',
         });
 
         // Create multiple tasks
         await Promise.all([
           createTask(user.id, taskList.id, {
             title: 'Completed Task 1',
-            completed: true
+            completed: true,
           }),
           createTask(user.id, taskList.id, {
             title: 'Incomplete Task 1',
-            completed: false
+            completed: false,
           }),
           createTask(user.id, taskList.id, {
             title: 'Completed Task 2',
-            completed: true
-          })
+            completed: true,
+          }),
         ]);
 
         // Query completed tasks (should use index)
@@ -725,7 +803,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
         );
 
         expect(completedTasks.rows).toHaveLength(2);
-        expect(completedTasks.rows.every(task => task.completed)).toBe(true);
+        expect(completedTasks.rows.every((task) => task.completed)).toBe(true);
       });
     });
   });
@@ -735,7 +813,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should create calendar with default values', async () => {
         const user = await createUser({
           email: 'calendar-default@example.com',
-          name: 'Calendar Default User'
+          name: 'Calendar Default User',
         });
 
         const result = await query<{
@@ -765,7 +843,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should support calendar customization', async () => {
         const user = await createUser({
           email: 'calendar-custom@example.com',
-          name: 'Calendar Custom User'
+          name: 'Calendar Custom User',
         });
 
         const calendar = await createCalendar(user.id, {
@@ -773,7 +851,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
           color: '#FF5733',
           description: 'My custom calendar',
           isVisible: false,
-          isDefault: true
+          isDefault: true,
         });
 
         expect(calendar.color).toBe('#FF5733');
@@ -787,11 +865,11 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should create event with all metadata fields', async () => {
         const user = await createUser({
           email: 'event-test@example.com',
-          name: 'Event Test User'
+          name: 'Event Test User',
         });
 
         const calendar = await createCalendar(user.id, {
-          name: 'Event Test Calendar'
+          name: 'Event Test Calendar',
         });
 
         const event = await createEvent(user.id, calendar.id, {
@@ -802,7 +880,7 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
           allDay: false,
           location: '123 Main St, City, State',
           notes: 'Important meeting notes',
-          recurrence: 'FREQ=WEEKLY;BYDAY=TU'
+          recurrence: 'FREQ=WEEKLY;BYDAY=TU',
         });
 
         expect(event.title).toBe('Comprehensive Event');
@@ -816,18 +894,18 @@ describe('Comprehensive Requirements 1-4 Testing', () => {
       it('should support all-day events', async () => {
         const user = await createUser({
           email: 'allday-test@example.com',
-          name: 'All Day Test User'
+          name: 'All Day Test User',
         });
 
         const calendar = await createCalendar(user.id, {
-          name: 'All Day Calendar'
+          name: 'All Day Calendar',
         });
 
         const event = await createEvent(user.id, calendar.id, {
           title: 'All Day Event',
           start: new Date('2024-12-25T00:00:00.000Z'),
           end: new Date('2024-12-25T23:59:59.999Z'),
-          allDay: true
+          allDay: true,
         });
 
         expect(event.allDay).toBe(true);

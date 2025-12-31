@@ -13,7 +13,7 @@ class TokenBlacklistService {
    */
   blacklistToken(token: string): void {
     this.blacklistedTokens.add(token);
-    
+
     // Store expiration time for cleanup
     const expiration = getTokenExpiration(token);
     if (expiration) {
@@ -63,7 +63,7 @@ class TokenBlacklistService {
 
     return {
       totalBlacklisted: this.blacklistedTokens.size,
-      expiredTokens: expiredCount
+      expiredTokens: expiredCount,
     };
   }
 
@@ -80,8 +80,11 @@ class TokenBlacklistService {
 export const tokenBlacklistService = new TokenBlacklistService();
 
 // Cleanup expired tokens every hour
-setInterval(() => {
-  tokenBlacklistService.cleanupExpiredTokens();
-}, 60 * 60 * 1000);
+setInterval(
+  () => {
+    tokenBlacklistService.cleanupExpiredTokens();
+  },
+  60 * 60 * 1000
+);
 
 export default TokenBlacklistService;

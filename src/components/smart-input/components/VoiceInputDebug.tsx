@@ -1,6 +1,6 @@
 /**
  * VoiceInputDebug - Debug component for testing voice input functionality
- * 
+ *
  * This component provides detailed logging and state information
  * to help debug voice input issues in the browser.
  */
@@ -15,7 +15,7 @@ export const VoiceInputDebug: React.FC = () => {
 
   const addLog = (message: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+    setLogs((prev) => [...prev, `[${timestamp}] ${message}`]);
   };
 
   const handleTranscriptChange = (newTranscript: string) => {
@@ -37,7 +37,7 @@ export const VoiceInputDebug: React.FC = () => {
   return (
     <div className="p-4 border rounded-lg bg-card">
       <h3 className="text-lg font-semibold mb-4">Voice Input Debug</h3>
-      
+
       {/* Voice Input Button */}
       <div className="mb-4">
         <label className="block text-sm font-medium mb-2">Voice Input:</label>
@@ -53,25 +53,52 @@ export const VoiceInputDebug: React.FC = () => {
         <div>
           <label className="block text-sm font-medium">Final Transcript:</label>
           <div className="p-2 bg-muted rounded border min-h-[40px]">
-            {transcript || <span className="text-muted-foreground">No final transcript yet</span>}
+            {transcript || (
+              <span className="text-muted-foreground">
+                No final transcript yet
+              </span>
+            )}
           </div>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium">Interim Transcript:</label>
+          <label className="block text-sm font-medium">
+            Interim Transcript:
+          </label>
           <div className="p-2 bg-muted/50 rounded border min-h-[40px]">
-            {interimTranscript || <span className="text-muted-foreground">No interim transcript</span>}
+            {interimTranscript || (
+              <span className="text-muted-foreground">
+                No interim transcript
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       {/* Browser Support Info */}
       <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Browser Support:</label>
+        <label className="block text-sm font-medium mb-2">
+          Browser Support:
+        </label>
         <div className="text-sm space-y-1">
-          <div>SpeechRecognition: {typeof window !== 'undefined' && window.SpeechRecognition ? '✅ Supported' : '❌ Not supported'}</div>
-          <div>webkitSpeechRecognition: {typeof window !== 'undefined' && window.webkitSpeechRecognition ? '✅ Supported' : '❌ Not supported'}</div>
-          <div>MediaDevices: {typeof navigator !== 'undefined' && navigator.mediaDevices ? '✅ Supported' : '❌ Not supported'}</div>
+          <div>
+            SpeechRecognition:{' '}
+            {typeof window !== 'undefined' && window.SpeechRecognition
+              ? '✅ Supported'
+              : '❌ Not supported'}
+          </div>
+          <div>
+            webkitSpeechRecognition:{' '}
+            {typeof window !== 'undefined' && window.webkitSpeechRecognition
+              ? '✅ Supported'
+              : '❌ Not supported'}
+          </div>
+          <div>
+            MediaDevices:{' '}
+            {typeof navigator !== 'undefined' && navigator.mediaDevices
+              ? '✅ Supported'
+              : '❌ Not supported'}
+          </div>
         </div>
       </div>
 
@@ -103,7 +130,9 @@ export const VoiceInputDebug: React.FC = () => {
 
       {/* Instructions */}
       <div className="text-sm text-muted-foreground">
-        <p><strong>Instructions:</strong></p>
+        <p>
+          <strong>Instructions:</strong>
+        </p>
         <ol className="list-decimal list-inside space-y-1 mt-1">
           <li>Click the microphone button to start voice input</li>
           <li>Allow microphone access when prompted</li>

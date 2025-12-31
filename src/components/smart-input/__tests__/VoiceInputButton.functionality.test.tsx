@@ -1,6 +1,6 @@
 /**
  * VoiceInputButton Functionality Tests
- * 
+ *
  * Tests for the actual voice input functionality and transcript handling
  */
 
@@ -29,11 +29,23 @@ const mockSpeechRecognition = {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  
+
   // Mock Web Speech API
-  (global.window as unknown as Window & { SpeechRecognition: new () => unknown }).SpeechRecognition = vi.fn(() => mockSpeechRecognition) as unknown as new () => SpeechRecognition;
-  (global.window as unknown as Window & { webkitSpeechRecognition: new () => unknown }).webkitSpeechRecognition = vi.fn(() => mockSpeechRecognition) as unknown as new () => SpeechRecognition;
-  
+  (
+    global.window as unknown as Window & {
+      SpeechRecognition: new () => unknown;
+    }
+  ).SpeechRecognition = vi.fn(
+    () => mockSpeechRecognition
+  ) as unknown as new () => SpeechRecognition;
+  (
+    global.window as unknown as Window & {
+      webkitSpeechRecognition: new () => unknown;
+    }
+  ).webkitSpeechRecognition = vi.fn(
+    () => mockSpeechRecognition
+  ) as unknown as new () => SpeechRecognition;
+
   // Reset mock functions
   mockSpeechRecognition.start.mockClear();
   mockSpeechRecognition.stop.mockClear();
@@ -46,21 +58,17 @@ beforeEach(() => {
 describe('VoiceInputButton Functionality', () => {
   it('calls onTranscriptChange when speech recognition produces final results', async () => {
     const mockOnTranscriptChange = vi.fn();
-    
-    render(
-      <VoiceInputButton 
-        onTranscriptChange={mockOnTranscriptChange}
-      />
-    );
+
+    render(<VoiceInputButton onTranscriptChange={mockOnTranscriptChange} />);
 
     const button = screen.getByRole('button');
-    
+
     // Click to start listening
     fireEvent.click(button);
-    
+
     // Verify start was called
     expect(mockSpeechRecognition.start).toHaveBeenCalled();
-    
+
     // Simulate speech recognition start
     act(() => {
       if (mockSpeechRecognition.onstart) {
@@ -76,8 +84,8 @@ describe('VoiceInputButton Functionality', () => {
           0: { transcript: 'hello world' },
           isFinal: true,
           length: 1,
-        }
-      ]
+        },
+      ],
     } as unknown as SpeechRecognitionEvent;
 
     act(() => {
@@ -92,18 +100,14 @@ describe('VoiceInputButton Functionality', () => {
 
   it('calls onInterimTranscript for interim results', async () => {
     const mockOnInterimTranscript = vi.fn();
-    
-    render(
-      <VoiceInputButton 
-        onInterimTranscript={mockOnInterimTranscript}
-      />
-    );
+
+    render(<VoiceInputButton onInterimTranscript={mockOnInterimTranscript} />);
 
     const button = screen.getByRole('button');
-    
+
     // Click to start listening
     fireEvent.click(button);
-    
+
     // Simulate speech recognition start
     act(() => {
       if (mockSpeechRecognition.onstart) {
@@ -119,8 +123,8 @@ describe('VoiceInputButton Functionality', () => {
           0: { transcript: 'hello' },
           isFinal: false,
           length: 1,
-        }
-      ]
+        },
+      ],
     } as unknown as SpeechRecognitionEvent;
 
     act(() => {
@@ -135,18 +139,14 @@ describe('VoiceInputButton Functionality', () => {
 
   it('accumulates multiple final results', async () => {
     const mockOnTranscriptChange = vi.fn();
-    
-    render(
-      <VoiceInputButton 
-        onTranscriptChange={mockOnTranscriptChange}
-      />
-    );
+
+    render(<VoiceInputButton onTranscriptChange={mockOnTranscriptChange} />);
 
     const button = screen.getByRole('button');
-    
+
     // Click to start listening
     fireEvent.click(button);
-    
+
     // Simulate speech recognition start
     act(() => {
       if (mockSpeechRecognition.onstart) {
@@ -162,8 +162,8 @@ describe('VoiceInputButton Functionality', () => {
           0: { transcript: 'hello' },
           isFinal: true,
           length: 1,
-        }
-      ]
+        },
+      ],
     } as unknown as SpeechRecognitionEvent;
 
     act(() => {
@@ -185,8 +185,8 @@ describe('VoiceInputButton Functionality', () => {
           0: { transcript: ' world' },
           isFinal: true,
           length: 1,
-        }
-      ]
+        },
+      ],
     } as unknown as SpeechRecognitionEvent;
 
     act(() => {
@@ -204,10 +204,10 @@ describe('VoiceInputButton Functionality', () => {
     render(<VoiceInputButton />);
 
     const button = screen.getByRole('button');
-    
+
     // Click to start listening
     fireEvent.click(button);
-    
+
     // Simulate speech recognition start
     act(() => {
       if (mockSpeechRecognition.onstart) {
@@ -217,7 +217,7 @@ describe('VoiceInputButton Functionality', () => {
 
     // Click again to stop
     fireEvent.click(button);
-    
+
     // Should call stop
     expect(mockSpeechRecognition.stop).toHaveBeenCalled();
   });
@@ -226,12 +226,14 @@ describe('VoiceInputButton Functionality', () => {
     render(<VoiceInputButton />);
 
     const button = screen.getByRole('button');
-    
+
     // Click to start listening
     fireEvent.click(button);
-    
+
     // Simulate permission denied error
-    const mockErrorEvent = { error: 'not-allowed' } as SpeechRecognitionErrorEvent;
+    const mockErrorEvent = {
+      error: 'not-allowed',
+    } as SpeechRecognitionErrorEvent;
 
     act(() => {
       if (mockSpeechRecognition.onerror) {

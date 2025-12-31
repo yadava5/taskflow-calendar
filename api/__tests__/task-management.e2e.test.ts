@@ -90,7 +90,8 @@ describe('Task Management API End-to-End Tests', () => {
         taskListId: 'list-123',
         scheduledDate: new Date('2024-01-20T10:00:00Z'),
         priority: 'HIGH',
-        originalInput: 'Complete project documentation by next week high priority',
+        originalInput:
+          'Complete project documentation by next week high priority',
         cleanTitle: 'Complete project documentation',
         tags: [
           {
@@ -121,7 +122,7 @@ describe('Task Management API End-to-End Tests', () => {
       const createRes = createResponse();
 
       await tasksHandler(createReq, createRes);
-      
+
       // Verify create was called with correct data
       expect(createRes.json).toHaveBeenCalled();
 
@@ -216,7 +217,7 @@ describe('Task Management API End-to-End Tests', () => {
         const res = createResponse();
 
         await tasksHandler(req, res);
-        
+
         // Verify the request was processed (mocked service would be called)
         expect(res.json).toHaveBeenCalled();
       }
@@ -270,7 +271,7 @@ describe('Task Management API End-to-End Tests', () => {
     it('should support bulk operations through service layer', async () => {
       // Note: Bulk operations would be implemented in the service layer
       // and called through individual API endpoints or a dedicated bulk endpoint
-      
+
       // This test verifies the API structure supports bulk operations
       const bulkUpdateScenarios = [
         { taskId: 'task-1', updates: { completed: true } },
@@ -373,7 +374,8 @@ describe('Task Management API End-to-End Tests', () => {
         taskListId: 'work-list-123',
         scheduledDate: new Date('2024-01-25T14:00:00Z'),
         priority: 'HIGH',
-        originalInput: 'Review quarterly reports tomorrow 2pm high priority @john #finance',
+        originalInput:
+          'Review quarterly reports tomorrow 2pm high priority @john #finance',
         cleanTitle: 'Review quarterly reports',
         tags: [
           {
@@ -492,7 +494,7 @@ describe('Task Management API End-to-End Tests', () => {
         const res = createResponse();
 
         await scenario.handler(req, res);
-        
+
         // All endpoints should handle unauthenticated requests consistently
         expect(res.json).toHaveBeenCalled();
       }

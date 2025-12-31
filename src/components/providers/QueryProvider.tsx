@@ -3,7 +3,12 @@
  */
 
 import React, { ReactNode } from 'react';
-import { QueryClient, QueryClientProvider, QueryCache, MutationCache } from '@tanstack/react-query';
+import {
+  QueryClient,
+  QueryClientProvider,
+  QueryCache,
+  MutationCache,
+} from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 interface QueryProviderProps {
@@ -16,8 +21,14 @@ interface QueryProviderProps {
 const handleQueryError = (error: Error) => {
   console.error('Query error:', error);
   if (typeof window !== 'undefined') {
-    const isNetwork = /Failed to fetch|NetworkError|ERR_NETWORK/i.test(error.message);
-    toast.error(isNetwork ? 'Network error. Please check your connection.' : error.message || 'Something went wrong loading data');
+    const isNetwork = /Failed to fetch|NetworkError|ERR_NETWORK/i.test(
+      error.message
+    );
+    toast.error(
+      isNetwork
+        ? 'Network error. Please check your connection.'
+        : error.message || 'Something went wrong loading data'
+    );
   }
 };
 
@@ -51,12 +62,13 @@ const createQueryClient = () => {
         // Retry configuration with exponential backoff
         retry: (failureCount, error) => {
           // Don't retry on 4xx errors (client errors)
-          if (error instanceof Error && (
-            error.message.includes('400') ||
-            error.message.includes('401') ||
-            error.message.includes('403') ||
-            error.message.includes('404')
-          )) {
+          if (
+            error instanceof Error &&
+            (error.message.includes('400') ||
+              error.message.includes('401') ||
+              error.message.includes('403') ||
+              error.message.includes('404'))
+          ) {
             return false;
           }
           // In dev, only retry once to avoid long exponential backoff stalls
@@ -81,12 +93,13 @@ const createQueryClient = () => {
         // Retry mutations once on failure with delay
         retry: (failureCount, error) => {
           // Don't retry client errors
-          if (error instanceof Error && (
-            error.message.includes('400') ||
-            error.message.includes('401') ||
-            error.message.includes('403') ||
-            error.message.includes('404')
-          )) {
+          if (
+            error instanceof Error &&
+            (error.message.includes('400') ||
+              error.message.includes('401') ||
+              error.message.includes('403') ||
+              error.message.includes('404'))
+          ) {
             return false;
           }
           const isDev = import.meta?.env?.MODE !== 'production';
@@ -114,9 +127,7 @@ const queryClient = createQueryClient();
  */
 export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 

@@ -1,6 +1,6 @@
 /**
  * FilePreviewProvider - Intelligent preview provider that selects appropriate preview component
- * 
+ *
  * Routes files to the correct preview component based on file type and capabilities.
  * Provides consistent interface and error handling across all preview types.
  */
@@ -71,22 +71,19 @@ const FilePreviewProviderComponent: React.FC<FilePreviewProviderProps> = ({
     case 'none':
     default:
       // All other files get enhanced icon preview
-      return (
-        <DefaultPreview
-          file={file}
-          size={size}
-          className={className}
-        />
-      );
+      return <DefaultPreview file={file} size={size} className={className} />;
   }
 };
 
-export const FilePreviewProvider = React.memo(FilePreviewProviderComponent, (prev, next) => {
-  return (
-    prev.file === next.file &&
-    prev.size === next.size &&
-    prev.className === next.className
-  );
-});
+export const FilePreviewProvider = React.memo(
+  FilePreviewProviderComponent,
+  (prev, next) => {
+    return (
+      prev.file === next.file &&
+      prev.size === next.size &&
+      prev.className === next.className
+    );
+  }
+);
 
 export default FilePreviewProvider;

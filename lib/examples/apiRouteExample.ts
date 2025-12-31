@@ -31,24 +31,24 @@ export const exampleCrudHandler = createCrudHandler({
       { id: '1', name: 'John Doe', email: 'john@example.com' },
       { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
     ];
-    
+
     sendSuccess(res, users);
   },
-  
+
   post: async (req: AuthenticatedRequest, res: VercelResponse) => {
     // Body validation is handled by the middleware
     const userData = req.body;
-    
+
     // Simulate creating user
     const newUser = {
       id: Date.now().toString(),
       ...userData,
       createdAt: new Date().toISOString(),
     };
-    
+
     sendSuccess(res, newUser, 201);
   },
-  
+
   requireAuth: true,
   rateLimit: 'api',
 });
@@ -57,10 +57,19 @@ export const exampleCrudHandler = createCrudHandler({
  * Example 2: Advanced API handler with custom validation
  */
 const taskQuerySchema = z.object({
-  completed: z.string().optional().transform(val => val === 'true'),
+  completed: z
+    .string()
+    .optional()
+    .transform((val) => val === 'true'),
   priority: z.enum(['low', 'medium', 'high']).optional(),
-  page: z.string().optional().transform(val => val ? parseInt(val, 10) : 1),
-  limit: z.string().optional().transform(val => val ? parseInt(val, 10) : 20),
+  page: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 1)),
+  limit: z
+    .string()
+    .optional()
+    .transform((val) => (val ? parseInt(val, 10) : 20)),
 });
 
 const createTaskSchema = z.object({
@@ -76,7 +85,7 @@ export const exampleTaskHandler = createApiHandler({
     method: HttpMethod.GET,
     handler: async (req: AuthenticatedRequest, res: VercelResponse) => {
       const query = req.query;
-      
+
       // Simulate database query with filters
       const tasks = [
         {
@@ -86,8 +95,11 @@ export const exampleTaskHandler = createApiHandler({
           priority: 'high',
           userId: req.user?.id,
         },
-      ].filter(task => {
-        if (query.completed !== undefined && task.completed !== query.completed) {
+      ].filter((task) => {
+        if (
+          query.completed !== undefined &&
+          task.completed !== query.completed
+        ) {
           return false;
         }
         if (query.priority && task.priority !== query.priority) {
@@ -95,13 +107,13 @@ export const exampleTaskHandler = createApiHandler({
         }
         return true;
       });
-      
+
       // Simulate pagination
       const page = query.page || 1;
       const limit = query.limit || 20;
       const offset = (page - 1) * limit;
       const paginatedTasks = tasks.slice(offset, offset + limit);
-      
+
       sendSuccess(res, paginatedTasks, 200, {
         pagination: {
           page,
@@ -114,12 +126,12 @@ export const exampleTaskHandler = createApiHandler({
     requireAuth: true,
     validateQuery: taskQuerySchema,
   },
-  
+
   [HttpMethod.POST]: {
     method: HttpMethod.POST,
     handler: async (req: AuthenticatedRequest, res: VercelResponse) => {
       const taskData = req.body;
-      
+
       // Simulate creating task
       const newTask = {
         id: Date.now().toString(),
@@ -129,7 +141,7 @@ export const exampleTaskHandler = createApiHandler({
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
+
       sendSuccess(res, newTask, 201);
     },
     requireAuth: true,
@@ -151,7 +163,7 @@ export const exampleTaskByIdHandler = createApiHandler({
     method: HttpMethod.GET,
     handler: async (req: AuthenticatedRequest, res: VercelResponse) => {
       const taskId = req.query.id as string;
-      
+
       // Simulate database lookup
       const task = {
         id: taskId,
@@ -160,27 +172,27 @@ export const exampleTaskByIdHandler = createApiHandler({
         priority: 'medium',
         userId: req.user?.id,
       };
-      
+
       if (!task) {
         throw new NotFoundError('Task');
       }
-      
+
       // Check ownership
       if (task.userId !== req.user?.id) {
         throw new NotFoundError('Task'); // Don't reveal existence
       }
-      
+
       sendSuccess(res, task);
     },
     requireAuth: true,
   },
-  
+
   [HttpMethod.PUT]: {
     method: HttpMethod.PUT,
     handler: async (req: AuthenticatedRequest, res: VercelResponse) => {
       const taskId = req.query.id as string;
       const updates = req.body;
-      
+
       // Simulate database update
       const updatedTask = {
         id: taskId,
@@ -188,21 +200,21 @@ export const exampleTaskByIdHandler = createApiHandler({
         userId: req.user?.id,
         updatedAt: new Date().toISOString(),
       };
-      
+
       sendSuccess(res, updatedTask);
     },
     requireAuth: true,
     validateBody: updateTaskSchema,
   },
-  
+
   [HttpMethod.DELETE]: {
     method: HttpMethod.DELETE,
     handler: async (req: AuthenticatedRequest, res: VercelResponse) => {
       const taskId = req.query.id as string;
-      
+
       // Simulate database deletion
       // In real implementation, check ownership first
-      
+
       sendSuccess(res, { deleted: true, id: taskId });
     },
     requireAuth: true,
@@ -218,7 +230,7 @@ export const exampleUploadHandler = createApiHandler({
     handler: async (req: AuthenticatedRequest, res: VercelResponse) => {
       // File upload logic would go here
       // This is just a placeholder
-      
+
       const file = {
         id: Date.now().toString(),
         fileName: 'example.jpg',
@@ -227,7 +239,7 @@ export const exampleUploadHandler = createApiHandler({
         fileSize: 1024,
         uploadedAt: new Date().toISOString(),
       };
-      
+
       sendSuccess(res, file, 201);
     },
     requireAuth: true,
@@ -246,19 +258,23 @@ export const exampleErrorHandler = createApiHandler({
     method: HttpMethod.GET,
     handler: async (req: AuthenticatedRequest, res: VercelResponse) => {
       const errorType = req.query.type as string;
-      
+
       switch (errorType) {
         case 'validation':
           throw new ValidationError([
-            { field: 'email', message: 'Invalid email format', code: 'invalid_string' },
+            {
+              field: 'email',
+              message: 'Invalid email format',
+              code: 'invalid_string',
+            },
           ]);
-          
+
         case 'notfound':
           throw new NotFoundError('Resource');
-          
+
         case 'server':
           throw new Error('Simulated server error');
-          
+
         default:
           sendSuccess(res, { message: 'No error triggered' });
       }

@@ -90,7 +90,10 @@ export const TaskInput: React.FC<TaskInputProps> = ({
             className="absolute left-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0 z-10"
             aria-label={`Current task group: ${activeTaskGroup.name}`}
           >
-            <span className="text-base" style={{ color: activeTaskGroup.color }}>
+            <span
+              className="text-base"
+              style={{ color: activeTaskGroup.color }}
+            >
               {activeTaskGroup.emoji}
             </span>
           </Button>

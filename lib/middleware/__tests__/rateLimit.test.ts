@@ -64,8 +64,14 @@ describe('Rate Limit Middleware', () => {
 
       await middleware(req, res, mockNext);
 
-      expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith('X-RateLimit-Limit', '10');
-      expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith('X-RateLimit-Remaining', '9');
+      expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith(
+        'X-RateLimit-Limit',
+        '10'
+      );
+      expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        '9'
+      );
       expect(vi.mocked(res.setHeader)).toHaveBeenCalledWith(
         'X-RateLimit-Reset',
         expect.any(String)
@@ -81,17 +87,26 @@ describe('Rate Limit Middleware', () => {
       // First request
       const res1 = createMockResponse();
       await middleware(req, res1, mockNext);
-      expect(vi.mocked(res1.setHeader)).toHaveBeenCalledWith('X-RateLimit-Remaining', '4');
+      expect(vi.mocked(res1.setHeader)).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        '4'
+      );
 
       // Second request
       const res2 = createMockResponse();
       await middleware(req, res2, mockNext);
-      expect(vi.mocked(res2.setHeader)).toHaveBeenCalledWith('X-RateLimit-Remaining', '3');
+      expect(vi.mocked(res2.setHeader)).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        '3'
+      );
 
       // Third request
       const res3 = createMockResponse();
       await middleware(req, res3, mockNext);
-      expect(vi.mocked(res3.setHeader)).toHaveBeenCalledWith('X-RateLimit-Remaining', '2');
+      expect(vi.mocked(res3.setHeader)).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        '2'
+      );
     });
 
     it('should set Retry-After header when rate limited', async () => {
@@ -114,10 +129,18 @@ describe('Rate Limit Middleware', () => {
 
     it('should use user ID as key when authenticated', async () => {
       const user1Req = createMockRequest() as AuthenticatedRequest;
-      user1Req.user = { id: 'user-1', email: 'user1@example.com', name: 'User 1' };
+      user1Req.user = {
+        id: 'user-1',
+        email: 'user1@example.com',
+        name: 'User 1',
+      };
 
       const user2Req = createMockRequest() as AuthenticatedRequest;
-      user2Req.user = { id: 'user-2', email: 'user2@example.com', name: 'User 2' };
+      user2Req.user = {
+        id: 'user-2',
+        email: 'user2@example.com',
+        name: 'User 2',
+      };
 
       const middleware = rateLimit({ max: 2, windowMs: 60000 });
 
@@ -369,10 +392,18 @@ describe('Rate Limit Middleware', () => {
 
     it('read preset should have higher limits than write', async () => {
       const readReq = createMockRequest() as AuthenticatedRequest;
-      readReq.user = { id: 'user-read', email: 'read@example.com', name: 'Read' };
+      readReq.user = {
+        id: 'user-read',
+        email: 'read@example.com',
+        name: 'Read',
+      };
 
       const writeReq = createMockRequest() as AuthenticatedRequest;
-      writeReq.user = { id: 'user-write', email: 'write@example.com', name: 'Write' };
+      writeReq.user = {
+        id: 'user-write',
+        email: 'write@example.com',
+        name: 'Write',
+      };
 
       // Read allows 200
       for (let i = 0; i < 200; i++) {
@@ -513,7 +544,10 @@ describe('Rate Limit Middleware', () => {
       await middleware(req, res3, mockNext);
 
       // Remaining should not go negative (clamped to 0)
-      expect(vi.mocked(res3.setHeader)).toHaveBeenCalledWith('X-RateLimit-Remaining', '0');
+      expect(vi.mocked(res3.setHeader)).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        '0'
+      );
     });
   });
 });

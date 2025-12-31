@@ -1,10 +1,22 @@
 import { useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { SharedToggleButton, type ToggleOption } from '@/components/ui/SharedToggleButton';
+import {
+  SharedToggleButton,
+  type ToggleOption,
+} from '@/components/ui/SharedToggleButton';
 import { RangeSlider } from '@/components/ui/RangeSlider';
-import { useCalendarSettingsStore, type TimeRangeMode } from '@/stores/calendarSettingsStore';
+import {
+  useCalendarSettingsStore,
+  type TimeRangeMode,
+} from '@/stores/calendarSettingsStore';
 
 const MODE_OPTIONS: ToggleOption<TimeRangeMode>[] = [
   { value: 'default', label: 'Default' },
@@ -37,7 +49,8 @@ export function CalendarSettings() {
         <CardHeader>
           <CardTitle>Calendar Time Range</CardTitle>
           <CardDescription>
-            Control which hours are visible in the calendar time grid (week and day views).
+            Control which hours are visible in the calendar time grid (week and
+            day views).
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -67,7 +80,10 @@ export function CalendarSettings() {
           <Separator />
 
           <div className="text-sm text-muted-foreground">
-            Visible Hours: <span className="font-medium text-foreground">{effectiveLabel}</span>
+            Visible Hours:{' '}
+            <span className="font-medium text-foreground">
+              {effectiveLabel}
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -86,4 +102,3 @@ function formatHour(hour: number): string {
 }
 
 export default CalendarSettings;
-

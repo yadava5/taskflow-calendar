@@ -43,10 +43,10 @@ export const useSwipeDetection = (input: SwipeInput): SwipeOutput => {
 
   const onTouchEnd = () => {
     if (!touchStartX || !touchEndX) return;
-    
+
     const distanceX = touchStartX - touchEndX;
     const distanceY = Math.abs(touchStartY - touchEndY);
-    
+
     const isLeftSwipe = distanceX > minSwipeDistance;
     const isRightSwipe = distanceX < -minSwipeDistance;
 
@@ -59,33 +59,36 @@ export const useSwipeDetection = (input: SwipeInput): SwipeOutput => {
     }
   };
 
-  const onWheel = useCallback((e: WheelEvent) => {
-    const now = Date.now();
-    
-    // Simple debounce to prevent multiple rapid triggers
-    if (now - lastWheelTime.current < wheelDebounceMs) {
-      return;
-    }
+  const onWheel = useCallback(
+    (e: WheelEvent) => {
+      const now = Date.now();
 
-    // Only handle horizontal wheel events (trackpad horizontal swipes)
-    if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10) {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      lastWheelTime.current = now;
-      
-      if (e.deltaX > 0) {
-        input.onSwipedLeft(); // Swipe left = next
-      } else {
-        input.onSwipedRight(); // Swipe right = prev
+      // Simple debounce to prevent multiple rapid triggers
+      if (now - lastWheelTime.current < wheelDebounceMs) {
+        return;
       }
-    }
-  }, [input, wheelDebounceMs]);
+
+      // Only handle horizontal wheel events (trackpad horizontal swipes)
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY) && Math.abs(e.deltaX) > 10) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        lastWheelTime.current = now;
+
+        if (e.deltaX > 0) {
+          input.onSwipedLeft(); // Swipe left = next
+        } else {
+          input.onSwipedRight(); // Swipe right = prev
+        }
+      }
+    },
+    [input, wheelDebounceMs]
+  );
 
   return {
     onTouchStart,
     onTouchMove,
     onTouchEnd,
-    onWheel
+    onWheel,
   };
 };

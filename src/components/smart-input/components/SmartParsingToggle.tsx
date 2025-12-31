@@ -1,6 +1,6 @@
 /**
  * SmartParsingToggle - Toggle component for smart parsing functionality
- * 
+ *
  * Replaces the three-dot dropdown menu with a proper shadcn Toggle component.
  * Shows Brain/Zap icon and "Autotag" label when pressed (on state).
  * Uses calendar's today background green color system for theme consistency.
@@ -24,7 +24,7 @@ export interface SmartParsingToggleProps {
 
 /**
  * Smart parsing toggle component using shadcn Toggle
- * 
+ *
  * Features:
  * - Uses Tag icon from Lucide
  * - Shows "Autotag" label when toggle is pressed (on state)
@@ -67,9 +67,7 @@ export const SmartParsingToggle: React.FC<SmartParsingToggleProps> = ({
       aria-label={pressed ? 'Disable smart parsing' : 'Enable smart parsing'}
     >
       <Tag className="w-4 h-4" />
-      {pressed && (
-        <span className="text-xs font-medium ml-1">Autotag</span>
-      )}
+      {pressed && <span className="text-xs font-medium ml-1">Autotag</span>}
     </Toggle>
   );
 };

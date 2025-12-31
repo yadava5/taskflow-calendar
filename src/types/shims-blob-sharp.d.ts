@@ -8,7 +8,9 @@ declare module '@vercel/blob' {
     url: string;
     pathname?: string;
   }
-  export const put: (name: string, data: any, opts?: { access?: 'public' | 'private'; contentType?: string }) => Promise<BlobPutResult>;
+  export const put: (
+    name: string,
+    data: any,
+    opts?: { access?: 'public' | 'private'; contentType?: string }
+  ) => Promise<BlobPutResult>;
 }
-
-

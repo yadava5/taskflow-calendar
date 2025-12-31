@@ -33,6 +33,8 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
 
-    expect(container.querySelector('[data-testid="test-content"]')).toBeInTheDocument();
+    expect(
+      container.querySelector('[data-testid="test-content"]')
+    ).toBeInTheDocument();
   });
-}); 
+});
