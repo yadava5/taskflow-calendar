@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
     "strict": true,
@@ -14,13 +14,13 @@
     "isolatedModules": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "baseUrl": ".",
+    "baseUrl": "..",
     "paths": {
       "@shared/*": ["./packages/shared/src/*"],
       "@lib/*": ["./lib/*"]
     },
     "types": ["node"]
   },
-  "include": ["api/**/*.ts", "lib/**/*.ts"],
+  "include": ["./**/*.ts", "../lib/**/*.ts"],
   "exclude": ["node_modules", "**/*.test.ts"]
 }
