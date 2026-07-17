@@ -1,7 +1,9 @@
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '@/services/api/auth';
+import { useAuthStore } from '@/stores/authStore';
 import {
   Card,
   CardContent,
@@ -17,6 +19,25 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<'div'>) {
   const navigate = useNavigate();
+  const setJWTAuth = useAuthStore((s) => s.setJWTAuth);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError(null);
+    const res = await authAPI.login({ email, password });
+    setBusy(false);
+    if (!res.success || !res.data) {
+      setError(res.message || 'Login failed');
+      return;
+    }
+    setJWTAuth(res.data.tokens, res.data.user);
+    navigate('/');
+  };
 
   const handleSignupLink = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -39,7 +60,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
@@ -47,6 +68,8 @@ export function LoginForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -60,19 +83,31 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" required />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </div>
+              {error && (
+                <p role="alert" className="text-sm text-red-500">
+                  {error}
+                </p>
+              )}
               <div className="flex flex-col gap-3">
                 <Button
                   type="submit"
                   variant="authPrimary"
+                  disabled={busy}
                   className={cn(
                     'w-full cursor-glow-border',
                     // Keep transitions for other properties, but no color change on hover in light mode
                     'transition-colors duration-200'
                   )}
                 >
-                  Login
+                  {busy ? 'Signing in…' : 'Login'}
                 </Button>
                 <Button
                   type="button"
