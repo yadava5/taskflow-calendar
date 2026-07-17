@@ -54,9 +54,12 @@ export function LoginForm({
     <div className={cn('flex flex-col gap-6', className)} {...props}>
       <Card className="bg-transparent shadow-none border-transparent">
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+          <p className="mb-1 font-mono text-[0.68rem] uppercase tracking-[0.09em] text-white/40">
+            sign in
+          </p>
+          <CardTitle className="text-2xl tracking-tight text-white">Welcome back.</CardTitle>
+          <CardDescription className="text-white/50">
+            Your calendar and tasks, exactly where you left them.
           </CardDescription>
         </CardHeader>
         <CardContent>

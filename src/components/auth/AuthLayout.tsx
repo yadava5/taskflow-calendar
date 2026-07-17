@@ -37,11 +37,19 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   }, []);
 
   return (
+    // `dark` forces the on-brand near-black auth surface regardless of the
+    // app's chosen theme — the calendar product stays light, the entry is
+    // cohesive with the rest of the portfolio.
     <div
       ref={containerRef}
-      className="auth-gradient-bg min-h-svh w-full flex items-center justify-center p-4 sm:p-6 md:p-10"
+      className="dark auth-gradient-bg min-h-svh w-full flex items-center justify-center p-4 sm:p-6 md:p-10"
     >
-      {children}
+      <div className="relative z-10 flex w-full flex-col items-center">
+        <div className="mb-8 flex items-center gap-2 font-mono text-sm font-semibold tracking-tight text-white">
+          task<span className="text-white/40">_</span>flow
+        </div>
+        {children}
+      </div>
     </div>
   );
 }
