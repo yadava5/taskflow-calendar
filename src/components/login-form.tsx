@@ -57,7 +57,9 @@ export function LoginForm({
           <p className="mb-1 font-mono text-[0.68rem] uppercase tracking-[0.09em] text-white/40">
             sign in
           </p>
-          <CardTitle className="text-2xl tracking-tight text-white">Welcome back.</CardTitle>
+          <CardTitle className="text-2xl tracking-tight text-white">
+            Welcome back.
+          </CardTitle>
           <CardDescription className="text-white/50">
             Your calendar and tasks, exactly where you left them.
           </CardDescription>
@@ -79,12 +81,6 @@ export function LoginForm({
               <div className="grid gap-3">
                 <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                 </div>
                 <Input
                   id="password"
