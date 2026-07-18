@@ -21,7 +21,7 @@ export function GoogleCallbackPage() {
   );
   const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const { setGoogleAuth, setError } = useAuthStore();
+  const { setJWTAuth, setError } = useAuthStore();
 
   useEffect(() => {
     const handleGoogleCallback = async () => {
@@ -29,6 +29,7 @@ export function GoogleCallbackPage() {
         // Get authorization code from URL parameters
         const code = searchParams.get('code');
         const error = searchParams.get('error');
+        const state = searchParams.get('state');
 
         if (error) {
           throw new Error(`Google OAuth error: ${error}`);
@@ -38,22 +39,51 @@ export function GoogleCallbackPage() {
           throw new Error('Authorization code not found');
         }
 
-        // Exchange code for tokens
         const redirectUri = `${window.location.origin}/auth/google/callback`;
+
+        if (state === 'calendar') {
+          // "Connect Google Calendar" grant for an already-signed-in user:
+          // hand the code to the calendar endpoint (Bearer-authed), which
+          // stores the refresh token server-side and runs a first sync.
+          const accessToken = useAuthStore.getState().jwtTokens?.accessToken;
+          if (!accessToken) {
+            throw new Error('Sign in before connecting Google Calendar');
+          }
+          const resp = await fetch('/api/google/calendar', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({ code, redirectUri }),
+          });
+          const payload = await resp.json();
+          if (!resp.ok || !payload.success) {
+            throw new Error(
+              payload.error?.message || 'Failed to connect Google Calendar'
+            );
+          }
+          setStatus('success');
+          setTimeout(
+            () => navigate('/?google=connected', { replace: true }),
+            1200
+          );
+          return;
+        }
+
+        // Sign-in flow: exchange the code for a TaskFlow session (JWTs).
         const response = await authAPI.googleAuth({ code, redirectUri });
 
         if (!response.success || !response.data) {
           throw new Error(response.message || 'Google authentication failed');
         }
 
-        const { googleTokens, user } = response.data;
+        const { tokens, user } = response.data;
 
-        // Store Google authentication
-        setGoogleAuth(googleTokens, {
+        setJWTAuth(tokens, {
           id: user.id,
           email: user.email,
-          name: user.name,
-          picture: user.picture,
+          name: user.name ?? undefined,
         });
 
         setStatus('success');
@@ -75,7 +105,7 @@ export function GoogleCallbackPage() {
     };
 
     handleGoogleCallback();
-  }, [searchParams, navigate, setGoogleAuth, setError]);
+  }, [searchParams, navigate, setJWTAuth, setError]);
 
   const handleRetry = () => {
     navigate('/login', { replace: true });

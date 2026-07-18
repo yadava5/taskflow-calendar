@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -21,6 +21,8 @@ import {
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
 import {
+  CalendarClock,
+  RefreshCw,
   Monitor,
   Moon,
   Sun,
@@ -33,6 +35,132 @@ import {
   useSettingsStore,
   type TaskCompletionControl,
 } from '@/stores/settingsStore';
+
+/**
+ * Connected accounts — Google Calendar connect + manual pull sync.
+ * Renders nothing when the server has no Google OAuth configured (503),
+ * so the card never shows a dead affordance.
+ */
+function GoogleCalendarCard() {
+  const jwtTokens = useAuthStore((s) => s.jwtTokens);
+  const [state, setState] = useState<
+    'unknown' | 'unavailable' | 'idle' | 'connecting' | 'syncing'
+  >('unknown');
+  const [message, setMessage] = useState<string | null>(null);
+
+  const authedFetch = (input: string, init?: RequestInit) =>
+    fetch(input, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${jwtTokens?.accessToken ?? ''}`,
+        ...(init?.headers ?? {}),
+      },
+    });
+
+  useEffect(() => {
+    // One availability probe; 503 = not configured on this deployment.
+    let cancelled = false;
+    authedFetch(
+      `/api/google/calendar?redirectUri=${encodeURIComponent(
+        `${window.location.origin}/auth/google/callback`
+      )}`
+    )
+      .then((r) => {
+        if (!cancelled) setState(r.status === 503 ? 'unavailable' : 'idle');
+      })
+      .catch(() => {
+        if (!cancelled) setState('unavailable');
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (state === 'unknown' || state === 'unavailable') return null;
+
+  const connect = async () => {
+    setState('connecting');
+    setMessage(null);
+    try {
+      const redirectUri = `${window.location.origin}/auth/google/callback`;
+      const resp = await authedFetch(
+        `/api/google/calendar?redirectUri=${encodeURIComponent(redirectUri)}`
+      );
+      const payload = await resp.json();
+      if (!resp.ok || !payload.data?.authUrl) {
+        throw new Error(payload.error?.message || 'Could not start connect');
+      }
+      window.location.href = payload.data.authUrl;
+    } catch (error) {
+      setMessage((error as Error).message);
+      setState('idle');
+    }
+  };
+
+  const syncNow = async () => {
+    setState('syncing');
+    setMessage(null);
+    try {
+      const resp = await authedFetch('/api/google/calendar', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
+      const payload = await resp.json();
+      if (!resp.ok) {
+        throw new Error(payload.error?.message || 'Sync failed');
+      }
+      setMessage(`Synced ${payload.data?.synced ?? 0} events from Google.`);
+    } catch (error) {
+      setMessage((error as Error).message);
+    } finally {
+      setState('idle');
+    }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Connected accounts</CardTitle>
+        <CardDescription>
+          Pull your Google Calendar into TaskFlow (read-only — we never write to
+          your Google account)
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            onClick={connect}
+            disabled={state !== 'idle'}
+            className="flex items-center gap-2"
+          >
+            <CalendarClock className="h-4 w-4" />
+            {state === 'connecting'
+              ? 'Opening Google…'
+              : 'Connect Google Calendar'}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={syncNow}
+            disabled={state !== 'idle'}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            {state === 'syncing' ? 'Syncing…' : 'Sync now'}
+          </Button>
+        </div>
+        {message && <p className="text-sm text-muted-foreground">{message}</p>}
+        <p className="text-xs text-muted-foreground">
+          Uses Google&apos;s official OAuth with the minimal read-only calendar
+          scope; your Google tokens are stored server-side only.
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
 
 export function GeneralSettings() {
   const { user, authMethod } = useAuthStore();
@@ -154,6 +282,9 @@ export function GeneralSettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Connected accounts */}
+      <GoogleCalendarCard />
 
       {/* Preferences */}
       <Card>

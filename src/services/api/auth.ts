@@ -66,24 +66,19 @@ export interface GoogleAuthRequest {
 export interface GoogleAuthResponse {
   success: boolean;
   data?: {
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
     user: {
       id: string;
       email: string;
-      name: string;
-      picture?: string;
+      name: string | null;
+      avatarUrl?: string;
       createdAt: string;
-      updatedAt: string;
     };
-    googleTokens: {
+    tokens: {
       accessToken: string;
-      refreshToken?: string;
+      refreshToken: string;
       expiresAt: number;
-      tokenType?: string;
-      scope?: string;
     };
+    isNewUser: boolean;
   };
   message?: string;
 }
