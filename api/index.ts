@@ -20,6 +20,7 @@ import authRegister from '../server-handlers/auth/register.js';
 import authGoogle from '../server-handlers/auth/google/index.js';
 import authGoogleCallback from '../server-handlers/auth/google/callback.js';
 import authGoogleVerify from '../server-handlers/auth/google/verify.js';
+import googleCalendar from '../server-handlers/google/calendar.js';
 import attachments from '../server-handlers/attachments/index.js';
 import attachmentsCleanup from '../server-handlers/attachments/cleanup.js';
 import attachmentsStats from '../server-handlers/attachments/stats.js';
@@ -43,7 +44,10 @@ import tasksStats from '../server-handlers/tasks/stats.js';
 import taskById from '../server-handlers/tasks/[id].js';
 import upload from '../server-handlers/upload/index.js';
 
-type Handler = (req: VercelRequest, res: VercelResponse) => unknown | Promise<unknown>;
+type Handler = (
+  req: VercelRequest,
+  res: VercelResponse
+) => unknown | Promise<unknown>;
 
 /** [segments] → handler; ":name" captures into req.query[name]. */
 const ROUTES: Array<[string[], Handler]> = [
@@ -58,6 +62,7 @@ const ROUTES: Array<[string[], Handler]> = [
   [['auth', 'google'], authGoogle],
   [['auth', 'google', 'callback'], authGoogleCallback],
   [['auth', 'google', 'verify'], authGoogleVerify],
+  [['google', 'calendar'], googleCalendar],
   [['attachments'], attachments],
   [['attachments', 'cleanup'], attachmentsCleanup],
   [['attachments', 'stats'], attachmentsStats],
@@ -82,7 +87,9 @@ const ROUTES: Array<[string[], Handler]> = [
   [['upload'], upload],
 ];
 
-function match(segments: string[]): { handler: Handler; params: Record<string, string> } | null {
+function match(
+  segments: string[]
+): { handler: Handler; params: Record<string, string> } | null {
   // Static patterns win over :param patterns of the same length.
   const candidates = ROUTES.filter(([p]) => p.length === segments.length);
   for (const staticFirst of [true, false]) {
@@ -92,7 +99,8 @@ function match(segments: string[]): { handler: Handler; params: Record<string, s
       const params: Record<string, string> = {};
       let ok = true;
       for (let i = 0; i < pattern.length; i += 1) {
-        if (pattern[i].startsWith(':')) params[pattern[i].slice(1)] = segments[i];
+        if (pattern[i].startsWith(':'))
+          params[pattern[i].slice(1)] = segments[i];
         else if (pattern[i] !== segments[i]) {
           ok = false;
           break;
@@ -109,7 +117,10 @@ export default async function router(req: VercelRequest, res: VercelResponse) {
   // /api/health and /api/auth/google/callback, no framework routing
   // assumptions.
   const pathname = (req.url ?? '').split('?')[0];
-  const segments = pathname.replace(/^\/api\/?/, '').split('/').filter(Boolean);
+  const segments = pathname
+    .replace(/^\/api\/?/, '')
+    .split('/')
+    .filter(Boolean);
 
   const found = match(segments);
   if (!found) {
