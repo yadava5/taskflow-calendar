@@ -48,27 +48,52 @@ class GoogleOAuthService {
   /**
    * Generate Google OAuth authorization URL
    */
-  getAuthUrl(): string {
-    const scopes = [
+  getAuthUrl(options?: {
+    redirectUri?: string;
+    scopes?: string[];
+    state?: string;
+  }): string {
+    const scopes = options?.scopes ?? [
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/userinfo.profile',
     ];
 
-    return this.oauth2Client.generateAuthUrl({
+    const client = options?.redirectUri
+      ? new OAuth2Client(
+          process.env.GOOGLE_CLIENT_ID,
+          process.env.GOOGLE_CLIENT_SECRET,
+          options.redirectUri
+        )
+      : this.oauth2Client;
+
+    return client.generateAuthUrl({
       access_type: 'offline',
       scope: scopes,
       prompt: 'consent',
+      include_granted_scopes: true,
+      state: options?.state,
     });
   }
 
   /**
    * Exchange authorization code for tokens and user info
    */
-  async handleCallback(code: string): Promise<GoogleAuthResult> {
+  async handleCallback(
+    code: string,
+    redirectUri?: string
+  ): Promise<GoogleAuthResult> {
     try {
-      // Exchange code for tokens
-      const { tokens } = await this.oauth2Client.getToken(code);
-      this.oauth2Client.setCredentials(tokens);
+      // The exchange must use the SAME redirect_uri the consent screen
+      // was opened with (the SPA sends its own origin-based value).
+      const client = redirectUri
+        ? new OAuth2Client(
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+            redirectUri
+          )
+        : this.oauth2Client;
+      const { tokens } = await client.getToken(code);
+      client.setCredentials(tokens);
 
       // Get user info from Google
       const userInfo = await this.getUserInfo(tokens.access_token!);
@@ -76,11 +101,75 @@ class GoogleOAuthService {
       // Find or create user in database
       const result = await this.findOrCreateUser(userInfo);
 
+      // Persist the Google refresh token (issued only on first consent) so
+      // later Calendar syncs can mint fresh access tokens server-side.
+      if (tokens.refresh_token) {
+        await this.storeRefreshToken(result.user.id, tokens.refresh_token);
+      }
+
       return result;
     } catch (error) {
       console.error('Google OAuth callback error:', error);
       throw new Error('GOOGLE_OAUTH_FAILED');
     }
+  }
+
+  /** Persist a user's Google refresh token (server-side only, never sent to the client). */
+  private async storeRefreshToken(
+    userId: string,
+    refreshToken: string
+  ): Promise<void> {
+    await query(
+      `UPDATE users SET "googleRefreshToken" = $1, "updatedAt" = NOW() WHERE id = $2`,
+      [refreshToken, userId]
+    );
+  }
+
+  /**
+   * Finish a "Connect Google Calendar" grant for an ALREADY-authenticated
+   * TaskFlow user: exchange the code and store the refresh token on that
+   * user. The Google account email does not need to match the TaskFlow
+   * account — the grant belongs to whoever is signed in.
+   */
+  async connectCalendar(
+    userId: string,
+    code: string,
+    redirectUri: string
+  ): Promise<void> {
+    const client = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      redirectUri
+    );
+    const { tokens } = await client.getToken(code);
+    if (!tokens.refresh_token) {
+      // prompt=consent should always yield one; if not, the user must
+      // revoke prior access and retry.
+      throw new Error('NO_REFRESH_TOKEN');
+    }
+    await this.storeRefreshToken(userId, tokens.refresh_token);
+  }
+
+  /** Mint a fresh Google access token from the stored refresh token. */
+  async getFreshAccessToken(userId: string): Promise<string> {
+    const row = await query<{ googleRefreshToken: string | null }>(
+      `SELECT "googleRefreshToken" FROM users WHERE id = $1 LIMIT 1`,
+      [userId]
+    );
+    const refreshToken = row.rows[0]?.googleRefreshToken;
+    if (!refreshToken) {
+      throw new Error('GOOGLE_NOT_CONNECTED');
+    }
+    const client = new OAuth2Client(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+    client.setCredentials({ refresh_token: refreshToken });
+    const { token } = await client.getAccessToken();
+    if (!token) {
+      throw new Error('GOOGLE_TOKEN_REFRESH_FAILED');
+    }
+    return token;
   }
 
   /**

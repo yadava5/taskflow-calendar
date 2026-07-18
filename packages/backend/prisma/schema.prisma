@@ -20,7 +20,8 @@ model User {
   updatedAt DateTime @updatedAt
 
   // OAuth fields
-  googleId String? @unique
+  googleId           String? @unique
+  googleRefreshToken String?
 
   // Relationships
   profile   UserProfile?
@@ -80,6 +81,7 @@ model Event {
 
   userId     String
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  googleEventId String?
   calendarId String
   calendar   Calendar @relation(fields: [calendarId], references: [id], onDelete: Cascade)
 
