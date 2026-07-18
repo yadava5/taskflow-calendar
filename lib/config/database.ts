@@ -2,7 +2,7 @@
  * Database configuration for Vercel API routes (Pure SQL via pg)
  */
 import { Pool, types, type PoolClient, type QueryResult } from 'pg';
-import { SUPABASE_CA } from './supabaseCA';
+import { SUPABASE_CA } from './supabaseCA.js';
 
 /**
  * TLS for the DB connection. Against Supabase we pin the Supabase Root
@@ -10,7 +10,9 @@ import { SUPABASE_CA } from './supabaseCA';
  * closing the MITM exposure of the old `sslmode=no-verify`. For a local
  * Postgres (no supabase/pooler in the host) TLS is left off.
  */
-function resolveSsl(url: string): false | { ca: string; rejectUnauthorized: true } {
+function resolveSsl(
+  url: string
+): false | { ca: string; rejectUnauthorized: true } {
   if (/supabase\.com|pooler\.supabase/.test(url)) {
     return { ca: SUPABASE_CA, rejectUnauthorized: true };
   }
