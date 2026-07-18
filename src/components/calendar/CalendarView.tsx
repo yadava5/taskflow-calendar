@@ -33,6 +33,25 @@ export type CalendarViewType =
   | 'timeGridDay'
   | 'listWeek';
 
+// Cohesive event palette — events without an explicit event/calendar color
+// get a stable, pleasant hue (hashed from their id) instead of one flat blue,
+// so an unlabelled calendar still reads as a colourful, differentiated board.
+const EVENT_PALETTE = [
+  '#6366f1', // indigo
+  '#8b5cf6', // violet
+  '#ec4899', // pink
+  '#f59e0b', // amber
+  '#10b981', // emerald
+  '#06b6d4', // cyan
+  '#f43f5e', // rose
+];
+function paletteColor(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i += 1)
+    h = (h * 31 + seed.charCodeAt(i)) >>> 0;
+  return EVENT_PALETTE[h % EVENT_PALETTE.length];
+}
+
 export interface CalendarViewProps {
   /** Optional class name for custom styling */
   className?: string;
@@ -73,6 +92,14 @@ export const CalendarView = ({
   // Use external refs and state if provided, otherwise use internal ones
   const calendarRef = externalCalendarRef ?? internalCalendarRef;
   const currentView = externalCurrentView ?? internalCurrentView;
+
+  // On phones the week/month grids cram 7 columns into a narrow viewport,
+  // so fall back to the readable agenda list. Day/List already fit.
+  const effectiveView: CalendarViewType =
+    isMobile &&
+    (currentView === 'timeGridWeek' || currentView === 'dayGridMonth')
+      ? 'listWeek'
+      : currentView;
 
   // Handle responsive behavior
   useEffect(() => {
@@ -115,19 +142,19 @@ export const CalendarView = ({
     };
   }, [sidebarState, calendarRef]);
 
-  // Handle view changes - update FullCalendar when currentView prop changes
+  // Handle view changes - update FullCalendar when the effective view changes
   useEffect(() => {
     const calendarApi = calendarRef.current?.getApi();
-    if (calendarApi && calendarApi.view.type !== currentView) {
+    if (calendarApi && calendarApi.view.type !== effectiveView) {
       // Defer to animation frame to avoid calling during render
       requestAnimationFrame(() => {
         const api = calendarRef.current?.getApi();
-        if (api && api.view.type !== currentView) {
-          api.changeView(currentView);
+        if (api && api.view.type !== effectiveView) {
+          api.changeView(effectiveView);
         }
       });
     }
-  }, [currentView, calendarRef]);
+  }, [effectiveView, calendarRef]);
 
   // Hooks for data management
   const { data: calendars = [], isLoading: calendarsLoading } = useCalendars();
@@ -232,8 +259,9 @@ export const CalendarView = ({
           allDay: event.allDay || false,
           // Disable drag/resize for optimistic temp events to avoid 404 updates
           editable: !String(event.id).startsWith('temp-'),
-          backgroundColor: event.color || calendar?.color || '#3788d8',
-          borderColor: event.color || calendar?.color || '#3788d8',
+          backgroundColor:
+            event.color || calendar?.color || paletteColor(event.id),
+          borderColor: event.color || calendar?.color || paletteColor(event.id),
           textColor: '#ffffff',
           extendedProps: {
             description: event.description,
@@ -476,7 +504,7 @@ export const CalendarView = ({
               listPlugin,
               interactionPlugin,
             ]}
-            initialView={currentView}
+            initialView={effectiveView}
             headerToolbar={false}
             height={height}
             events={calendarEvents}
