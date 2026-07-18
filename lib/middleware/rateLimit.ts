@@ -149,21 +149,31 @@ export function rateLimit(config: Partial<RateLimitConfig> = {}) {
  * Get client IP address
  */
 function getClientIP(req: AuthenticatedRequest): string | undefined {
-  // Check various headers for the real IP
-  const forwarded = req.headers['x-forwarded-for'];
+  // SECURITY: never trust the *first* X-Forwarded-For hop — it is fully
+  // client-controlled, so keying the limiter off it lets an attacker mint a
+  // fresh bucket per request (rotate the header) and defeat throttling.
+  // On Vercel the platform sets authoritative, un-spoofable headers: prefer
+  // `x-vercel-forwarded-for`, then `x-real-ip`. Only as a last resort do we
+  // read X-Forwarded-For, and then the LAST hop (the one the trusted proxy
+  // appended), not the first.
+  const vercelIP = req.headers['x-vercel-forwarded-for'];
+  if (typeof vercelIP === 'string' && vercelIP.trim()) {
+    return vercelIP.split(',')[0].trim();
+  }
+
   const realIP = req.headers['x-real-ip'];
-  const cfConnectingIP = req.headers['cf-connecting-ip'];
-
-  if (typeof forwarded === 'string') {
-    return forwarded.split(',')[0].trim();
+  if (typeof realIP === 'string' && realIP.trim()) {
+    return realIP.trim();
   }
 
-  if (typeof realIP === 'string') {
-    return realIP;
-  }
-
-  if (typeof cfConnectingIP === 'string') {
-    return cfConnectingIP;
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string' && forwarded.trim()) {
+    const hops = forwarded
+      .split(',')
+      .map((h) => h.trim())
+      .filter(Boolean);
+    // Last hop is appended by the trusted edge; first is attacker-controllable.
+    return hops[hops.length - 1];
   }
 
   return req.connection?.remoteAddress || req.socket?.remoteAddress;
