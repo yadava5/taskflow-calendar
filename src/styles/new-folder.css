@@ -106,7 +106,7 @@
 
 .folder-wrapper.group:hover .add-new-folder {
   border-color: var(--primary);
-  background: hsl(var(--primary) / 0.05);
+  background: oklch(from var(--primary) l c h / 0.05);
 }
 
 /* Use a different tab color for the add new button */

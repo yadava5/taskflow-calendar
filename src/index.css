@@ -63,10 +63,10 @@
   /* Global scrollbar tokens */
   --scrollbar-size: 8px;
   --scrollbar-size-lg: 12px;
-  --scrollbar-track: hsl(var(--muted) / 0.3);
-  --scrollbar-thumb: hsl(var(--muted-foreground) / 0.3);
-  --scrollbar-thumb-hover: hsl(var(--muted-foreground) / 0.5);
-  --scrollbar-thumb-active: hsl(var(--muted-foreground) / 0.7);
+  --scrollbar-track: oklch(from var(--muted) l c h / 0.3);
+  --scrollbar-thumb: oklch(from var(--muted-foreground) l c h / 0.3);
+  --scrollbar-thumb-hover: oklch(from var(--muted-foreground) l c h / 0.5);
+  --scrollbar-thumb-active: oklch(from var(--muted-foreground) l c h / 0.7);
 }
 
 body {
@@ -188,10 +188,10 @@ h1 {
   /* Dark mode scrollbar tokens */
   --scrollbar-size: 8px;
   --scrollbar-size-lg: 12px;
-  --scrollbar-track: hsl(var(--muted) / 0.2);
-  --scrollbar-thumb: hsl(var(--muted-foreground) / 0.35);
-  --scrollbar-thumb-hover: hsl(var(--muted-foreground) / 0.55);
-  --scrollbar-thumb-active: hsl(var(--muted-foreground) / 0.75);
+  --scrollbar-track: oklch(from var(--muted) l c h / 0.2);
+  --scrollbar-thumb: oklch(from var(--muted-foreground) l c h / 0.35);
+  --scrollbar-thumb-hover: oklch(from var(--muted-foreground) l c h / 0.55);
+  --scrollbar-thumb-active: oklch(from var(--muted-foreground) l c h / 0.75);
 }
 
 @layer base {
@@ -212,7 +212,7 @@ h1 {
     --rte-button-fg: var(--foreground);
     --rte-button-fg-muted: oklch(0.552 0.016 285.938);
     --rte-button-bg-active: color-mix(in oklch, var(--accent) 40%, transparent);
-    border: 1px solid hsl(var(--rte-border));
+    border: 1px solid var(--rte-border);
     background: var(--rte-bg);
     border-radius: var(--radius-md);
     transition:
@@ -226,8 +226,8 @@ h1 {
     --rte-button-bg-active: color-mix(in oklch, var(--accent) 35%, transparent);
   }
   .rte-root:focus-within {
-    border-color: hsl(var(--ring));
-    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.5);
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px oklch(from var(--ring) l c h / 0.5);
   }
 
   .rte-root .rte-actionbar {
@@ -236,7 +236,7 @@ h1 {
     gap: 6px;
     padding: 4px 6px;
     border: 0;
-    border-bottom: 1px solid hsl(var(--rte-toolbar-border));
+    border-bottom: 1px solid var(--rte-toolbar-border);
     background: var(--rte-toolbar-bg);
     border-top-left-radius: var(--radius-md);
     border-top-right-radius: var(--radius-md);
@@ -247,7 +247,7 @@ h1 {
     border-radius: var(--radius-sm);
     padding: 0;
     background: transparent;
-    color: hsl(var(--foreground));
+    color: var(--foreground);
     opacity: 0.9;
     transition:
       background-color 0.15s ease,
@@ -266,13 +266,13 @@ h1 {
   }
   .rte-root .rte-button:focus-visible {
     outline: none;
-    border-color: hsl(var(--ring));
-    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.5);
+    border-color: var(--ring);
+    box-shadow: 0 0 0 3px oklch(from var(--ring) l c h / 0.5);
   }
   .rte-root .rte-button-selected {
     /* Invert to light scheme when selected, no outlines */
-    background: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background: var(--primary);
+    color: var(--primary-foreground);
     border-color: transparent;
   }
 
@@ -287,18 +287,18 @@ h1 {
     overflow-x: hidden;
     word-wrap: break-word;
     overflow-wrap: anywhere;
-    color: hsl(var(--foreground));
+    color: var(--foreground);
     border-bottom-left-radius: var(--radius-md);
     border-bottom-right-radius: var(--radius-md);
   }
   .rte-root .rte-content:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 3px hsl(var(--ring) / 0.5);
-    border-color: hsl(var(--ring));
+    box-shadow: 0 0 0 3px oklch(from var(--ring) l c h / 0.5);
+    border-color: var(--ring);
   }
   .rte-root .rte-content:empty:before {
     content: attr(data-placeholder);
-    color: hsl(var(--muted-foreground));
+    color: var(--muted-foreground);
     pointer-events: none;
   }
   .rte-root .rte-content p {
@@ -319,10 +319,10 @@ h1 {
     margin: 0.5rem 0 0.5rem 1.25rem;
   }
   .rte-root .rte-content blockquote {
-    border-left: 3px solid hsl(var(--border));
+    border-left: 3px solid var(--border);
     margin: 0.5rem 0;
     padding-left: 0.75rem;
-    color: hsl(var(--muted-foreground));
+    color: var(--muted-foreground);
   }
 
   /* Display-only rich text (inside EventDisplayDialog) */
@@ -338,10 +338,10 @@ h1 {
     margin: 0.5rem 0;
   }
   .rte-display blockquote {
-    border-left: 3px solid hsl(var(--border));
+    border-left: 3px solid var(--border);
     margin: 0.5rem 0;
     padding-left: 0.75rem;
-    color: hsl(var(--muted-foreground));
+    color: var(--muted-foreground);
   }
 
   /* Force checkbox to maintain proper dimensions */
@@ -374,7 +374,7 @@ h1 {
     overscroll-behavior: contain !important;
     -webkit-overflow-scrolling: touch !important;
     scrollbar-width: thin !important;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent !important;
+    scrollbar-color: oklch(from var(--muted-foreground) l c h / 0.3) transparent !important;
     max-height: 128px !important;
     height: 128px !important;
     padding: 0 !important;
@@ -394,17 +394,17 @@ h1 {
   }
 
   .time-picker-scroll::-webkit-scrollbar-track {
-    background: hsl(var(--muted)) !important;
+    background: var(--muted) !important;
     border-radius: 3px !important;
   }
 
   .time-picker-scroll::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.3) !important;
+    background: oklch(from var(--muted-foreground) l c h / 0.3) !important;
     border-radius: 3px !important;
   }
 
   .time-picker-scroll::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.5) !important;
+    background: oklch(from var(--muted-foreground) l c h / 0.5) !important;
   }
 
   /* Global scrollbar styling for all elements - external monitor compatible */
@@ -440,7 +440,7 @@ h1 {
   *::-webkit-scrollbar-thumb {
     background: var(--scrollbar-thumb);
     border-radius: 4px;
-    border: 1px solid hsl(var(--background));
+    border: 1px solid var(--background);
   }
 
   *::-webkit-scrollbar-thumb:hover {
@@ -459,7 +459,8 @@ h1 {
   /* Specific styling for containers that should have more prominent scrollbars */
   .scrollbar-styled {
     scrollbar-width: auto;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.5) hsl(var(--muted) / 0.5);
+    scrollbar-color: oklch(from var(--muted-foreground) l c h / 0.5)
+      oklch(from var(--muted) l c h / 0.5);
   }
 
   .scrollbar-styled::-webkit-scrollbar {
@@ -468,18 +469,18 @@ h1 {
   }
 
   .scrollbar-styled::-webkit-scrollbar-track {
-    background: hsl(var(--muted) / 0.5);
+    background: oklch(from var(--muted) l c h / 0.5);
     border-radius: 6px;
   }
 
   .scrollbar-styled::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.5);
+    background: oklch(from var(--muted-foreground) l c h / 0.5);
     border-radius: 6px;
-    border: 2px solid hsl(var(--background));
+    border: 2px solid var(--background);
   }
 
   .scrollbar-styled::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.7);
+    background: oklch(from var(--muted-foreground) l c h / 0.7);
   }
 
   /* Hide scrollbar while keeping functionality */

@@ -21,27 +21,27 @@
   height: 18px;
   width: 18px;
   border-radius: 9999px;
-  background: hsl(var(--primary));
-  border: 2px solid hsl(var(--background));
-  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35);
+  background: var(--primary);
+  border: 2px solid var(--background);
+  box-shadow: 0 0 0 1px oklch(from var(--primary) l c h / 0.35);
   cursor: pointer;
 }
 .rc-range input[type='range']::-moz-range-thumb {
   height: 18px;
   width: 18px;
   border-radius: 9999px;
-  background: hsl(var(--primary));
-  border: 2px solid hsl(var(--background));
-  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.35);
+  background: var(--primary);
+  border: 2px solid var(--background);
+  box-shadow: 0 0 0 1px oklch(from var(--primary) l c h / 0.35);
   cursor: pointer;
 }
 
 /* Focus ring */
 .rc-range input[type='range']:focus-visible::-webkit-slider-thumb {
-  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.35);
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.35);
 }
 .rc-range input[type='range']:focus-visible::-moz-range-thumb {
-  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.35);
+  box-shadow: 0 0 0 3px oklch(from var(--primary) l c h / 0.35);
 }
 
 /* Invisible thumb variant so the label can act as the "visible handle" */

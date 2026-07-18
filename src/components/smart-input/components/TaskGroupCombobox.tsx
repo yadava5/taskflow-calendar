@@ -105,7 +105,7 @@ export const TaskGroupCombobox: React.FC<TaskGroupComboboxProps> = ({
         >
           {isAllSelected ? (
             <>
-              <div style={{ color: 'hsl(var(--muted-foreground))' }}>
+              <div style={{ color: 'var(--muted-foreground)' }}>
                 <List className="w-4 h-4" />
               </div>
               <span className="text-sm font-medium">All Tasks</span>
@@ -138,7 +138,7 @@ export const TaskGroupCombobox: React.FC<TaskGroupComboboxProps> = ({
                 }}
               >
                 <div className="flex items-center gap-2 flex-1">
-                  <div style={{ color: 'hsl(var(--muted-foreground))' }}>
+                  <div style={{ color: 'var(--muted-foreground)' }}>
                     <List className="w-4 h-4" />
                   </div>
                   <span>All Tasks</span>
