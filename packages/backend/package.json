@@ -15,6 +15,7 @@
     "db:seed": "npx tsx src/scripts/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.3",
     "@react-calendar-app/shared": "*",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -34,6 +35,7 @@
     "@types/morgan": "^1.9.9",
     "@types/node": "^24.1.0",
     "nodemon": "^3.1.7",
+    "prisma": "^6.19.3",
     "ts-node": "^10.9.2",
     "typescript": "~5.8.3",
     "vitest": "^2.1.9"
