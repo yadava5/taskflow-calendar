@@ -2,6 +2,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { query, withTransaction } from '../config/database.js';
 import { generateTokenPair, TokenPair } from '../utils/jwt.js';
 import { refreshTokenService } from './RefreshTokenService.js';
+import { encryptSecret, decryptSecret } from '../utils/tokenCrypto.js';
 
 // Pure SQL queries will be used instead of Prisma
 
@@ -119,9 +120,11 @@ class GoogleOAuthService {
     userId: string,
     refreshToken: string
   ): Promise<void> {
+    // Encrypt at rest (AES-256-GCM). A DB dump/leak never yields a usable
+    // Google refresh token without the separate encryption key.
     await query(
       `UPDATE users SET "googleRefreshToken" = $1, "updatedAt" = NOW() WHERE id = $2`,
-      [refreshToken, userId]
+      [encryptSecret(refreshToken), userId]
     );
   }
 
@@ -156,10 +159,11 @@ class GoogleOAuthService {
       `SELECT "googleRefreshToken" FROM users WHERE id = $1 LIMIT 1`,
       [userId]
     );
-    const refreshToken = row.rows[0]?.googleRefreshToken;
-    if (!refreshToken) {
+    const stored = row.rows[0]?.googleRefreshToken;
+    if (!stored) {
       throw new Error('GOOGLE_NOT_CONNECTED');
     }
+    const refreshToken = decryptSecret(stored);
     const client = new OAuth2Client(
       process.env.GOOGLE_CLIENT_ID,
       process.env.GOOGLE_CLIENT_SECRET
