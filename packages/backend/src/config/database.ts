@@ -1,4 +1,12 @@
 import { Pool, type PoolClient, type QueryResult } from 'pg';
+import { SUPABASE_CA } from './supabaseCA';
+
+/** Verify the DB server's cert against Supabase's CA (see lib/config). */
+function resolveSsl(url: string): false | { ca: string; rejectUnauthorized: true } {
+  return /supabase\.com|pooler\.supabase/.test(url)
+    ? { ca: SUPABASE_CA, rejectUnauthorized: true }
+    : false;
+}
 
 // Pure SQL (pg) client for the backend workspace
 export const databaseConfig = {
@@ -18,6 +26,7 @@ const createPool = () =>
     connectionString: databaseConfig.url,
     max: databaseConfig.max,
     idleTimeoutMillis: databaseConfig.idleTimeoutMillis,
+    ssl: resolveSsl(databaseConfig.url),
   });
 
 export const pool: Pool = globalThis.__backendPgPool || createPool();

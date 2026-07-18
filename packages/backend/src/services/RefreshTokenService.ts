@@ -43,27 +43,33 @@ class RefreshTokenService {
     email: string;
     family: string;
   }> {
-    // Check if token exists in our store
-    const tokenInfo = this.validRefreshTokens.get(refreshToken);
-    if (!tokenInfo) {
-      throw new Error('REFRESH_TOKEN_NOT_FOUND');
+    // Serverless-correct validation. Each Vercel invocation is a fresh
+    // process with an empty in-memory store, so requiring a store hit
+    // (the old behavior) broke refresh entirely across instances. The
+    // refresh token is itself a signed, expiring JWT — its cryptographic
+    // validity plus an explicit-revocation (blacklist) check is a sound,
+    // stateless source of truth. The in-memory Map is kept only as a
+    // best-effort reuse-detection optimization within a single warm
+    // instance; a durable Postgres-backed rotation table is the next
+    // hardening step (tracked), not required for correctness here.
+    if (tokenBlacklistService.isTokenBlacklisted(refreshToken)) {
+      throw new Error('REFRESH_TOKEN_REVOKED');
     }
 
-    // Verify JWT signature and expiration
-    const decoded = await verifyToken(refreshToken);
-
+    const decoded = await verifyToken(refreshToken); // signature + exp
     if (decoded.type !== 'refresh') {
       throw new Error('INVALID_TOKEN_TYPE');
     }
 
-    if (decoded.userId !== tokenInfo.userId) {
+    const tokenInfo = this.validRefreshTokens.get(refreshToken);
+    if (tokenInfo && tokenInfo.userId !== decoded.userId) {
       throw new Error('TOKEN_USER_MISMATCH');
     }
 
     return {
-      userId: tokenInfo.userId,
-      email: tokenInfo.email,
-      family: tokenInfo.family,
+      userId: decoded.userId,
+      email: decoded.email,
+      family: tokenInfo?.family ?? this.generateTokenFamily(),
     };
   }
 

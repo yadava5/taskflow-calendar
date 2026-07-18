@@ -106,7 +106,9 @@ class AuthAPI {
       if (!response.ok) {
         return {
           success: false,
-          message: data.message || 'Login failed',
+          // Server returns errors as { error: { message } }; fall back
+          // through the older flat shape before the generic message.
+          message: data.error?.message || data.message || 'Login failed',
         };
       }
 

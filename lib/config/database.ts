@@ -2,6 +2,20 @@
  * Database configuration for Vercel API routes (Pure SQL via pg)
  */
 import { Pool, types, type PoolClient, type QueryResult } from 'pg';
+import { SUPABASE_CA } from './supabaseCA';
+
+/**
+ * TLS for the DB connection. Against Supabase we pin the Supabase Root
+ * 2021 CA and REQUIRE certificate verification (rejectUnauthorized),
+ * closing the MITM exposure of the old `sslmode=no-verify`. For a local
+ * Postgres (no supabase/pooler in the host) TLS is left off.
+ */
+function resolveSsl(url: string): false | { ca: string; rejectUnauthorized: true } {
+  if (/supabase\.com|pooler\.supabase/.test(url)) {
+    return { ca: SUPABASE_CA, rejectUnauthorized: true };
+  }
+  return false;
+}
 
 // Configure pg to parse TIMESTAMP WITHOUT TIME ZONE as UTC
 // PostgreSQL TIMESTAMP WITHOUT TIME ZONE strips timezone info.
@@ -33,6 +47,7 @@ const createPool = () =>
     connectionString: databaseConfig.url,
     max: databaseConfig.maxConnections,
     idleTimeoutMillis: databaseConfig.connectionTimeout,
+    ssl: resolveSsl(databaseConfig.url),
   });
 
 export const pool: Pool = globalThis.__pgPool || createPool();

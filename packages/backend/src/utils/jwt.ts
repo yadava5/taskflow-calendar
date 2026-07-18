@@ -1,7 +1,20 @@
 import jwt from 'jsonwebtoken';
 
-// JWT Configuration
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
+// JWT Configuration.
+// SECURITY: never fall back to a constant secret. A missing JWT_SECRET
+// with a public default would let anyone forge tokens (full auth
+// bypass), so fail fast at module load instead. Tests set it in
+// packages/backend/src/test/setup.ts.
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error(
+    'JWT_SECRET is not set. Refusing to start: signing tokens with a ' +
+      'default secret would allow trivial token forgery.',
+  );
+}
+// Pin the algorithm on both sign and verify so an attacker can never
+// slip in `alg:none` or an asymmetric-key confusion.
+const JWT_ALGORITHM = 'HS256' as const;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
@@ -60,6 +73,7 @@ export async function generateAccessToken(
   };
 
   return await signAsync(payload, JWT_SECRET, {
+    algorithm: JWT_ALGORITHM,
     expiresIn: JWT_EXPIRES_IN as jwt.SignOptions['expiresIn'],
     issuer: 'react-calendar-app',
     audience: 'react-calendar-app-users',
@@ -114,7 +128,11 @@ export async function generateTokenPair(
  */
 export async function verifyToken(token: string): Promise<JWTPayload> {
   try {
-    const decoded = await verifyAsync<JWTPayload>(token, JWT_SECRET);
+    const decoded = await verifyAsync<JWTPayload>(token, JWT_SECRET, {
+      algorithms: [JWT_ALGORITHM],
+      issuer: 'react-calendar-app',
+      audience: 'react-calendar-app-users',
+    });
     return decoded as JWTPayload;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {

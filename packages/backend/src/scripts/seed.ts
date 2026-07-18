@@ -108,7 +108,7 @@ async function main() {
   // Create sample task lists
   const personalTasks = await query<{ id: string }>(
     `INSERT INTO task_lists (id, name, color, icon, description, "userId", "createdAt", "updatedAt")
-     VALUES (gen_random_uuid()::text, 'Personal', '#8B5CF6', 'user', 'Personal tasks and reminders', $1, NOW(), NOW()) RETURNING id`,
+     VALUES (gen_random_uuid()::text, 'Personal', '#8B5CF6', '', 'Personal tasks and reminders', $1, NOW(), NOW()) RETURNING id`,
     [user1.id]
   ).then((r) => r.rows[0]);
 
