@@ -1,8 +1,10 @@
 import { Pool, type PoolClient, type QueryResult } from 'pg';
-import { SUPABASE_CA } from './supabaseCA';
+import { SUPABASE_CA } from './supabaseCA.js';
 
 /** Verify the DB server's cert against Supabase's CA (see lib/config). */
-function resolveSsl(url: string): false | { ca: string; rejectUnauthorized: true } {
+function resolveSsl(
+  url: string
+): false | { ca: string; rejectUnauthorized: true } {
   return /supabase\.com|pooler\.supabase/.test(url)
     ? { ca: SUPABASE_CA, rejectUnauthorized: true }
     : false;
