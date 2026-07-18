@@ -19,6 +19,7 @@ const LoginPage = lazy(async () => ({
 const SignupPage = lazy(async () => ({
   default: (await import('./pages/Signup')).SignupPage,
 }));
+const WelcomePage = lazy(() => import('./pages/Welcome'));
 const GoogleCallbackPage = lazy(async () => ({
   default: (await import('./pages/GoogleCallback')).GoogleCallbackPage,
 }));
@@ -224,6 +225,14 @@ function App() {
             <Routes>
               {/* Public routes */}
               <Route
+                path="/welcome"
+                element={
+                  <PublicRoute>
+                    <WelcomePage />
+                  </PublicRoute>
+                }
+              />
+              <Route
                 path="/login"
                 element={
                   <PublicRoute>
@@ -248,11 +257,11 @@ function App() {
                 element={<GoogleCallbackPage />}
               />
 
-              {/* Protected routes */}
+              {/* Protected routes — logged-out visitors land on /welcome */}
               <Route
                 path="/"
                 element={
-                  <ProtectedRoute>
+                  <ProtectedRoute redirectTo="/welcome">
                     <MainLayout />
                   </ProtectedRoute>
                 }
