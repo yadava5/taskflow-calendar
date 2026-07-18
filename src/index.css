@@ -1,6 +1,6 @@
-/* Inter as base font per UI requirement */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
+/* Self-contained by design: no external font CDN (strict CSP, zero
+   third-party calls). Falls through to the platform UI face — SF Pro on
+   Apple, Segoe on Windows, Roboto on Android — all near-identical to Inter. */
 @import 'tw-animate-css';
 
 @import 'tailwindcss';
@@ -645,8 +645,16 @@ h1 {
     inset: -35%;
     z-index: 0;
     background-image:
-      radial-gradient(circle at 32% 26%, rgb(255 255 255 / 0.1), transparent 42%),
-      radial-gradient(circle at 74% 78%, rgb(255 255 255 / 0.05), transparent 46%);
+      radial-gradient(
+        circle at 32% 26%,
+        rgb(255 255 255 / 0.1),
+        transparent 42%
+      ),
+      radial-gradient(
+        circle at 74% 78%,
+        rgb(255 255 255 / 0.05),
+        transparent 46%
+      );
     filter: blur(40px);
     transform: translate3d(0, 0, 0) scale(1.04);
     animation: auth-breathe 24s ease-in-out infinite;
@@ -662,8 +670,16 @@ h1 {
       linear-gradient(rgb(255 255 255 / 0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgb(255 255 255 / 0.03) 1px, transparent 1px);
     background-size: 52px 52px;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 40%, transparent 78%);
-    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 40%, transparent 78%);
+    mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 40%,
+      black 40%,
+      transparent 78%
+    );
+    -webkit-mask-image: radial-gradient(
+      ellipse 70% 60% at 50% 40%,
+      black 40%,
+      transparent 78%
+    );
     pointer-events: none;
   }
 
