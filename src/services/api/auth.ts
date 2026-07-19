@@ -15,10 +15,10 @@ export interface SignupRequest {
 
 export interface LoginResponse {
   success: boolean;
+  // The server returns AuthService.loginUser()'s result verbatim: a nested
+  // `{ user, tokens }` shape (not the flat token fields). Typing it flat made
+  // `login-form`'s correct `res.data.tokens` access a compile error.
   data?: {
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
     user: {
       id: string;
       email: string;
@@ -27,23 +27,32 @@ export interface LoginResponse {
       createdAt: string;
       updatedAt: string;
     };
+    tokens: {
+      accessToken: string;
+      refreshToken: string;
+      expiresAt: number;
+    };
   };
   message?: string;
 }
 
 export interface SignupResponse {
   success: boolean;
+  // Matches the /api/auth/register payload (AuthService result): nested
+  // `{ user, tokens }`, not flat token fields.
   data?: {
-    accessToken: string;
-    refreshToken: string;
-    expiresAt: number;
     user: {
       id: string;
       email: string;
-      name: string;
+      name: string | null;
       picture?: string;
       createdAt: string;
-      updatedAt: string;
+      updatedAt?: string;
+    };
+    tokens: {
+      accessToken: string;
+      refreshToken: string;
+      expiresAt: number;
     };
   };
   message?: string;
@@ -119,7 +128,8 @@ class AuthAPI {
 
   async signup(userData: SignupRequest): Promise<SignupResponse> {
     try {
-      const response = await fetch(`${this.baseURL}/signup`, {
+      // The backend registration route is /api/auth/register.
+      const response = await fetch(`${this.baseURL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -205,6 +215,50 @@ class AuthAPI {
       console.error('Logout error:', error);
       // Return success even on network error since we'll clear local state anyway
       return { success: true };
+    }
+  }
+
+  /**
+   * Permanently delete the signed-in user's account and all of their data.
+   * Strictly user-scoped on the server (DELETE /api/account).
+   */
+  async deleteAccount(
+    accessToken: string
+  ): Promise<{ success: boolean; message?: string; deleted?: unknown }> {
+    try {
+      const response = await fetch('/api/account', {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      const contentType = response.headers.get('content-type') || '';
+      // Offline/localStorage mode (no backend, e.g. the e2e preview): mirror the
+      // rest of the service layer's `isJson` fallback — clear the local caches
+      // and treat the account as deleted locally.
+      if (!contentType.includes('application/json')) {
+        try {
+          localStorage.removeItem('calendar-app-tasks');
+          localStorage.removeItem('calendar-app-events');
+          localStorage.removeItem('calendar-app-calendars');
+        } catch {
+          // ignore storage failures
+        }
+        return { success: true };
+      }
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.success) {
+        return {
+          success: false,
+          message:
+            data.error?.message || data.message || 'Failed to delete account',
+        };
+      }
+      return { success: true, deleted: data.data };
+    } catch (error) {
+      console.error('Delete account error:', error);
+      return { success: false, message: 'Network error. Please try again.' };
     }
   }
 
