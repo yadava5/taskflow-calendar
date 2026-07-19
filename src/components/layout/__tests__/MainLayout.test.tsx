@@ -52,6 +52,16 @@ vi.mock('@/components/settings/SettingsDialog', () => ({
   ),
 }));
 
+// The shell mounts these two globally; they own react-query data of their own,
+// so — like the panes above — stub them out to keep this a layout-only unit test.
+vi.mock('@/components/command/CommandPalette', () => ({
+  CommandPalette: () => <div data-testid="command-palette" />,
+}));
+
+vi.mock('@/components/insights/WeekInsights', () => ({
+  WeekInsights: () => <div data-testid="week-insights" />,
+}));
+
 describe('MainLayout', () => {
   const mockSetCurrentView = vi.fn();
   const mockLogout = vi.fn();
