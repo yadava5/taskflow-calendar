@@ -149,11 +149,13 @@ export const SpreadPage: React.FC<SpreadPageProps> = ({
         )}
       </div>
 
-      {/* gutter continuity marker */}
+      {/* gutter continuity marker — sits in the clear band between the foot
+          note (bottom 1.2in) and the page-number footer (bottom 0.5in) so it
+          never collides with the section label. */}
       <div
         style={{
           position: "absolute",
-          bottom: "0.55in",
+          bottom: "0.86in",
           [half === "left" ? "right" : "left"]: "0.75in",
           fontFamily: FONTS.MONO,
           fontSize: 8,
