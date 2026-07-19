@@ -17,23 +17,78 @@ import {
 } from '@/utils/passwordStrength';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '@/services/api/auth';
+import { useAuthStore } from '@/stores/authStore';
 
 function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
   const navigate = useNavigate();
+  const setJWTAuth = useAuthStore((s) => s.setJWTAuth);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
   const strength = useMemo(
     () => calculatePasswordStrength(password),
     [password]
   );
   const passwordsMatch = confirm.length > 0 && confirm === password;
+  const meetsRequirements =
+    strength.checks.length &&
+    strength.checks.uppercase &&
+    strength.checks.lowercase &&
+    strength.checks.numbers;
+  const canSubmit =
+    name.trim().length > 0 &&
+    email.trim().length > 0 &&
+    passwordsMatch &&
+    meetsRequirements &&
+    !busy;
 
   // Border glow follows global cursor via page-level CSS vars set in SignupPage
 
   const handleSigninLink = (e: React.MouseEvent) => {
     e.preventDefault();
     navigate('/login');
+  };
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!name.trim() || !email.trim()) {
+      setError('Please enter your name and email.');
+      return;
+    }
+    if (!passwordsMatch) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (!meetsRequirements) {
+      setError(
+        'Password needs at least 8 characters with upper, lower, and a number.'
+      );
+      return;
+    }
+    setBusy(true);
+    const res = await authAPI.signup({
+      name: name.trim(),
+      email: email.trim(),
+      password,
+    });
+    setBusy(false);
+    if (!res.success || !res.data) {
+      setError(res.message || 'Could not create your account.');
+      return;
+    }
+    setJWTAuth(res.data.tokens, {
+      id: res.data.user.id,
+      email: res.data.user.email,
+      name: res.data.user.name ?? name.trim(),
+      createdAt: res.data.user.createdAt,
+      updatedAt: res.data.user.updatedAt ?? res.data.user.createdAt,
+    });
+    navigate('/');
   };
 
   const handleGoogleSignup = () => {
@@ -52,11 +107,18 @@ function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={handleSignup}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="name">Full name</Label>
-                <Input id="name" type="text" placeholder="John Doe" required />
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
               </div>
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
@@ -64,6 +126,8 @@ function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
                   id="email"
                   type="email"
                   placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -153,16 +217,26 @@ function SignupForm({ className, ...props }: React.ComponentProps<'div'>) {
                   </p>
                 )}
               </div>
+              {error && (
+                <p
+                  role="alert"
+                  className="text-sm text-destructive -mt-2"
+                  data-testid="signup-error"
+                >
+                  {error}
+                </p>
+              )}
               <div className="flex flex-col gap-3">
                 <Button
                   type="submit"
                   variant="authPrimary"
+                  disabled={!canSubmit}
                   className={cn(
                     'w-full cursor-glow-border',
                     'transition-colors duration-200'
                   )}
                 >
-                  Create account
+                  {busy ? 'Creating account…' : 'Create account'}
                 </Button>
                 <Button
                   type="button"
