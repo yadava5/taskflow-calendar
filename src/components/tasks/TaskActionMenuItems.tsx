@@ -6,7 +6,6 @@ import {
   DropdownMenuShortcut,
 } from '@/components/ui/dropdown-menu';
 import { Tooltip, TooltipTrigger } from '@/components/ui/tooltip';
-import { Badge } from '@/components/ui/badge';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import { cn } from '@/lib/utils';
 
@@ -64,14 +63,8 @@ export const TaskActionMenuItems: React.FC<TaskActionMenuItemsProps> = ({
                     )}
                   >
                     <span className="inline">
-                      <Badge
-                        variant="outline"
-                        className="text-xs h-4 px-1.5 mr-1 debug-ai-badge text-white font-bold border-none inline-flex items-center align-text-bottom"
-                      >
-                        AI
-                      </Badge>
-                      Schedule this task using extensive knowledge of your
-                      schedule and deep context understanding.
+                      Sets this task&apos;s due date to today, so it moves under
+                      Today in your lists.
                     </span>
                   </TooltipPrimitive.Content>
                 </TooltipPrimitive.Portal>

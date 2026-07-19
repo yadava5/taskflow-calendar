@@ -267,8 +267,18 @@ export function useTaskManagement(
     : undefined;
 
   const handleScheduleTask = includeTaskOperations
-    ? (id: string, scheduledDate: Date) => {
-        scheduleTask.mutate({ id, scheduledDate });
+    ? (id: string, scheduledDate?: Date) => {
+        // The task-row menu calls this with just an id ("Schedule"), so default
+        // to today at 9am — a real, visible effect (the task moves under Today)
+        // instead of the previous no-op that cleared the date.
+        const date =
+          scheduledDate ??
+          (() => {
+            const d = new Date();
+            d.setHours(9, 0, 0, 0);
+            return d;
+          })();
+        scheduleTask.mutate({ id, scheduledDate: date });
       }
     : undefined;
 

@@ -10,6 +10,7 @@ export type CalendarSubView =
   | 'listWeek';
 export type SavedTaskGrouping = 'taskList' | 'dueDate' | 'priority';
 export type TaskCompletionControl = 'checkbox' | 'status-tag';
+export type DefaultViewPreference = 'calendar' | 'tasks' | 'last-used';
 
 export interface SavedTaskPaneConfig {
   id: string;
@@ -45,6 +46,16 @@ interface SettingsState {
   taskCompletionControl: TaskCompletionControl;
   /** Whether to show the sidebar task analytics summary */
   showSidebarTaskAnalytics: boolean;
+  /** In-app reminders for upcoming events/tasks while the app is open */
+  desktopNotifications: boolean;
+  /** Persist unsaved event-dialog drafts to localStorage while typing */
+  autoSaveDrafts: boolean;
+  /** Enable non-essential app-wide keyboard shortcuts (⌘P/⌘,/⌘?/⌘Q, Cmd+F) */
+  keyboardShortcutsEnabled: boolean;
+  /** Which view the app boots into (or remembers the last used one) */
+  defaultView: DefaultViewPreference;
+  /** Last app view the user was on — backs the "Remember last used" option */
+  lastUsedAppView: AppViewMode;
 
   // Actions
   setDateDisplayMode: (mode: DateDisplayMode) => void;
@@ -63,6 +74,11 @@ interface SettingsState {
   setLeftSmartInputTaskListId: (taskListId: string | null) => void;
   setTaskCompletionControl: (mode: TaskCompletionControl) => void;
   setShowSidebarTaskAnalytics: (visible: boolean) => void;
+  setDesktopNotifications: (enabled: boolean) => void;
+  setAutoSaveDrafts: (enabled: boolean) => void;
+  setKeyboardShortcutsEnabled: (enabled: boolean) => void;
+  setDefaultView: (view: DefaultViewPreference) => void;
+  setLastUsedAppView: (view: AppViewMode) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -89,6 +105,11 @@ export const useSettingsStore = create<SettingsState>()(
         leftSmartInputTaskListId: null,
         taskCompletionControl: 'checkbox',
         showSidebarTaskAnalytics: true,
+        desktopNotifications: false,
+        autoSaveDrafts: true,
+        keyboardShortcutsEnabled: true,
+        defaultView: 'calendar',
+        lastUsedAppView: 'calendar',
 
         setDateDisplayMode: (mode) =>
           set({ dateDisplayMode: mode }, false, 'setDateDisplayMode'),
@@ -164,6 +185,24 @@ export const useSettingsStore = create<SettingsState>()(
             false,
             'setShowSidebarTaskAnalytics'
           ),
+        setDesktopNotifications: (enabled) =>
+          set(
+            { desktopNotifications: enabled },
+            false,
+            'setDesktopNotifications'
+          ),
+        setAutoSaveDrafts: (enabled) =>
+          set({ autoSaveDrafts: enabled }, false, 'setAutoSaveDrafts'),
+        setKeyboardShortcutsEnabled: (enabled) =>
+          set(
+            { keyboardShortcutsEnabled: enabled },
+            false,
+            'setKeyboardShortcutsEnabled'
+          ),
+        setDefaultView: (view) =>
+          set({ defaultView: view }, false, 'setDefaultView'),
+        setLastUsedAppView: (view) =>
+          set({ lastUsedAppView: view }, false, 'setLastUsedAppView'),
       }),
       {
         name: 'settings-store',
@@ -181,6 +220,11 @@ export const useSettingsStore = create<SettingsState>()(
           leftSmartInputTaskListId: state.leftSmartInputTaskListId,
           taskCompletionControl: state.taskCompletionControl,
           showSidebarTaskAnalytics: state.showSidebarTaskAnalytics,
+          desktopNotifications: state.desktopNotifications,
+          autoSaveDrafts: state.autoSaveDrafts,
+          keyboardShortcutsEnabled: state.keyboardShortcutsEnabled,
+          defaultView: state.defaultView,
+          lastUsedAppView: state.lastUsedAppView,
         }),
       }
     ),

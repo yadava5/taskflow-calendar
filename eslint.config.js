@@ -47,7 +47,12 @@ export default tseslint.config([
 
   // Backend configuration (serverless api/ and local lib/ helpers, plus monorepo backend)
   {
-    files: ['packages/backend/**/*.ts', 'api/**/*.ts', 'lib/**/*.ts'],
+    files: [
+      'packages/backend/**/*.ts',
+      'api/**/*.ts',
+      'lib/**/*.ts',
+      'server-handlers/**/*.ts',
+    ],
     ignores: [],
     extends: [js.configs.recommended, tseslint.configs.recommended],
     languageOptions: {

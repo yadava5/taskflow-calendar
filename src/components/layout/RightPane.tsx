@@ -1,5 +1,9 @@
 import { ReactNode, useCallback, useState, useRef, useEffect } from 'react';
 import { CalendarView, CalendarViewType } from '../calendar';
+import {
+  EMPTY_CALENDAR_FILTERS,
+  type CalendarFilterState,
+} from '../calendar/calendarFilters';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useCalendarCommandStore } from '@/stores/calendarCommandStore';
 import { lazy, Suspense } from 'react';
@@ -30,6 +34,13 @@ export const RightPane = ({
   const [currentView, setCurrentView] =
     useState<CalendarViewType>('timeGridWeek');
   const { calendarSubView, setCalendarSubView } = useSettingsStore();
+
+  // Toolbar search + filter state (owned here so both the header controls and
+  // the calendar grid stay in sync).
+  const [searchValue, setSearchValue] = useState('');
+  const [filters, setFilters] = useState<CalendarFilterState>(
+    EMPTY_CALENDAR_FILTERS
+  );
 
   // Initialize calendar sub-view from settings on mount and when settings change
   useEffect(() => {
@@ -210,6 +221,10 @@ export const RightPane = ({
           onNextClick={handleNextClick}
           onCreateEvent={handleCreateEvent}
           calendarRef={calendarRef}
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+          filters={filters}
+          onFiltersChange={setFilters}
         />
       </Suspense>
 
@@ -224,6 +239,11 @@ export const RightPane = ({
           onPrevClick={handlePrevClick}
           onNextClick={handleNextClick}
           calendarRef={calendarRef}
+          searchValue={searchValue}
+          filterCalendarNames={filters.calendarNames}
+          filterAllDayOnly={filters.allDayOnly}
+          filterStartDate={filters.startDate}
+          filterEndDate={filters.endDate}
           className="h-full"
         />
       </div>

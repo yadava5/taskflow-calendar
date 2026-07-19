@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Card,
   CardContent,
@@ -8,6 +10,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/Input';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -18,8 +21,27 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/Select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useAuthStore } from '@/stores/authStore';
 import { useThemeStore } from '@/stores/themeStore';
+import { useAllEvents } from '@/hooks/useEvents';
+import { useAllTasks } from '@/hooks/useTasks';
+import { authAPI } from '@/services/api/auth';
+import {
+  buildExportJson,
+  buildEventsIcs,
+  downloadBlob,
+  exportDateStamp,
+} from '@/utils/exportData';
 import {
   CalendarClock,
   RefreshCw,
@@ -28,12 +50,14 @@ import {
   Sun,
   Trash2,
   Download,
+  CalendarDays,
   CheckSquare,
   Tag,
 } from 'lucide-react';
 import {
   useSettingsStore,
   type TaskCompletionControl,
+  type DefaultViewPreference,
 } from '@/stores/settingsStore';
 
 /**
@@ -165,7 +189,15 @@ function GoogleCalendarCard() {
 export function GeneralSettings() {
   const { user, authMethod } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
+  const navigate = useNavigate();
   const [exportingData, setExportingData] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+
+  const { data: events = [] } = useAllEvents();
+  const { data: tasks = [] } = useAllTasks();
+
   const taskCompletionControl = useSettingsStore(
     (s) => s.taskCompletionControl
   );
@@ -178,23 +210,117 @@ export function GeneralSettings() {
   const setShowSidebarTaskAnalytics = useSettingsStore(
     (s) => s.setShowSidebarTaskAnalytics
   );
-
-  // const userInfo = authMethod === 'google' ? googleUser : user;
+  const desktopNotifications = useSettingsStore((s) => s.desktopNotifications);
+  const setDesktopNotifications = useSettingsStore(
+    (s) => s.setDesktopNotifications
+  );
+  const autoSaveDrafts = useSettingsStore((s) => s.autoSaveDrafts);
+  const setAutoSaveDrafts = useSettingsStore((s) => s.setAutoSaveDrafts);
+  const keyboardShortcutsEnabled = useSettingsStore(
+    (s) => s.keyboardShortcutsEnabled
+  );
+  const setKeyboardShortcutsEnabled = useSettingsStore(
+    (s) => s.setKeyboardShortcutsEnabled
+  );
+  const defaultView = useSettingsStore((s) => s.defaultView);
+  const setDefaultView = useSettingsStore((s) => s.setDefaultView);
 
   const handleExportData = async () => {
     try {
       setExportingData(true);
-      // TODO: Implement data export
-      console.log('Exporting user data...');
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const settingsSnapshot = useSettingsStore.getState();
+      const json = buildExportJson(events, tasks, {
+        dateDisplayMode: settingsSnapshot.dateDisplayMode,
+        taskCompletionControl: settingsSnapshot.taskCompletionControl,
+        defaultView: settingsSnapshot.defaultView,
+        desktopNotifications: settingsSnapshot.desktopNotifications,
+        autoSaveDrafts: settingsSnapshot.autoSaveDrafts,
+        keyboardShortcutsEnabled: settingsSnapshot.keyboardShortcutsEnabled,
+      });
+      downloadBlob(
+        json,
+        `taskflow-export-${exportDateStamp()}.json`,
+        'application/json'
+      );
+      toast.success('Export ready', {
+        description: `${events.length} events and ${tasks.length} tasks downloaded`,
+      });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to export data'
+      );
     } finally {
       setExportingData(false);
     }
   };
 
-  const handleDeleteAccount = () => {
-    // TODO: Implement account deletion confirmation dialog
-    console.log('Delete account requested');
+  const handleExportIcs = () => {
+    if (events.length === 0) {
+      toast('No events to export');
+      return;
+    }
+    downloadBlob(
+      buildEventsIcs(events),
+      `taskflow-events-${exportDateStamp()}.ics`,
+      'text/calendar'
+    );
+    toast.success('Calendar (.ics) downloaded', {
+      description: `${events.length} events`,
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    const token = useAuthStore.getState().getValidAccessToken();
+    if (!token) {
+      toast.error('Your session has expired. Please sign in again.');
+      return;
+    }
+    setDeleting(true);
+    try {
+      const res = await authAPI.deleteAccount(token);
+      if (!res.success) {
+        toast.error(res.message || 'Failed to delete account');
+        setDeleting(false);
+        return;
+      }
+      toast.success('Your account and all data were deleted');
+      setDeleteDialogOpen(false);
+      // Clear the local session, then land on the public landing page.
+      await useAuthStore.getState().logout();
+      navigate('/welcome', { replace: true });
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to delete account'
+      );
+      setDeleting(false);
+    }
+  };
+
+  const requestNotifications = async (enabled: boolean) => {
+    if (!enabled) {
+      setDesktopNotifications(false);
+      return;
+    }
+    // Turning on: request browser permission where available. We keep the
+    // preference on even if permission is denied — reminders then fall back to
+    // in-app toasts (see useEventReminders).
+    try {
+      if (
+        typeof Notification !== 'undefined' &&
+        Notification.permission === 'default'
+      ) {
+        const result = await Notification.requestPermission();
+        if (result === 'denied') {
+          toast('Reminders will show in-app', {
+            description:
+              'Browser notifications are blocked; TaskFlow will use in-app toasts instead.',
+          });
+        }
+      }
+    } catch {
+      // Some browsers throw if called outside a user gesture — ignore.
+    }
+    setDesktopNotifications(true);
   };
 
   return (
@@ -355,22 +481,33 @@ export function GeneralSettings() {
             <div className="space-y-0.5">
               <Label htmlFor="notifications">Desktop Notifications</Label>
               <p className="text-sm text-muted-foreground">
-                Receive notifications for upcoming events and tasks
+                In-app reminders for events and tasks starting soon (while
+                TaskFlow is open). Uses browser notifications when allowed,
+                otherwise in-app alerts.
               </p>
             </div>
-            <Switch id="notifications" />
+            <Switch
+              id="notifications"
+              checked={desktopNotifications}
+              onCheckedChange={(on) => void requestNotifications(on)}
+            />
           </div>
 
           <Separator />
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="auto-save">Auto-save Changes</Label>
+              <Label htmlFor="auto-save">Auto-save Drafts</Label>
               <p className="text-sm text-muted-foreground">
-                Automatically save changes as you type
+                Save an unfinished event as you type and restore it the next
+                time you open the create dialog
               </p>
             </div>
-            <Switch id="auto-save" defaultChecked />
+            <Switch
+              id="auto-save"
+              checked={autoSaveDrafts}
+              onCheckedChange={setAutoSaveDrafts}
+            />
           </div>
 
           <Separator />
@@ -379,10 +516,15 @@ export function GeneralSettings() {
             <div className="space-y-0.5">
               <Label htmlFor="keyboard-shortcuts">Keyboard Shortcuts</Label>
               <p className="text-sm text-muted-foreground">
-                Enable keyboard shortcuts for quick navigation
+                Enable keyboard shortcuts (⌘K command palette, ⌘F search, ⌘,
+                settings, and more)
               </p>
             </div>
-            <Switch id="keyboard-shortcuts" defaultChecked />
+            <Switch
+              id="keyboard-shortcuts"
+              checked={keyboardShortcutsEnabled}
+              onCheckedChange={setKeyboardShortcutsEnabled}
+            />
           </div>
 
           <Separator />
@@ -392,7 +534,12 @@ export function GeneralSettings() {
               Default View
             </Label>
             <div className="min-w-40">
-              <Select defaultValue="calendar">
+              <Select
+                value={defaultView}
+                onValueChange={(v) =>
+                  setDefaultView(v as DefaultViewPreference)
+                }
+              >
                 <SelectTrigger id="default-view" className="w-full">
                   <SelectValue placeholder="Select default view" />
                 </SelectTrigger>
@@ -420,26 +567,37 @@ export function GeneralSettings() {
             <div>
               <h4 className="font-medium">Export Data</h4>
               <p className="text-sm text-muted-foreground">
-                Download all your tasks, events, and settings
+                Download all your tasks, events, and settings as JSON — or your
+                events as a calendar (.ics) file
               </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={handleExportData}
-              disabled={exportingData}
-            >
-              {exportingData ? (
-                <>
-                  <Download className="mr-2 h-4 w-4 animate-pulse" />
-                  Exporting...
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" />
-                  Export
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                onClick={handleExportIcs}
+                title="Export events as .ics"
+              >
+                <CalendarDays className="mr-2 h-4 w-4" />
+                .ics
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExportData}
+                disabled={exportingData}
+              >
+                {exportingData ? (
+                  <>
+                    <Download className="mr-2 h-4 w-4 animate-pulse" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Export JSON
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
           <div className="flex items-center justify-between p-4 border border-destructive/20 rounded-lg bg-destructive/5">
@@ -451,7 +609,10 @@ export function GeneralSettings() {
             </div>
             <Button
               variant="outline"
-              onClick={handleDeleteAccount}
+              onClick={() => {
+                setDeleteConfirmText('');
+                setDeleteDialogOpen(true);
+              }}
               className="border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
             >
               <Trash2 className="mr-2 h-4 w-4" />
@@ -460,6 +621,48 @@ export function GeneralSettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Typed-confirmation dialog for irreversible account deletion */}
+      <AlertDialog
+        open={deleteDialogOpen}
+        onOpenChange={(o) => {
+          if (!deleting) setDeleteDialogOpen(o);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This permanently deletes your account and every calendar, event,
+              task, list, and attachment tied to it. This cannot be undone. Type{' '}
+              <span className="font-semibold text-foreground">DELETE</span> to
+              confirm.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2">
+            <Input
+              aria-label="Type DELETE to confirm"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+              placeholder="DELETE"
+              autoComplete="off"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={deleteConfirmText !== 'DELETE' || deleting}
+              onClick={(e) => {
+                e.preventDefault();
+                void handleConfirmDelete();
+              }}
+            >
+              {deleting ? 'Deleting…' : 'Delete account'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState, useEffect, useMemo } from 'react';
 // Import FullCalendar core & plugin styles so grid lines and headers render correctly
 
 import FullCalendar from '@fullcalendar/react';
@@ -73,6 +73,20 @@ export interface CalendarViewProps {
   onNextClick?: () => void;
   /** Ref to the FullCalendar instance */
   calendarRef?: React.RefObject<FullCalendar | null>;
+  /** Free-text search applied to event title/description/location */
+  searchValue?: string;
+  /**
+   * Explicit calendar-name selection from the Filter popover.
+   * `undefined` = no narrowing (show all visible calendars); an array narrows
+   * to that subset; an empty array means "none selected" → show nothing.
+   */
+  filterCalendarNames?: string[];
+  /** Filter popover: show only all-day events */
+  filterAllDayOnly?: boolean;
+  /** Filter popover: optional start of a date range */
+  filterStartDate?: Date;
+  /** Filter popover: optional end of a date range */
+  filterEndDate?: Date;
 }
 
 export const CalendarView = ({
@@ -84,6 +98,11 @@ export const CalendarView = ({
   onPrevClick,
   onNextClick,
   calendarRef: externalCalendarRef,
+  searchValue,
+  filterCalendarNames,
+  filterAllDayOnly,
+  filterStartDate,
+  filterEndDate,
 }: CalendarViewProps) => {
   const internalCalendarRef = useRef<FullCalendar>(null);
   const [internalCurrentView] = useState<CalendarViewType>('timeGridWeek');
@@ -164,12 +183,49 @@ export const CalendarView = ({
   const defaultCalendar =
     calendars.find((cal) => cal.isDefault) || visibleCalendars[0];
 
-  const { data: events = [] } = useEvents(
-    {
-      calendarNames: visibleCalendarNames,
-    },
-    { enabled: visibleCalendarNames.length > 0 && !calendarsLoading }
-  );
+  // Narrow the visible calendars by the Filter popover's explicit selection.
+  // `undefined` = no filter; an array intersects; an empty result set means the
+  // user deselected everything → render zero events (see `events` override).
+  const effectiveCalendarNames = useMemo(() => {
+    if (filterCalendarNames === undefined) return visibleCalendarNames;
+    const selected = new Set(filterCalendarNames);
+    return visibleCalendarNames.filter((n) => selected.has(n));
+  }, [visibleCalendarNames, filterCalendarNames]);
+
+  const eventFilters = useMemo(() => {
+    const f: {
+      calendarNames: string[];
+      search?: string;
+      allDay?: boolean;
+      startDate?: Date;
+      endDate?: Date;
+    } = { calendarNames: effectiveCalendarNames };
+    const trimmed = searchValue?.trim();
+    if (trimmed) f.search = trimmed;
+    if (filterAllDayOnly) f.allDay = true;
+    if (filterStartDate && filterEndDate) {
+      f.startDate = filterStartDate;
+      f.endDate = filterEndDate;
+    }
+    return f;
+  }, [
+    effectiveCalendarNames,
+    searchValue,
+    filterAllDayOnly,
+    filterStartDate,
+    filterEndDate,
+  ]);
+
+  const { data: fetchedEvents = [] } = useEvents(eventFilters, {
+    enabled: visibleCalendarNames.length > 0 && !calendarsLoading,
+  });
+
+  // If the Filter popover deselected every calendar, show nothing rather than
+  // falling through useEvents' "empty calendarNames = no filter" behaviour.
+  const events =
+    filterCalendarNames !== undefined && effectiveCalendarNames.length === 0
+      ? []
+      : fetchedEvents;
 
   const updateEventMutation = useUpdateEvent();
 
