@@ -1,14 +1,15 @@
 import React from "react";
-import { QRCodeSVG } from "qrcode.react";
-import { COLORS, FONTS } from "../theme";
+import { COLORS, FONTS, PAGE } from "../theme";
 import { BACK_COVER } from "../content";
 import { WeekField } from "../visuals/WeekField";
 
 /**
- * Back cover (page 28). Continues the front cover's week field (variant "back"
- * = the second example, a task → FRI, so the spread reads as one wraparound),
- * then lands the reader on the live product: a QR to the web app on a paper
- * card, plus the seeded demo account.
+ * Back cover (page 28) — a PURE CLOSING that bookends the front cover. It reuses
+ * the cover's full-bleed week field (variant "back" = the second example, a
+ * task → FRI) so front and back read as one wraparound, then closes quietly: a
+ * colophon upper-left, a wordmark + one closing line lower-left, a vertical
+ * margin note. No QR, no live URL, no CTA — the Try-It page (27) sends the
+ * reader to the product; this page just closes the book.
  */
 export const BackCoverPage: React.FC = () => (
   <section
@@ -23,19 +24,19 @@ export const BackCoverPage: React.FC = () => (
   >
     <WeekField widthIn={8.75} heightIn={11.25} variant="back" />
 
-    {/* Colophon — upper-left */}
+    {/* Colophon — upper-left (mirrors the cover masthead) */}
     <div
       style={{
         position: "absolute",
         top: "0.7in",
         left: "0.7in",
         fontFamily: FONTS.MONO,
-        fontSize: 8.5,
-        fontWeight: 500,
+        fontSize: 9,
+        fontWeight: 600,
         letterSpacing: "0.16em",
         textTransform: "uppercase",
         color: COLORS.ON_DARK_MUTED,
-        lineHeight: 1.6,
+        lineHeight: 1.7,
       }}
     >
       {BACK_COVER.colophon.map((line, i) => (
@@ -46,87 +47,103 @@ export const BackCoverPage: React.FC = () => (
       ))}
     </div>
 
-    {/* QR block — center-lower, on a paper card for scannability */}
+    {/* fin marker — top-right, mirrors the cover's beats pill position */}
     <div
       style={{
         position: "absolute",
-        left: 0,
-        right: 0,
-        bottom: "2.2in",
-        display: "flex",
-        flexDirection: "column",
+        top: "0.66in",
+        right: "0.66in",
+        display: "inline-flex",
         alignItems: "center",
-        gap: 14,
+        gap: 8,
+        padding: "7px 13px",
+        borderRadius: 999,
+        background: "rgba(15, 16, 17, 0.72)",
+        border: `0.5pt solid ${COLORS.ON_DARK_HAIRLINE}`,
+        fontFamily: FONTS.MONO,
+        fontSize: 8,
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: COLORS.ON_DARK,
       }}
     >
-      <div
-        style={{
-          background: COLORS.PAPER,
-          borderRadius: 12,
-          padding: 18,
-          boxShadow: `0 0 0 1px ${COLORS.ON_DARK_HAIRLINE}`,
-        }}
-      >
-        <QRCodeSVG value={BACK_COVER.qrTarget} size={150} level="M" marginSize={0} fgColor={COLORS.GROUND} />
-      </div>
-      <div
-        style={{
-          fontFamily: FONTS.MONO,
-          fontSize: 9,
-          fontWeight: 600,
-          letterSpacing: "0.16em",
-          textTransform: "uppercase",
-          color: COLORS.ON_DARK,
-        }}
-      >
-        {BACK_COVER.qrCaption}
-      </div>
-      <div
-        style={{
-          fontFamily: FONTS.SANS,
-          fontSize: 15,
-          fontWeight: 600,
-          letterSpacing: "-0.01em",
-          color: COLORS.EMERALD_400,
-        }}
-      >
-        {BACK_COVER.qrTarget.replace("https://", "")}
-      </div>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: COLORS.EMERALD_400 }} />
+      {BACK_COVER.fin}
     </div>
 
-    {/* Demo account note */}
+    {/* Vertical margin callout — right edge (mirrors the cover) */}
     <div
       style={{
         position: "absolute",
-        left: "0.9in",
-        right: "0.9in",
-        bottom: "1.35in",
-        textAlign: "center",
+        right: "0.4in",
+        bottom: `${PAGE.margin.bottom}in`,
+        writingMode: "vertical-rl",
         fontFamily: FONTS.MONO,
         fontSize: 8.5,
         fontWeight: 500,
-        letterSpacing: "0.04em",
-        color: COLORS.ON_DARK_MUTED,
-        lineHeight: 1.5,
+        letterSpacing: "0.22em",
+        textTransform: "uppercase",
+        color: COLORS.ON_DARK_SUBTLE,
       }}
     >
-      {BACK_COVER.spaceNote}
+      {BACK_COVER.marginNote}
     </div>
 
-    {/* Closing italic line — bottom-right */}
+    {/* Closing block — lower-left, mirrors the cover title block but quiet */}
     <div
       style={{
         position: "absolute",
-        bottom: "0.7in",
+        left: "0.7in",
+        bottom: "0.95in",
         right: "0.7in",
-        fontFamily: FONTS.SERIF,
-        fontStyle: "italic",
-        fontSize: 14,
-        color: COLORS.ON_DARK_MUTED,
-        textAlign: "right",
+        display: "flex",
+        flexDirection: "column",
+        gap: 12,
       }}
     >
-      {BACK_COVER.closingLine}
+      <div
+        style={{
+          fontFamily: FONTS.MONO,
+          fontSize: 12,
+          fontWeight: 600,
+          letterSpacing: "0.04em",
+          color: COLORS.ON_DARK_MUTED,
+        }}
+      >
+        {BACK_COVER.wordmark.split("_")[0]}
+        <span style={{ color: COLORS.STEEL_SUBTLE }}>_</span>
+        {BACK_COVER.wordmark.split("_")[1]}
+      </div>
+      <div
+        style={{
+          fontFamily: FONTS.SERIF,
+          fontStyle: "italic",
+          fontSize: 40,
+          lineHeight: 1.05,
+          letterSpacing: "-0.01em",
+          color: COLORS.ON_DARK,
+          maxWidth: "5.6in",
+        }}
+      >
+        {BACK_COVER.closingLine}
+      </div>
+      <div
+        style={{
+          marginTop: 4,
+          display: "flex",
+          alignItems: "center",
+          gap: 14,
+          fontFamily: FONTS.MONO,
+          fontSize: 9,
+          fontWeight: 500,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: COLORS.ON_DARK_SUBTLE,
+        }}
+      >
+        <span style={{ width: 28, height: 1, background: COLORS.ON_DARK_HAIRLINE }} />
+        <span>{BACK_COVER.title} · end</span>
+      </div>
     </div>
   </section>
 );
