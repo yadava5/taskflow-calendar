@@ -42,8 +42,11 @@ import {
 } from '@/components/ui/Select';
 
 import type { CalendarEvent } from '@shared/types';
+import { toast } from 'sonner';
 import { useCalendars } from '@/hooks/useCalendars';
 import { useCreateEvent, useUpdateEvent } from '@/hooks/useEvents';
+import { useCreateTask } from '@/hooks/useTasks';
+import { useTaskManagement } from '@/hooks/useTaskManagement';
 import { useUIStore } from '@/stores/uiStore';
 import { ConditionalDialogHeader } from './ConditionalDialogHeader';
 import type { RecurrenceEditorOptions } from '@/utils/recurrence';
@@ -81,6 +84,56 @@ interface EventFormData {
   calendarName: string;
   recurrence?: string;
   exceptions?: string[];
+}
+
+interface TaskFormData {
+  title: string;
+  dueDate: Date | undefined;
+  dueTime: string;
+  hasTime: boolean;
+  priority: 'low' | 'medium' | 'high';
+  taskListId: string; // 'default' => let the backend assign the General list
+}
+
+// --- Event-dialog draft autosave (governed by the "Auto-save" setting) -------
+const EVENT_DRAFT_KEY = 'taskflow:event-draft';
+
+function serializeEventDraft(f: EventFormData): string {
+  return JSON.stringify({
+    ...f,
+    startDate: f.startDate ? f.startDate.toISOString() : undefined,
+    endDate: f.endDate ? f.endDate.toISOString() : undefined,
+  });
+}
+
+function parseEventDraft(raw: string): EventFormData | null {
+  try {
+    const o = JSON.parse(raw) as Record<string, unknown>;
+    if (!o || typeof o !== 'object') return null;
+    return {
+      title: String(o.title ?? ''),
+      startDate: o.startDate ? new Date(o.startDate as string) : undefined,
+      endDate: o.endDate ? new Date(o.endDate as string) : undefined,
+      startTime: String(o.startTime ?? '09:00'),
+      endTime: String(o.endTime ?? '10:00'),
+      allDay: Boolean(o.allDay),
+      description: String(o.description ?? ''),
+      location: String(o.location ?? ''),
+      calendarName: String(o.calendarName ?? ''),
+      recurrence: (o.recurrence as string | undefined) ?? undefined,
+      exceptions: Array.isArray(o.exceptions) ? (o.exceptions as string[]) : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+function clearEventDraft(): void {
+  try {
+    localStorage.removeItem(EVENT_DRAFT_KEY);
+  } catch {
+    // ignore storage failures (private mode etc.)
+  }
 }
 
 export function CustomDateInput({
@@ -163,14 +216,26 @@ export function CustomDateInput({
 function EventCreationDialogContent({
   initialEventData,
   onClose,
+  open = false,
+  active = true,
 }: {
   initialEventData?: Partial<CalendarEvent>;
   onClose: () => void;
+  /** Whether the dialog is currently open (drives draft restore/persist). */
+  open?: boolean;
+  /** Whether THIS instance is the visible one (Sheet vs Dialog). */
+  active?: boolean;
 }) {
   const dateDisplayMode = useSettingsStore((s) => s.dateDisplayMode);
+  const autoSaveDrafts = useSettingsStore((s) => s.autoSaveDrafts);
   const { data: calendars = [] } = useCalendars();
   const createEventMutation = useCreateEvent();
   const updateEventMutation = useUpdateEvent();
+  const createTaskMutation = useCreateTask();
+  // Task lists (categories) for the Task tab. `taskGroups` is fetched from
+  // /api/task-lists; the 'default' group id means "no explicit list" and lets
+  // the backend assign the user's General list.
+  const { taskGroups, activeTaskGroupId } = useTaskManagement();
   const { peekMode, setPeekMode } = useUIStore();
 
   // Check if we're editing an existing event
@@ -211,6 +276,18 @@ function EventCreationDialogContent({
 
   const [activeTab, setActiveTab] = useState('event');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ---- Task tab state -----------------------------------------------------
+  const [taskFormData, setTaskFormData] = useState<TaskFormData>(() => ({
+    title: '',
+    dueDate: undefined,
+    dueTime: '09:00',
+    hasTime: false,
+    priority: 'medium',
+    taskListId: 'default',
+  }));
+  const [isTaskSubmitting, setIsTaskSubmitting] = useState(false);
+
   const [scopeDialogOpen, setScopeDialogOpen] = useState(false);
   const [pendingPayload, setPendingPayload] = useState<null | {
     start: Date;
@@ -266,8 +343,56 @@ function EventCreationDialogContent({
       recurrence: initialEventData?.recurrence,
       exceptions: initialEventData?.exceptions || [],
     });
+    setTaskFormData({
+      title: '',
+      dueDate: undefined,
+      dueTime: '09:00',
+      hasTime: false,
+      priority: 'medium',
+      taskListId: 'default',
+    });
+    setIsTaskSubmitting(false);
     setActiveTab('event');
   }, [initialEventData, defaultCalendar]);
+
+  // Draft autosave: restore a saved draft when opening a fresh "New event"
+  // (not editing, no seeded slot data). Runs once per open.
+  const draftRestoredRef = useRef(false);
+  useEffect(() => {
+    if (!open) {
+      draftRestoredRef.current = false;
+      return;
+    }
+    if (draftRestoredRef.current) return;
+    if (!active || !autoSaveDrafts || isEditing || initialEventData) return;
+    draftRestoredRef.current = true;
+    try {
+      const raw = localStorage.getItem(EVENT_DRAFT_KEY);
+      if (!raw) return;
+      const draft = parseEventDraft(raw);
+      if (draft) setFormData(draft);
+    } catch {
+      // ignore storage failures
+    }
+  }, [open, active, autoSaveDrafts, isEditing, initialEventData]);
+
+  // Draft autosave: debounced persist of the in-progress event form.
+  useEffect(() => {
+    if (!open || !active || !autoSaveDrafts || isEditing) return;
+    const id = window.setTimeout(() => {
+      const hasContent =
+        formData.title.trim() ||
+        formData.location.trim() ||
+        formData.description.trim();
+      if (!hasContent) return;
+      try {
+        localStorage.setItem(EVENT_DRAFT_KEY, serializeEventDraft(formData));
+      } catch {
+        // ignore storage failures
+      }
+    }, 400);
+    return () => window.clearTimeout(id);
+  }, [open, active, autoSaveDrafts, isEditing, formData]);
 
   // Create calendar options for combobox
   const calendarOptions: ComboboxOption[] = useMemo(() => {
@@ -577,6 +702,7 @@ function EventCreationDialogContent({
         });
       }
 
+      clearEventDraft();
       onClose();
     } catch (error) {
       console.error(
@@ -598,6 +724,69 @@ function EventCreationDialogContent({
     onClose,
     getStartDateTime,
     getEndDateTime,
+  ]);
+
+  // ---- Task tab helpers ---------------------------------------------------
+  const updateTaskFormData = useCallback(
+    <K extends keyof TaskFormData>(field: K, value: TaskFormData[K]) => {
+      setTaskFormData((prev) => ({ ...prev, [field]: value }));
+    },
+    []
+  );
+
+  const isTaskFormValid = useMemo(
+    () => taskFormData.title.trim().length > 0,
+    [taskFormData.title]
+  );
+
+  const buildTaskScheduledDate = useCallback((): Date | undefined => {
+    if (!taskFormData.dueDate) return undefined;
+    const d = new Date(taskFormData.dueDate);
+    if (taskFormData.hasTime && taskFormData.dueTime) {
+      const [h, m] = taskFormData.dueTime.split(':').map(Number);
+      d.setHours(h || 0, m || 0, 0, 0);
+    } else {
+      d.setHours(0, 0, 0, 0);
+    }
+    return d;
+  }, [taskFormData.dueDate, taskFormData.dueTime, taskFormData.hasTime]);
+
+  const handleTaskSubmit = useCallback(async () => {
+    if (!isTaskFormValid || isTaskSubmitting) return;
+    const title = taskFormData.title.trim();
+    const scheduledDate = buildTaskScheduledDate();
+    const taskListId =
+      taskFormData.taskListId && taskFormData.taskListId !== 'default'
+        ? taskFormData.taskListId
+        : undefined;
+
+    setIsTaskSubmitting(true);
+    try {
+      await createTaskMutation.mutateAsync({
+        title,
+        taskListId,
+        scheduledDate,
+        priority: taskFormData.priority,
+        parsedMetadata: { originalInput: title, cleanTitle: title },
+      });
+      toast.success('Task added', { description: title });
+      onClose();
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Failed to add task'
+      );
+    } finally {
+      setIsTaskSubmitting(false);
+    }
+  }, [
+    isTaskFormValid,
+    isTaskSubmitting,
+    taskFormData.title,
+    taskFormData.taskListId,
+    taskFormData.priority,
+    buildTaskScheduledDate,
+    createTaskMutation,
+    onClose,
   ]);
 
   const handleCancel = useCallback(() => {
@@ -863,12 +1052,130 @@ function EventCreationDialogContent({
 
         <TabsContent
           value="task"
-          className={`space-y-4 ${isEditing ? 'mt-0' : 'mt-6'}`}
+          className={`space-y-6 ${isEditing ? 'mt-0' : 'mt-6'}`}
         >
-          <div className="text-center py-8 text-muted-foreground">
-            <p>Task creation form will be implemented here.</p>
-            <p className="text-sm mt-2">Coming soon...</p>
+          {/* Task title + priority */}
+          <div className="flex items-end gap-3 min-w-0">
+            <div className="flex-1">
+              <Input
+                id="task-title"
+                placeholder="Task title"
+                aria-label="Task title"
+                value={taskFormData.title}
+                onChange={(e) => updateTaskFormData('title', e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && isTaskFormValid) {
+                    e.preventDefault();
+                    void handleTaskSubmit();
+                  }
+                }}
+                className="w-full"
+              />
+            </div>
+            <div className="w-44">
+              <Select
+                value={taskFormData.priority}
+                onValueChange={(v) =>
+                  updateTaskFormData('priority', v as 'low' | 'medium' | 'high')
+                }
+              >
+                <SelectTrigger className="w-full" aria-label="Task priority">
+                  <SelectValue placeholder="Priority" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="low">Low priority</SelectItem>
+                  <SelectItem value="medium">Medium priority</SelectItem>
+                  <SelectItem value="high">High priority</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
+
+          {/* Due date + optional time */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Switch
+                id="task-has-due"
+                checked={Boolean(taskFormData.dueDate)}
+                onCheckedChange={(on) =>
+                  updateTaskFormData(
+                    'dueDate',
+                    on ? (taskFormData.dueDate ?? new Date()) : undefined
+                  )
+                }
+              />
+              <Label htmlFor="task-has-due" className="text-sm font-medium">
+                Due date
+              </Label>
+            </div>
+            {taskFormData.dueDate && (
+              <>
+                <CustomDateInput
+                  value={format(taskFormData.dueDate, 'yyyy-MM-dd')}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    updateTaskFormData(
+                      'dueDate',
+                      v ? parseLocalDate(v) : undefined
+                    );
+                  }}
+                  className="w-auto"
+                />
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="task-has-time"
+                    checked={taskFormData.hasTime}
+                    onCheckedChange={(on) => updateTaskFormData('hasTime', on)}
+                  />
+                  <Label htmlFor="task-has-time" className="text-sm">
+                    Set time
+                  </Label>
+                </div>
+                {taskFormData.hasTime && (
+                  <CustomTimeInput
+                    value={taskFormData.dueTime}
+                    onChange={(e) =>
+                      updateTaskFormData('dueTime', e.target.value)
+                    }
+                    className="w-auto"
+                  />
+                )}
+              </>
+            )}
+          </div>
+
+          {/* Task list / category */}
+          <div className="flex items-center gap-2">
+            <Label className="text-sm">List</Label>
+            <Select
+              value={taskFormData.taskListId}
+              onValueChange={(v) => updateTaskFormData('taskListId', v)}
+            >
+              <SelectTrigger className="w-[220px]" aria-label="Task list">
+                <SelectValue placeholder="Default list" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">Default (General)</SelectItem>
+                {taskGroups
+                  .filter((g) => g.id !== 'default')
+                  .map((g) => (
+                    <SelectItem key={g.id} value={g.id}>
+                      {g.emoji ? `${g.emoji} ` : ''}
+                      {g.name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {activeTaskGroupId !== 'default' &&
+            taskFormData.taskListId === 'default' &&
+            taskGroups.some((g) => g.id === activeTaskGroupId) && (
+              <p className="text-xs text-muted-foreground">
+                Tip: pick a list above to file this task under a specific
+                category.
+              </p>
+            )}
         </TabsContent>
       </Tabs>
 
@@ -876,19 +1183,31 @@ function EventCreationDialogContent({
         <Button
           variant="outline"
           onClick={handleCancel}
-          disabled={isSubmitting}
+          disabled={isSubmitting || isTaskSubmitting}
         >
           Cancel
         </Button>
-        <Button onClick={handleSubmit} disabled={!isFormValid || isSubmitting}>
-          {isSubmitting
-            ? isEditing
-              ? 'Saving...'
-              : 'Creating...'
-            : isEditing
-              ? 'Save'
-              : 'Create Event'}
-        </Button>
+        {activeTab === 'task' ? (
+          <Button
+            onClick={handleTaskSubmit}
+            disabled={!isTaskFormValid || isTaskSubmitting}
+          >
+            {isTaskSubmitting ? 'Adding…' : 'Add Task'}
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSubmit}
+            disabled={!isFormValid || isSubmitting}
+          >
+            {isSubmitting
+              ? isEditing
+                ? 'Saving...'
+                : 'Creating...'
+              : isEditing
+                ? 'Save'
+                : 'Create Event'}
+          </Button>
+        )}
       </div>
 
       {/* Post-save scope dialog for editing recurring events */}
@@ -1035,6 +1354,8 @@ export function EventCreationDialog({
           <EventCreationDialogContent
             initialEventData={initialEventData}
             onClose={handleClose}
+            open={open && isSheetMode}
+            active={isSheetMode}
           />
         </SheetContent>
       </Sheet>
@@ -1052,6 +1373,8 @@ export function EventCreationDialog({
           <EventCreationDialogContent
             initialEventData={initialEventData}
             onClose={handleClose}
+            open={open && !isSheetMode}
+            active={!isSheetMode}
           />
         </DialogContent>
       </Dialog>
