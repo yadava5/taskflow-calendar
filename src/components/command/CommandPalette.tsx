@@ -219,12 +219,18 @@ function CommandPaletteBody({ onClose }: { onClose: () => void }) {
           return d;
         })();
       const end = p.end ?? new Date(start.getTime() + 60 * 60 * 1000);
+      // Fall back to the universal default calendar. An empty calendarName
+      // fails validateEvent ("Calendar is required"), so if the calendars query
+      // hasn't resolved yet (e.g. ⌘K quick-add moments after login) the create
+      // silently failed while still toasting success. 'Personal' is the default
+      // calendar for every seeded/new account and offline mode.
+      const calendarName = defaultCalendar?.name ?? 'Personal';
       createEvent.mutate({
         title: p.title,
         start,
         end,
         allDay: p.allDay,
-        calendarName: defaultCalendar?.name ?? '',
+        calendarName,
         color: defaultCalendar?.color,
       });
       toast.success('Event created', { description: p.title });
