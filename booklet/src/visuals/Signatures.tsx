@@ -1,5 +1,6 @@
 import React from "react";
 import { COLORS, FONTS } from "../theme";
+import { Lollipop } from "./charts";
 
 /**
  * Per-stage "signature" visuals — one distinct diagram per parser rung so the
@@ -86,47 +87,32 @@ export const ChronoSignature: React.FC = () => (
   </div>
 );
 
-// ── Stage 2 · priority — the rule table as bars ─────────────────────────────
+// ── Stage 2 · priority — the rule table as a confidence dot-plot ─────────────
+// A lollipop plot (not a bar chart): each pattern sits at its exact confidence
+// on a shared 0.65–1.0 axis, so the reader compares by position, not length.
 
 const PRIORITY_ROWS: ReadonlyArray<{ pat: string; level: string; conf: number }> = [
   { pat: "p1 / p2 / p3", level: "high·med·low", conf: 0.95 },
   { pat: "urgent · asap", level: "high", conf: 0.85 },
+  { pat: "someday", level: "low", conf: 0.8 },
   { pat: "high", level: "high", conf: 0.75 },
   { pat: "medium", level: "medium", conf: 0.7 },
 ];
 
 export const PrioritySignature: React.FC = () => (
   <div style={CARD}>
-    <CardHead label="pattern → level · confidence" source="PriorityParser.ts" />
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {PRIORITY_ROWS.map((r) => (
-        <div key={r.pat} style={{ display: "grid", gridTemplateColumns: "1fr 46px 1fr", alignItems: "center", gap: 8 }}>
-          <code
-            style={{
-              fontFamily: FONTS.MONO,
-              fontSize: 9,
-              color: COLORS.INK,
-              background: COLORS.SURFACE,
-              border: `0.5pt solid ${COLORS.HAIRLINE}`,
-              borderRadius: 3,
-              padding: "3px 6px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            /{r.pat}/
-          </code>
-          <span style={{ fontFamily: FONTS.MONO, fontSize: 8, fontWeight: 700, color: COLORS.EMERALD_700 }}>{r.conf.toFixed(2)}</span>
-          <div style={{ height: 7, background: COLORS.SURFACE, borderRadius: 4, overflow: "hidden" }}>
-            <div style={{ width: `${r.conf * 100}%`, height: "100%", background: COLORS.EMERALD_400 }} />
-          </div>
-        </div>
-      ))}
-    </div>
+    <CardHead label="pattern · confidence" source="PriorityParser.ts" />
+    <Lollipop
+      rows={PRIORITY_ROWS.map((r) => ({ label: r.pat, sub: r.level, value: r.conf, highlight: r.conf === 0.95 }))}
+      min={0.65}
+      max={1.0}
+      ticks={[0.7, 0.8, 0.9, 1.0]}
+      format={(v) => v.toFixed(2)}
+      labelW={96}
+    />
     <Caption>
-      Each pattern carries an explicit confidence in the source — “p1” scores 0.95,
-      a bare “high” 0.75. Auditable, not learned.
+      Each pattern sits at its exact confidence in the source — “p1” at 0.95, a bare
+      “high” at 0.75. Auditable, not learned.
     </Caption>
   </div>
 );
