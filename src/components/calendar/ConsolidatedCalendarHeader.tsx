@@ -20,8 +20,24 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/Input';
+import { useCalendars } from '@/hooks/useCalendars';
+import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/lib/utils';
-import { toLocal } from '@/utils/date';
+import { toLocal, parseLocalDate } from '@/utils/date';
+import {
+  type CalendarFilterState,
+  EMPTY_CALENDAR_FILTERS,
+  activeFilterCount,
+} from './calendarFilters';
 
 /**
  * Calendar view types
@@ -31,6 +47,8 @@ export type CalendarViewType =
   | 'timeGridWeek'
   | 'timeGridDay'
   | 'listWeek';
+
+export type { CalendarFilterState } from './calendarFilters';
 
 export interface ConsolidatedCalendarHeaderProps {
   currentView: CalendarViewType;
@@ -43,6 +61,8 @@ export interface ConsolidatedCalendarHeaderProps {
   calendarRef?: React.RefObject<FullCalendar | null>;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  filters?: CalendarFilterState;
+  onFiltersChange?: (filters: CalendarFilterState) => void;
 }
 
 // Define view options outside component to avoid recreating on every render
@@ -85,11 +105,12 @@ interface AnimatedSearchProps {
 const AnimatedSearch: React.FC<AnimatedSearchProps> = ({ value, onChange }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const shortcutsEnabled = useSettingsStore((s) => s.keyboardShortcutsEnabled);
 
-  // Keyboard shortcuts effect
+  // Cmd/Ctrl+F to focus search — governed by the keyboard-shortcuts setting.
   useEffect(() => {
+    if (!shortcutsEnabled) return;
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      // Cmd/Ctrl + F to activate search
       if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
         e.preventDefault();
         handleSearchClick();
@@ -100,7 +121,7 @@ const AnimatedSearch: React.FC<AnimatedSearchProps> = ({ value, onChange }) => {
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
-  }, []);
+  }, [shortcutsEnabled]);
 
   const handleSearchClick = () => {
     setIsExpanded(true);
@@ -198,7 +219,187 @@ interface CalendarToolbarProps {
   onCreateEvent: () => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
+  filters?: CalendarFilterState;
+  onFiltersChange?: (filters: CalendarFilterState) => void;
 }
+
+/**
+ * Real filter popover: narrow the calendar by calendar name(s), all-day-only,
+ * and an optional date range. Shows an active-filter count badge and a
+ * "Clear filters" action. Replaces the old permanently-disabled button.
+ */
+const CalendarFilterPopover: React.FC<{
+  filters: CalendarFilterState;
+  onFiltersChange: (filters: CalendarFilterState) => void;
+}> = ({ filters, onFiltersChange }) => {
+  const count = activeFilterCount(filters);
+
+  return (
+    <Popover>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 w-auto min-w-7 gap-1 px-1.5"
+              aria-label="Filter events"
+            >
+              <Filter className="w-3.5 h-3.5" />
+              {count > 0 && (
+                <span
+                  className="inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground"
+                  aria-label={`${count} active filters`}
+                >
+                  {count}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Filter events</p>
+        </TooltipContent>
+      </Tooltip>
+      {/* Radix only mounts PopoverContent (and its useCalendars query) when
+          open, so the header itself needs no QueryClient just to render. */}
+      <PopoverContent align="end" className="w-72 space-y-4">
+        <CalendarFilterBody
+          filters={filters}
+          onFiltersChange={onFiltersChange}
+        />
+      </PopoverContent>
+    </Popover>
+  );
+};
+
+const CalendarFilterBody: React.FC<{
+  filters: CalendarFilterState;
+  onFiltersChange: (filters: CalendarFilterState) => void;
+}> = ({ filters, onFiltersChange }) => {
+  const { data: calendars = [] } = useCalendars();
+  const allNames = React.useMemo(
+    () => calendars.filter((c) => c.visible).map((c) => c.name),
+    [calendars]
+  );
+  // The effective selection: `undefined` means every visible calendar.
+  const selected = filters.calendarNames ?? allNames;
+  const count = activeFilterCount(filters);
+
+  const toggleCalendar = (name: string, checked: boolean) => {
+    const next = checked
+      ? Array.from(new Set([...selected, name]))
+      : selected.filter((n) => n !== name);
+    // Collapse "everything selected" back to `undefined` (no narrowing).
+    const isAll =
+      next.length === allNames.length &&
+      allNames.every((n) => next.includes(n));
+    onFiltersChange({ ...filters, calendarNames: isAll ? undefined : next });
+  };
+
+  const setStart = (value: string) =>
+    onFiltersChange({
+      ...filters,
+      startDate: value ? parseLocalDate(value) : undefined,
+    });
+  const setEnd = (value: string) =>
+    onFiltersChange({
+      ...filters,
+      endDate: value ? parseLocalDate(value) : undefined,
+    });
+
+  return (
+    <>
+      <div className="flex items-center justify-between">
+        <span className="text-sm font-medium">Filter events</span>
+        {count > 0 && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs"
+            onClick={() => onFiltersChange(EMPTY_CALENDAR_FILTERS)}
+          >
+            Clear filters
+          </Button>
+        )}
+      </div>
+
+      {allNames.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted-foreground">Calendars</p>
+          <div className="max-h-40 space-y-1.5 overflow-y-auto">
+            {allNames.map((name) => {
+              const cal = calendars.find((c) => c.name === name);
+              return (
+                <label
+                  key={name}
+                  className="flex cursor-pointer items-center gap-2 text-sm"
+                >
+                  <Checkbox
+                    checked={selected.includes(name)}
+                    onCheckedChange={(v) => toggleCalendar(name, v === true)}
+                    aria-label={name}
+                  />
+                  <span
+                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: cal?.color || 'var(--primary)' }}
+                  />
+                  <span className="truncate">{name}</span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <Label htmlFor="filter-all-day" className="text-sm">
+          All-day events only
+        </Label>
+        <Switch
+          id="filter-all-day"
+          checked={filters.allDayOnly}
+          onCheckedChange={(on) =>
+            onFiltersChange({ ...filters, allDayOnly: on })
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <p className="text-xs font-medium text-muted-foreground">Date range</p>
+        <div className="flex items-center gap-2">
+          <Input
+            type="date"
+            aria-label="Filter start date"
+            value={
+              filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : ''
+            }
+            max={
+              filters.endDate
+                ? format(filters.endDate, 'yyyy-MM-dd')
+                : undefined
+            }
+            onChange={(e) => setStart(e.target.value)}
+            className="h-8 text-xs"
+          />
+          <span className="text-muted-foreground">–</span>
+          <Input
+            type="date"
+            aria-label="Filter end date"
+            value={filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : ''}
+            min={
+              filters.startDate
+                ? format(filters.startDate, 'yyyy-MM-dd')
+                : undefined
+            }
+            onChange={(e) => setEnd(e.target.value)}
+            className="h-8 text-xs"
+          />
+        </div>
+      </div>
+    </>
+  );
+};
 
 const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onPrevClick,
@@ -206,6 +407,8 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onCreateEvent,
   searchValue = '',
   onSearchChange,
+  filters = EMPTY_CALENDAR_FILTERS,
+  onFiltersChange,
 }) => {
   const openInsights = useInsightsStore((s) => s.setOpen);
   return (
@@ -234,22 +437,11 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         </TooltipContent>
       </Tooltip>
 
-      {/* Filter Button (Future Enhancement) */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0"
-            disabled // Disabled for now
-          >
-            <Filter className="w-3.5 h-3.5" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>Filter events</p>
-        </TooltipContent>
-      </Tooltip>
+      {/* Filter popover — calendar names, all-day, and date range */}
+      <CalendarFilterPopover
+        filters={filters}
+        onFiltersChange={onFiltersChange || (() => {})}
+      />
 
       {/* Back Button */}
       <Tooltip>
@@ -422,6 +614,8 @@ export const ConsolidatedCalendarHeader: React.FC<
   calendarRef,
   searchValue = '',
   onSearchChange,
+  filters,
+  onFiltersChange,
 }) => {
   const [calendarTitle, setCalendarTitle] = useState(() =>
     getCalendarTitle(currentView, calendarRef)
@@ -515,6 +709,8 @@ export const ConsolidatedCalendarHeader: React.FC<
             onCreateEvent={onCreateEvent}
             searchValue={searchValue}
             onSearchChange={onSearchChange}
+            filters={filters}
+            onFiltersChange={onFiltersChange}
           />
         </div>
       </div>
