@@ -2,6 +2,7 @@ import React from "react";
 import { Page } from "../primitives/Page";
 import { COLORS, FONTS } from "../theme";
 import { ABSTRACT, BRAND, MASTHEAD } from "../content";
+import { ProcessRibbon } from "../visuals/charts";
 
 /**
  * Welcome / endpaper (page 02). A quiet opening spread: the masthead kicker,
@@ -23,17 +24,40 @@ export const EndpaperPage: React.FC<{
   >
     <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
       {/* Masthead */}
-      <div
-        style={{
-          fontFamily: FONTS.MONO,
-          fontSize: 10,
-          fontWeight: 600,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: COLORS.INK_MUTED,
-        }}
-      >
-        {MASTHEAD.volume}
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16 }}>
+        <div
+          style={{
+            fontFamily: FONTS.MONO,
+            fontSize: 10,
+            fontWeight: 600,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: COLORS.INK_MUTED,
+          }}
+        >
+          {MASTHEAD.volume}
+        </div>
+        <div style={{ fontFamily: FONTS.SERIF, fontStyle: "italic", fontSize: 12, color: COLORS.INK_SUBTLE }}>
+          calendar + tasks · in plain English
+        </div>
+      </div>
+
+      {/* The whole system, in one line — the path a sentence takes. */}
+      <div style={{ marginTop: 26 }}>
+        <div style={{ fontFamily: FONTS.MONO, fontSize: 8.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: COLORS.EMERALD_600, marginBottom: 12 }}>
+          the path a sentence takes
+        </div>
+        <div style={{ borderTop: `0.5pt solid ${COLORS.HAIRLINE}`, borderBottom: `0.5pt solid ${COLORS.HAIRLINE}`, padding: "14px 0" }}>
+          <ProcessRibbon
+            steps={[
+              { label: "type", sub: "one sentence" },
+              { label: "parse", sub: "three stages" },
+              { label: "resolve", sub: "overlaps → chips" },
+              { label: "dispatch", sub: "one function" },
+              { label: "persist", sub: "pinned Postgres" },
+            ]}
+          />
+        </div>
       </div>
 
       <div style={{ flex: 1 }} />
