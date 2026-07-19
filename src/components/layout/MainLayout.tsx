@@ -28,6 +28,7 @@ import { CommandPalette } from '@/components/command/CommandPalette';
 import { WeekInsights } from '@/components/insights/WeekInsights';
 import { useSettingsDialog } from '@/hooks/useSettingsDialog';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useEventReminders } from '@/hooks/useEventReminders';
 import { useAuthStore } from '@/stores/authStore';
 import { cn } from '@/lib/utils';
 import type FullCalendar from '@fullcalendar/react';
@@ -63,7 +64,13 @@ const MainContent = ({ children }: { children?: ReactNode }) => {
 export const MainLayout = ({ children }: MainLayoutProps) => {
   const { currentView, dragState, setCurrentView } = useUIStore();
   const { logout } = useAuthStore();
-  const { sidebarExpanded, appViewMode } = useSettingsStore();
+  const sidebarExpanded = useSettingsStore((s) => s.sidebarExpanded);
+  const keyboardShortcutsEnabled = useSettingsStore(
+    (s) => s.keyboardShortcutsEnabled
+  );
+
+  // In-app reminders for upcoming events/tasks while the app is open.
+  useEventReminders();
 
   // Settings dialog management
   const {
@@ -73,12 +80,13 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
     closeSettings,
   } = useSettingsDialog();
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (governed by the "Keyboard Shortcuts" setting)
   useKeyboardShortcuts({
     onOpenProfile: () => openSettings('profile'),
     onOpenSettings: () => openSettings('general'),
     onOpenHelp: () => openSettings('help'),
     onLogout: () => logout(),
+    enabled: keyboardShortcutsEnabled,
   });
 
   // Global event bridge so dropdown can open settings without prop drilling
@@ -93,13 +101,28 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       window.removeEventListener('app:open-settings', handler as EventListener);
   }, [openSettings]);
 
-  // Initialize UI view from settings on mount
+  // Apply the user's Default View preference on first mount:
+  // Calendar / Tasks / Remember-last-used.
   useEffect(() => {
-    if (appViewMode && currentView !== appViewMode) {
-      setCurrentView(appViewMode);
-    }
+    const { defaultView, lastUsedAppView } = useSettingsStore.getState();
+    const target: 'calendar' | 'task' =
+      defaultView === 'tasks'
+        ? 'task'
+        : defaultView === 'calendar'
+          ? 'calendar'
+          : lastUsedAppView === 'task'
+            ? 'task'
+            : 'calendar';
+    if (currentView !== target) setCurrentView(target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Track the last-used view so "Remember last used" can restore it next boot.
+  useEffect(() => {
+    if (currentView === 'calendar' || currentView === 'task') {
+      useSettingsStore.getState().setLastUsedAppView(currentView);
+    }
+  }, [currentView]);
 
   return (
     <SidebarProvider defaultOpen={sidebarExpanded}>
