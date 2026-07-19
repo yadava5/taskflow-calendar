@@ -4,6 +4,8 @@ import { StatBig } from "../primitives/StatBig";
 import { SourceNote } from "../primitives/SourceNote";
 import { COLORS, FONTS, SECTION_INK } from "../theme";
 import { PROOF, COVER } from "../content";
+import { FigureCard, Donut, HeatMatrix, SpanMap, Legend } from "../visuals/charts";
+import { BreakpointThreshold } from "../visuals/flows";
 
 const SECTION_LABEL = "PROOF";
 const ACCENT = SECTION_INK["04_PROOF"];
@@ -82,6 +84,25 @@ export const ProofTestsPage: React.FC<PageProps> = (p) => {
           <p style={{ fontFamily: FONTS.SANS, fontSize: 10, lineHeight: 1.4, color: COLORS.INK, margin: 0 }}>{c.ciBody}</p>
         </div>
       </div>
+
+      {/* where the tests live — the static it()/test() split, front vs back */}
+      <div style={{ marginTop: 20 }}>
+        <FigureCard
+          label="where the tests live"
+          source="static it()/test() count"
+          caption="The app reports 1,145 green; a static count of it()/test() calls is ≈1,249 — roughly even across the React frontend and the API/handler backend. We print the app's reported figure and show the split."
+        >
+          <Donut
+            segments={[
+              { value: 634, color: COLORS.EMERALD_400, label: "frontend · React UI" },
+              { value: 615, color: COLORS.EMERALD_700, label: "backend · handlers" },
+            ]}
+            centerValue="1,249"
+            centerSub="STATIC COUNT"
+          />
+        </FigureCard>
+      </div>
+
       <SourceRail>{c.source}</SourceRail>
     </BodyPage>
   );
@@ -178,10 +199,49 @@ export const ProofParsePage: React.FC<PageProps> = (p) => {
         <span style={{ fontFamily: FONTS.SERIF, fontStyle: "italic", fontSize: 13, color: COLORS.INK }}>{c.legendGate}.</span>
         <span style={{ fontFamily: FONTS.MONO, fontSize: 8, color: COLORS.INK_SUBTLE }}>{c.illustrativeNote}</span>
       </div>
+
+      {/* which parser claims which words — the span map behind each chip */}
+      <div style={{ marginTop: 20 }}>
+        <FigureCard label="the reading · span by span" source="SmartParser.ts">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", columnGap: "0.4in", rowGap: 8 }}>
+            <SpanMap tokens={SPANS_EVENT} />
+            <SpanMap tokens={SPANS_TASK} />
+          </div>
+          <Legend
+            items={[
+              { color: COLORS.EMERALD_500, label: "chrono · date/time", swatch: "line" },
+              { color: COLORS.EMERALD_700, label: "priority · flag", swatch: "line" },
+              { color: COLORS.HAIRLINE_STRONG, label: "compromise · language", swatch: "line" },
+            ]}
+          />
+        </FigureCard>
+      </div>
+
       <SourceRail>{c.source}</SourceRail>
     </BodyPage>
   );
 };
+
+// Honest span attributions for the app's two landing examples — which of the
+// three parsers claims each token; the rest becomes the clean title.
+const SPANS_EVENT = [
+  { text: "Lunch", parser: "compromise" as const, tag: "title" },
+  { text: "with" },
+  { text: "Sam", parser: "compromise" as const, tag: "person" },
+  { text: "tomorrow", parser: "chrono" as const, tag: "date" },
+  { text: "1pm", parser: "chrono" as const, tag: "time" },
+  { text: "at" },
+  { text: "Patterson's", parser: "compromise" as const, tag: "place" },
+];
+const SPANS_TASK = [
+  { text: "Ship", parser: "compromise" as const, tag: "title" },
+  { text: "the" },
+  { text: "report", parser: "compromise" as const, tag: "title" },
+  { text: "by" },
+  { text: "Friday", parser: "chrono" as const, tag: "date" },
+  { text: "!high", parser: "priority" as const, tag: "flag" },
+  { text: "#work", tag: "list" },
+];
 
 // ── p21 · it folds to fit (mobile + google) ─────────────────────────────────
 
@@ -232,6 +292,18 @@ export const ProofAdaptPage: React.FC<PageProps> = (p) => {
           <div style={{ fontFamily: FONTS.MONO, fontSize: 8, letterSpacing: "0.1em", color: COLORS.INK_SUBTLE }}>&lt; 768px · the week folds</div>
         </div>
       </div>
+
+      {/* the fold, as a threshold — the same data recomposed either side of 768px */}
+      <div style={{ marginTop: 20 }}>
+        <FigureCard
+          label="the fold · one threshold"
+          source="CalendarView.tsx:96–107"
+          caption="One breakpoint decides the layout: at 768px and up, the seven-column week grid; below it, FullCalendar's listWeek agenda. Same events, recomposed for the device."
+        >
+          <BreakpointThreshold />
+        </FigureCard>
+      </div>
+
       <SourceRail>{c.source}</SourceRail>
     </BodyPage>
   );
@@ -256,7 +328,32 @@ export const ProofSecurityPage: React.FC<PageProps> = (p) => {
       <div style={{ marginTop: 16, borderLeft: `2px solid ${COLORS.EMERALD_400}`, paddingLeft: 12, fontFamily: FONTS.SERIF, fontStyle: "italic", fontSize: 12.5, color: COLORS.INK }}>
         {c.honest}
       </div>
-      <div style={{ marginTop: 22, borderTop: `1pt solid ${COLORS.INK}`, paddingTop: 14 }}>
+
+      {/* the actual CSP, as a matrix — which directive allows which source */}
+      <div style={{ marginTop: 18 }}>
+        <FigureCard
+          label="content-security-policy · directive × source"
+          source="vercel.json"
+          caption="The real policy, read as a grid: a filled cell means the directive allows that source. Everything narrows to 'self' — scripts and styles add 'unsafe-inline', images add data:/blob:, framing and objects are 'none'."
+        >
+          <HeatMatrix
+            cols={["'self'", "unsafe-inline", "data:", "blob:", "'none'"]}
+            rows={[
+              { label: "default-src", cells: [true, false, false, false, false] },
+              { label: "script-src", cells: [true, true, false, false, false] },
+              { label: "style-src", cells: [true, true, false, false, false] },
+              { label: "img-src", cells: [true, false, true, true, false] },
+              { label: "font-src", cells: [true, false, true, false, false] },
+              { label: "connect-src", cells: [true, false, false, false, false] },
+              { label: "frame-ancestors", cells: [false, false, false, false, true] },
+              { label: "base-uri", cells: [true, false, false, false, false] },
+              { label: "object-src", cells: [false, false, false, false, true] },
+            ]}
+          />
+        </FigureCard>
+      </div>
+
+      <div style={{ marginTop: 18, borderTop: `1pt solid ${COLORS.INK}`, paddingTop: 14 }}>
         <span style={{ fontFamily: FONTS.SERIF, fontStyle: "italic", fontSize: 18, lineHeight: 1.3, color: COLORS.INK }}>{c.handoffQuote}</span>
       </div>
     </BodyPage>
