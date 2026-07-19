@@ -768,3 +768,107 @@ h1 {
     --glow-radius: 340px;
   }
 }
+
+/* ==========================================
+   Public landing (Welcome.tsx) — premium micro-interactions.
+   Scoped under .tf-* so nothing leaks into the app. House language:
+   near-black ink + a single emerald accent, restrained, motion-safe.
+   ========================================== */
+@layer components {
+  /* Smoothly animatable angle for the signature card's traveling beam.
+     Same proven technique as --auth-angle above (no element rotation, so
+     the corners stay square). */
+  @property --tf-angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+  }
+
+  /* Traveling emerald beam that laps the signature card's border. A single
+     bright arc rides a conic gradient, revealed only on the 1px border ring
+     via a mask (same recipe as .cursor-glow-border). */
+  .tf-beam {
+    position: absolute;
+    inset: -1px;
+    border-radius: calc(0.75rem + 1px);
+    padding: 1px;
+    background: conic-gradient(
+      from var(--tf-angle),
+      transparent 0deg 244deg,
+      rgba(52, 211, 153, 0.5) 300deg,
+      rgba(110, 231, 183, 0.95) 322deg,
+      transparent 348deg 360deg
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    animation: tf-beam-rotate 7s linear infinite;
+    opacity: 0.4;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+  }
+  .tf-card:hover .tf-beam {
+    opacity: 0.78;
+  }
+  @keyframes tf-beam-rotate {
+    to {
+      --tf-angle: 360deg;
+    }
+  }
+
+  /* Cursor-follow emerald spotlight over the signature card. Position is
+     driven by --mx/--my (set in JS); clipped to the card's rounded corners. */
+  .tf-spot {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    background: radial-gradient(
+      220px circle at var(--mx, 50%) var(--my, 50%),
+      rgba(52, 211, 153, 0.14),
+      transparent 62%
+    );
+  }
+  .tf-card:hover .tf-spot {
+    opacity: 1;
+  }
+
+  /* Subtle 3D tilt shell for the signature card (angles set in JS). */
+  .tf-tilt {
+    transform: perspective(1100px) rotateX(var(--rx, 0deg))
+      rotateY(var(--ry, 0deg));
+    transition: transform 0.24s ease-out;
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  /* Easter-egg quick-parse panel entrance. */
+  @keyframes tf-pop {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tf-beam {
+      animation: none;
+      opacity: 0.3;
+    }
+    .tf-tilt {
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+}
