@@ -16,7 +16,11 @@
       "destination": "/api/index"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/system-card",
+      "destination": "/system-card/index.html"
+    },
+    {
+      "source": "/((?!api|system-card).*)",
       "destination": "/index.html"
     }
   ],
