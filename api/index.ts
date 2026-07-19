@@ -20,6 +20,7 @@ import authRegister from '../server-handlers/auth/register.js';
 import authGoogle from '../server-handlers/auth/google/index.js';
 import authGoogleCallback from '../server-handlers/auth/google/callback.js';
 import authGoogleVerify from '../server-handlers/auth/google/verify.js';
+import account from '../server-handlers/account/index.js';
 import googleCalendar from '../server-handlers/google/calendar.js';
 import attachments from '../server-handlers/attachments/index.js';
 import attachmentsCleanup from '../server-handlers/attachments/cleanup.js';
@@ -62,6 +63,7 @@ const ROUTES: Array<[string[], Handler]> = [
   [['auth', 'google'], authGoogle],
   [['auth', 'google', 'callback'], authGoogleCallback],
   [['auth', 'google', 'verify'], authGoogleVerify],
+  [['account'], account],
   [['google', 'calendar'], googleCalendar],
   [['attachments'], attachments],
   [['attachments', 'cleanup'], attachmentsCleanup],
