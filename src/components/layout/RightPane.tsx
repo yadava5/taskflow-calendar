@@ -1,6 +1,7 @@
 import { ReactNode, useCallback, useState, useRef, useEffect } from 'react';
 import { CalendarView, CalendarViewType } from '../calendar';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useCalendarCommandStore } from '@/stores/calendarCommandStore';
 import { lazy, Suspense } from 'react';
 const LazyConsolidatedCalendarHeader = lazy(async () => ({
   default: (await import('../calendar/ConsolidatedCalendarHeader'))
@@ -95,8 +96,19 @@ export const RightPane = ({
       } catch {
         // Ignore settings persistence failures
       }
+      // Imperatively drive the FullCalendar instance too. The React-state ->
+      // effect path in CalendarView lagged a selection behind (grid stuck on the
+      // previous view). We defer to a microtask so the change lands right after
+      // React flushes this event (FullCalendar uses flushSync internally, which
+      // warns if invoked mid-render) — reliable, and no visible lag.
+      queueMicrotask(() => {
+        const api = calendarRef.current?.getApi();
+        if (api && api.view.type !== view) {
+          api.changeView(view);
+        }
+      });
     },
-    [setCalendarSubView, setCurrentView]
+    [setCalendarSubView, setCurrentView, calendarRef]
   );
 
   /**
@@ -122,6 +134,69 @@ export const RightPane = ({
     const calendarApi = calendarRef.current?.getApi();
     calendarApi?.next();
   }, [calendarRef]);
+
+  // Execute imperative calendar intents dispatched by the ⌘K command palette.
+  // Routing through a store (instead of a ref) means a command fired while the
+  // calendar was unmounted (task view) still runs the moment it mounts.
+  const calendarCommand = useCalendarCommandStore((s) => s.command);
+  const clearCalendarCommand = useCalendarCommandStore((s) => s.clear);
+  useEffect(() => {
+    if (!calendarCommand) return;
+
+    const runWithApi = (
+      fn: (api: NonNullable<ReturnType<FullCalendar['getApi']>>) => void
+    ) => {
+      const api = calendarRef.current?.getApi();
+      if (api) {
+        fn(api);
+        return;
+      }
+      // Calendar may still be mounting; retry on the next frame.
+      requestAnimationFrame(() => {
+        const late = calendarRef.current?.getApi();
+        if (late) fn(late);
+      });
+    };
+
+    switch (calendarCommand.type) {
+      case 'view':
+        handleViewChange(calendarCommand.view);
+        break;
+      case 'goto':
+        runWithApi((api) => api.gotoDate(new Date(calendarCommand.dateISO)));
+        break;
+      case 'today':
+        handleTodayClick();
+        break;
+      case 'prev':
+        handlePrevClick();
+        break;
+      case 'next':
+        handleNextClick();
+        break;
+      case 'openEvent': {
+        const ev = calendarCommand.event;
+        if (ev.start) runWithApi((api) => api.gotoDate(new Date(ev.start)));
+        setSelectedEvent(ev);
+        setDisplayDialogOpen(true);
+        break;
+      }
+      case 'newEvent':
+        setInitialEventData(undefined);
+        setCreateDialogOpen(true);
+        break;
+    }
+
+    clearCalendarCommand();
+  }, [
+    calendarCommand,
+    clearCalendarCommand,
+    calendarRef,
+    handleViewChange,
+    handleTodayClick,
+    handlePrevClick,
+    handleNextClick,
+  ]);
 
   return (
     <div className="h-full flex flex-col bg-background overflow-hidden right-pane-container">

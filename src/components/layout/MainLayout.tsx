@@ -24,6 +24,8 @@ const SettingsDialog = lazy(async () => ({
     .SettingsDialog,
 }));
 import { useUIStore } from '@/stores/uiStore';
+import { CommandPalette } from '@/components/command/CommandPalette';
+import { WeekInsights } from '@/components/insights/WeekInsights';
 import { useSettingsDialog } from '@/hooks/useSettingsDialog';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useAuthStore } from '@/stores/authStore';
@@ -136,6 +138,12 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
             defaultSection={currentSection}
           />
         </Suspense>
+
+        {/* ⌘K command palette — keyboard-first create/navigate/search */}
+        <CommandPalette />
+
+        {/* "Where your week goes" — real time-allocation insights */}
+        <WeekInsights />
       </div>
     </SidebarProvider>
   );
