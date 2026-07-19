@@ -4,6 +4,8 @@ import { StatBig } from "../primitives/StatBig";
 import { SourceNote } from "../primitives/SourceNote";
 import { COLORS, FONTS, SECTION_INK } from "../theme";
 import { INSIDE } from "../content";
+import { FigureCard, Waffle, Bullet, LogTimeAxis } from "../visuals/charts";
+import { DataPath } from "../visuals/flows";
 
 const SECTION_LABEL = "INSIDE";
 const ACCENT = SECTION_INK["03_INSIDE"];
@@ -102,6 +104,34 @@ export const InsideDispatchPage: React.FC<PageProps> = (p) => {
       <div style={{ marginTop: 14, fontFamily: FONTS.SERIF, fontStyle: "italic", fontSize: 13, color: COLORS.INK_MUTED }}>
         {c.ratio}.
       </div>
+
+      {/* the routes as units + the cap it cleared */}
+      <div style={{ marginTop: 18, display: "grid", gridTemplateColumns: "1.25fr 1fr", columnGap: "0.4in", alignItems: "stretch" }}>
+        <FigureCard
+          label="34 routes · one function"
+          source="api/index.ts"
+          caption="Every route lives in one catch-all: 32 product handlers plus a health and a test diagnostic — 34 entries, one serverless function."
+        >
+          <Waffle
+            total={34}
+            cols={17}
+            cell={12}
+            gap={4}
+            segments={[
+              { count: 32, color: COLORS.EMERALD_400, label: "32 product handlers" },
+              { count: 2, color: COLORS.HAIRLINE_STRONG, label: "health + test", hollow: true },
+            ]}
+          />
+        </FigureCard>
+        <FigureCard
+          label="the cap, cleared"
+          source="vercel.json"
+          caption="Vercel's Hobby tier caps a deployment at 12 functions. TaskFlow ships one."
+        >
+          <Bullet min={0} max={14} value={1} cap={{ at: 12, label: "Hobby cap · 12" }} valueLabel="1 function" ticks={[0, 6, 12]} />
+        </FigureCard>
+      </div>
+
       <SourceRail>{c.source}</SourceRail>
     </BodyPage>
   );
@@ -121,6 +151,18 @@ export const InsideDataPage: React.FC<PageProps> = (p) => {
         </div>
         <FactGrid facts={c.facts} />
       </div>
+
+      {/* the pinned path — how an unqualified query reaches the right tenant */}
+      <div style={{ marginTop: 20 }}>
+        <FigureCard
+          label="the pinned path · one query"
+          source="lib/config/database.ts:66,72–74"
+          caption="TLS is verified against the inlined Supabase Root 2021 CA, then every connection is pinned to search_path=public — so “FROM tasks” always resolves in the right tenant, never the co-tenant's schema."
+        >
+          <DataPath />
+        </FigureCard>
+      </div>
+
       <SourceRail>{c.source}</SourceRail>
     </BodyPage>
   );
@@ -140,6 +182,31 @@ export const InsideAuthPage: React.FC<PageProps> = (p) => {
         </div>
         <FactGrid facts={c.facts} />
       </div>
+
+      {/* token lifetimes on a log time axis — short access, long refresh */}
+      <div style={{ marginTop: 20 }}>
+        <FigureCard
+          label="token lifetimes · log scale"
+          source="jwt.ts · RefreshTokenService.ts"
+          caption="A short access token (15m) rides alongside a long refresh token (7d); every refresh rotates the pair. Auth endpoints are rate-limited to 5 attempts per 15-minute window."
+        >
+          <LogTimeAxis
+            minMinutes={1}
+            maxMinutes={20160}
+            ticks={[
+              { minutes: 1, label: "1m" },
+              { minutes: 60, label: "1h" },
+              { minutes: 1440, label: "1d" },
+              { minutes: 10080, label: "7d" },
+            ]}
+            markers={[
+              { minutes: 15, label: "access · 15m", sub: "short-lived", color: COLORS.EMERALD_500, above: true },
+              { minutes: 10080, label: "refresh · 7d", sub: "rotated on use", color: COLORS.EMERALD_700, above: true },
+            ]}
+          />
+        </FigureCard>
+      </div>
+
       <SourceRail>{c.source}</SourceRail>
     </BodyPage>
   );
