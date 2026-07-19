@@ -121,6 +121,10 @@ describe('GoogleOAuthService', () => {
           'https://www.googleapis.com/auth/userinfo.profile',
         ],
         prompt: 'consent',
+        // getAuthUrl now requests incremental auth and forwards an optional
+        // state (undefined here) — the Calendar-connect flow relies on both.
+        include_granted_scopes: true,
+        state: undefined,
       });
     });
   });
