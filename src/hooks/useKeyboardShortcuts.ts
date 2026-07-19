@@ -6,6 +6,8 @@ interface KeyboardShortcutsOptions {
   onOpenSettings: () => void;
   onOpenHelp: () => void;
   onLogout: () => void;
+  /** When false, none of these shortcuts are bound (governed by settings). */
+  enabled?: boolean;
 }
 
 /**
@@ -17,10 +19,12 @@ export function useKeyboardShortcuts({
   onOpenSettings,
   onOpenHelp,
   onLogout,
+  enabled = true,
 }: KeyboardShortcutsOptions) {
   const { logout } = useAuthStore();
 
   useEffect(() => {
+    if (!enabled) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check if Cmd (Mac) or Ctrl (Windows/Linux) is pressed
       const isModifierPressed = event.metaKey || event.ctrlKey;
@@ -81,7 +85,7 @@ export function useKeyboardShortcuts({
     return () => {
       document.removeEventListener('keydown', handleKeyDown, { capture: true });
     };
-  }, [onOpenProfile, onOpenSettings, onOpenHelp, onLogout, logout]);
+  }, [enabled, onOpenProfile, onOpenSettings, onOpenHelp, onLogout, logout]);
 }
 
 /**
