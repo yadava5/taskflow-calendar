@@ -157,16 +157,26 @@ function ParseShowcase() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    // Respect reduced-motion: hold on the first example instead of cross-fading.
-    if (prefersReducedMotion()) return;
+    // Cycle both examples for everyone. Under prefers-reduced-motion we still
+    // advance — we just swap instantly instead of cross-fading, so the story
+    // is never frozen on a single example (motion pref must not cost content).
+    const reduce = prefersReducedMotion();
+    let swapTimer: ReturnType<typeof window.setTimeout> | undefined;
     const id = window.setInterval(() => {
+      if (reduce) {
+        setIndex((i) => (i + 1) % EXAMPLES.length);
+        return;
+      }
       setVisible(false);
-      window.setTimeout(() => {
+      swapTimer = window.setTimeout(() => {
         setIndex((i) => (i + 1) % EXAMPLES.length);
         setVisible(true);
       }, 260);
     }, 5200);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+      if (swapTimer) window.clearTimeout(swapTimer);
+    };
   }, []);
 
   const ex = EXAMPLES[index];
