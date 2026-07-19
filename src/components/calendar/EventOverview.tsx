@@ -3,6 +3,8 @@ import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { useCalendars } from '@/hooks/useCalendars';
+import { useCalendarCommandStore } from '@/stores/calendarCommandStore';
+import { useUIStore } from '@/stores/uiStore';
 import { type CalendarEvent } from '@shared/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +27,18 @@ const EventOverviewComponent: React.FC<EventOverviewProps> = ({
 }) => {
   const { data: calendars = [] } = useCalendars();
   const { data: allEvents = [] } = useEvents({}, { enabled: true });
+  const dispatchCalendar = useCalendarCommandStore((s) => s.dispatch);
+  const setCurrentView = useUIStore((s) => s.setCurrentView);
+
+  // Open an event from the sidebar overview: switch to the calendar and let
+  // RightPane's command effect navigate to it and open the display dialog.
+  const openEvent = React.useCallback(
+    (event: CalendarEvent) => {
+      setCurrentView('calendar');
+      dispatchCalendar({ type: 'openEvent', event });
+    },
+    [setCurrentView, dispatchCalendar]
+  );
 
   // Filter events to get visible calendar events only
   const visibleCalendarNames = calendars
@@ -121,8 +135,17 @@ const EventOverviewComponent: React.FC<EventOverviewProps> = ({
               {events.map((event) => (
                 <div
                   key={event.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => openEvent(event)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      openEvent(event);
+                    }
+                  }}
                   className={cn(
-                    'flex items-center gap-3 py-2 px-3 rounded-md shadow-sm hover:shadow-md transition-all duration-200 ease-out group cursor-pointer'
+                    'flex items-center gap-3 py-2 px-3 rounded-md shadow-sm hover:shadow-md transition-all duration-200 ease-out group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring'
                   )}
                   style={{
                     backgroundColor: `${getEventColor(event.calendarName || '')}1A`,
