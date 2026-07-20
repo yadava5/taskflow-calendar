@@ -30,6 +30,15 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
   const [activeThumb, setActiveThumb] = React.useState<'start' | 'end' | null>(
     null
   );
+  // Tracks which thumb currently has keyboard focus so the *visible* label
+  // handle (not the invisible native input sitting underneath it) can show
+  // a focus ring. Without this, tabbing to the slider moves focus to the
+  // native <input type="range"> but its focus-visible ring is permanently
+  // hidden by the `.thumb-invisible` CSS variant, leaving keyboard users
+  // with no visible indicator of which handle is focused.
+  const [focusedThumb, setFocusedThumb] = React.useState<
+    'start' | 'end' | null
+  >(null);
   // No measuring – keep layout simple and robust
 
   const clamp = React.useCallback(
@@ -130,6 +139,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
           step={step}
           value={start}
           onChange={handleStartChange}
+          onFocus={() => setFocusedThumb('start')}
+          onBlur={() => setFocusedThumb(null)}
           aria-label={ariaLabel[0]}
           className={cn(
             'absolute top-1/2 -translate-y-1/2 appearance-none bg-transparent thumb-invisible z-10 pointer-events-none'
@@ -144,6 +155,8 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
           step={step}
           value={end}
           onChange={handleEndChange}
+          onFocus={() => setFocusedThumb('end')}
+          onBlur={() => setFocusedThumb(null)}
           aria-label={ariaLabel[1]}
           className={cn(
             'absolute top-1/2 -translate-y-1/2 appearance-none bg-transparent thumb-invisible z-10 pointer-events-none'
@@ -152,7 +165,13 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
         />
         {/* Visible draggable labels/handles, OVER the track */}
         <div
-          className="absolute top-1/2 -translate-y-1/2 min-w-[40px] text-center text-[11px] px-2 py-1 rounded-md border bg-card text-foreground shadow-sm whitespace-nowrap -translate-x-1/2 cursor-grab active:cursor-grabbing z-50 select-none"
+          className={cn(
+            'absolute top-1/2 -translate-y-1/2 min-w-[40px] text-center text-[11px] px-2 py-1 rounded-md border bg-card text-foreground shadow-sm whitespace-nowrap -translate-x-1/2 cursor-grab active:cursor-grabbing z-50 select-none',
+            // The native input is the element that actually receives keyboard
+            // focus, but it's visually hidden behind this label. Mirror its
+            // focus state here so keyboard users can see which handle is active.
+            focusedThumb === 'start' && 'ring-[3px] ring-ring/50 border-ring'
+          )}
           style={{ left: clampLeftCss(startPct), touchAction: 'none' }}
           role="slider"
           aria-label={ariaLabel[0]}
@@ -166,7 +185,10 @@ export const RangeSlider: React.FC<RangeSliderProps> = ({
           {formatHour(start)}
         </div>
         <div
-          className="absolute top-1/2 -translate-y-1/2 min-w-[40px] text-center text-[11px] px-2 py-1 rounded-md border bg-card text-foreground shadow-sm whitespace-nowrap -translate-x-1/2 cursor-grab active:cursor-grabbing z-50 select-none"
+          className={cn(
+            'absolute top-1/2 -translate-y-1/2 min-w-[40px] text-center text-[11px] px-2 py-1 rounded-md border bg-card text-foreground shadow-sm whitespace-nowrap -translate-x-1/2 cursor-grab active:cursor-grabbing z-50 select-none',
+            focusedThumb === 'end' && 'ring-[3px] ring-ring/50 border-ring'
+          )}
           style={{ left: clampLeftCss(endPct), touchAction: 'none' }}
           role="slider"
           aria-label={ariaLabel[1]}
