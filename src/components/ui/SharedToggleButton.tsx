@@ -151,10 +151,17 @@ export const SharedToggleButton = <T extends string | number = string>({
             {/* Labels */}
             {showLabels && (
               <>
-                {/* Full label on larger screens */}
+                {/* Full label on larger screens. Only hide it below `sm` when
+                    there's something to replace it with on mobile (a short
+                    label, or an icon that already conveys the option) —
+                    otherwise callers that forget to pass `shortLabel` end up
+                    with a completely blank, unusable button on mobile. */}
                 <span
                   className={cn(
-                    showShortLabelsOnMobile ? 'hidden sm:inline' : 'inline'
+                    showShortLabelsOnMobile &&
+                      (option.shortLabel || IconComponent)
+                      ? 'hidden sm:inline'
+                      : 'inline'
                   )}
                 >
                   {option.label}
