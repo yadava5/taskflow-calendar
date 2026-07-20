@@ -662,20 +662,43 @@ export const CalendarView = ({
               const viewType = args.view?.type ?? '';
               const isMonthOrWeek =
                 viewType === 'dayGridMonth' || viewType === 'timeGridWeek';
-              const shortWeekdayUpper = args.date
-                .toLocaleDateString('en-US', { weekday: 'short' })
-                .toUpperCase();
+              // dayGridMonth's header row is shared across every week-row,
+              // so FullCalendar hands it a placeholder `date` rather than a
+              // real visible date for that column — running it through
+              // toLocaleDateString() in a UTC-negative timezone could roll
+              // it back a calendar day, mislabeling every column (e.g. the
+              // Sunday column reading "SAT"). `dow` (0=Sun..6=Sat) is the
+              // stable, timezone-independent source of truth for which
+              // weekday a header column represents.
+              const WEEKDAY_ABBR = [
+                'SUN',
+                'MON',
+                'TUE',
+                'WED',
+                'THU',
+                'FRI',
+                'SAT',
+              ];
+              const shortWeekdayUpper = WEEKDAY_ABBR[args.dow];
               const labelText = isMonthOrWeek ? shortWeekdayUpper : args.text;
-              const dayNumber = args.date.getDate();
               const isToday = args.isToday;
+              // Month view's header row is one shared row spanning every
+              // week in the grid, so — unlike week/day view — there's no
+              // single correct date for a column to show; each day already
+              // carries its own number in the grid cell below. Only render
+              // the number badge where `args.date` names one real date.
+              const showDayNumber = viewType !== 'dayGridMonth';
+              const dayNumber = args.date.getDate();
               return (
                 <div className="day-header-container">
                   <span className="day-header-name">{labelText}</span>
-                  <span
-                    className={`day-header-number ${isToday ? 'today' : ''}`}
-                  >
-                    {dayNumber}
-                  </span>
+                  {showDayNumber && (
+                    <span
+                      className={`day-header-number ${isToday ? 'today' : ''}`}
+                    >
+                      {dayNumber}
+                    </span>
+                  )}
                 </div>
               );
             }}
