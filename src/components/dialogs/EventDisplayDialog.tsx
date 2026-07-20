@@ -330,7 +330,7 @@ export function EventDisplayDialog({
       {/* Dialog (center modal) - only open when open=true AND peekMode='center' */}
       <Dialog open={open && !isSheetMode} onOpenChange={onOpenChange}>
         <DialogContent
-          className="sm:max-w-[400px] overflow-hidden"
+          className="sm:max-w-[440px] overflow-hidden"
           showCloseButton={false}
         >
           <DialogTitle className="sr-only">{event.title}</DialogTitle>
