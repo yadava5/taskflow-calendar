@@ -414,7 +414,7 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
 }) => {
   const openInsights = useInsightsStore((s) => s.setOpen);
   return (
-    <div className="flex items-center gap-1 bg-muted/30 rounded-md p-1">
+    <div className="flex flex-wrap items-center gap-1 bg-muted/30 rounded-md p-1">
       {/* Animated Search */}
       <AnimatedSearch
         value={searchValue}
