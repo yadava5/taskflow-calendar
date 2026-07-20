@@ -138,7 +138,11 @@ export const CreateTaskDialog: React.FC<CreateTaskDialogProps> = ({
                       {emoji}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-fit p-0" align="start">
+                  {/* z-[60]: this popover opens on top of a Dialog (z-50).
+                      Equal z-index falls back to DOM order, and the dialog's
+                      own content was winning that tie and painting over the
+                      picker, making it look invisible/see-through. */}
+                  <PopoverContent className="w-fit p-0 z-[60]" align="start">
                     <Suspense fallback={<div className="p-4">Loading...</div>}>
                       <EmojiPicker
                         selectedEmoji={emoji}
