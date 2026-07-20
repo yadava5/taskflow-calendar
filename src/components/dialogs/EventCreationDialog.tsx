@@ -817,8 +817,8 @@ function EventCreationDialogContent({
           className={`space-y-6 ${isEditing ? 'mt-0' : 'mt-6'}`}
         >
           {/* Event Name and Calendar Selection */}
-          <div className="flex items-end gap-3 min-w-0">
-            <div className="flex-1">
+          <div className="flex flex-wrap items-end gap-3 min-w-0">
+            <div className="flex-1 min-w-[10rem]">
               <Input
                 ref={titleInputRef}
                 id="event-title"
@@ -841,8 +841,12 @@ function EventCreationDialogContent({
             </div>
           </div>
 
-          {/* Date and Time Selection */}
-          <div className="flex items-center gap-3 min-w-0">
+          {/* Date and Time Selection. Wraps at narrow widths — on a
+              375px-wide sheet, the date input plus two time inputs plus
+              their separator icons need ~470px in a single row, which
+              silently overflowed the dialog with no way to reach the
+              hidden end-time field (or the Create button further down). */}
+          <div className="flex flex-wrap items-center gap-3 min-w-0">
             <CustomDateInput
               value={
                 formData.startDate
