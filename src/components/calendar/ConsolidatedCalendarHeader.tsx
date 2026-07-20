@@ -10,7 +10,6 @@ import {
 } from 'lucide-react';
 import { useInsightsStore } from '@/stores/insightsStore';
 import { format } from 'date-fns';
-import { motion, AnimatePresence } from 'framer-motion';
 import type FullCalendar from '@fullcalendar/react';
 import { Button } from '@/components/ui/Button';
 import { SmoothSidebarTrigger } from '@/components/layout/SmoothSidebarTrigger';
@@ -142,70 +141,73 @@ const AnimatedSearch: React.FC<AnimatedSearchProps> = ({ value, onChange }) => {
     }
   };
 
+  // Plain CSS width/opacity transition on an always-mounted wrapper, rather
+  // than an AnimatePresence-driven mount/exit. The input needs to stay
+  // interactive (typed value, focus) for the whole time it's open, and a
+  // Framer Motion enter/exit pair re-evaluating on every keystroke (each
+  // change re-renders this component) proved unreliable — the wrapper could
+  // get stuck rendered at its `initial`/`exit` keyframe (width 0, opacity 0)
+  // while the input itself stayed mounted and focused, making the box
+  // disappear the moment the user started typing. A CSS transition on
+  // static width classes has no such state machine to desync.
   return (
     <div className="relative">
-      <motion.div
-        className="flex items-center"
-        layout
-        transition={{ duration: 0.25, ease: 'easeOut' }}
-      >
+      <div className="flex items-center">
         {/* Search Icon/Button */}
-        <motion.div layout>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 shrink-0"
+          onClick={isExpanded ? undefined : handleSearchClick}
+          title={isExpanded ? undefined : 'Search events (Ctrl+F)'}
+          aria-label={isExpanded ? undefined : 'Open search input'}
+          aria-expanded={isExpanded}
+        >
+          <Search className="w-3.5 h-3.5" />
+        </Button>
+
+        {/* Expandable Search Input */}
+        <div
+          className={cn(
+            'relative overflow-hidden transition-[width,opacity] duration-[250ms] ease-out',
+            isExpanded
+              ? 'w-[200px] opacity-100'
+              : 'w-0 opacity-0 pointer-events-none'
+          )}
+          role="search"
+          aria-label="Event search"
+          aria-hidden={!isExpanded}
+        >
+          <input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Search events..."
+            tabIndex={isExpanded ? 0 : -1}
+            className="w-[200px] h-7 px-3 pr-8 text-xs bg-background border border-border rounded-md focus:outline-none focus:ring-0 focus:border-border focus-visible:ring-0 focus-visible:outline-none"
+            aria-label="Search events by title or content"
+            aria-describedby="search-help"
+          />
+          {/* Screen reader helper text */}
+          <div id="search-help" className="sr-only">
+            Press Escape to close search, or use Ctrl+F to open
+          </div>
+          {/* Close button */}
           <Button
             variant="ghost"
             size="sm"
-            className="h-7 w-7 p-0"
-            onClick={isExpanded ? undefined : handleSearchClick}
-            title={isExpanded ? undefined : 'Search events (Ctrl+F)'}
-            aria-label={isExpanded ? undefined : 'Open search input'}
-            aria-expanded={isExpanded}
+            className="absolute right-1 top-0.5 h-6 w-6 p-0"
+            onClick={handleClose}
+            title="Close search (Escape)"
+            aria-label="Close search input"
+            tabIndex={isExpanded ? 0 : -1}
           >
-            <Search className="w-3.5 h-3.5" />
+            <X className="w-3 h-3" />
           </Button>
-        </motion.div>
-
-        {/* Expandable Search Input */}
-        <AnimatePresence>
-          {isExpanded && (
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: '200px', opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.25, ease: 'easeOut' }}
-              className="relative overflow-hidden"
-              role="search"
-              aria-label="Event search"
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                value={value}
-                onChange={(e) => onChange(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Search events..."
-                className="w-full h-7 px-3 pr-8 text-xs bg-background border border-border rounded-md focus:outline-none focus:ring-0 focus:border-border focus-visible:ring-0 focus-visible:outline-none"
-                aria-label="Search events by title or content"
-                aria-describedby="search-help"
-              />
-              {/* Screen reader helper text */}
-              <div id="search-help" className="sr-only">
-                Press Escape to close search, or use Ctrl+F to open
-              </div>
-              {/* Close button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute right-1 top-0.5 h-6 w-6 p-0"
-                onClick={handleClose}
-                title="Close search (Escape)"
-                aria-label="Close search input"
-              >
-                <X className="w-3 h-3" />
-              </Button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
+        </div>
+      </div>
     </div>
   );
 };
@@ -658,10 +660,18 @@ export const ConsolidatedCalendarHeader: React.FC<
         className
       )}
     >
-      {/* Three-section layout: Left, Center, Right */}
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+      {/* Three-section layout: Left, Center, Right. Below `sm` the three
+          sections stack instead of sharing one grid row — at 375px the
+          right section alone (Today + the six toolbar icons) needs ~280px,
+          which left no room for the title or view switcher in a single
+          `grid-cols-[1fr_auto_1fr]` row: the title wrapped onto three lines
+          fighting for its slice, and the entire right section (search,
+          insights, filter, prev/next, new-event) silently overflowed past
+          the viewport with no scroll affordance — unreachable, not just
+          ugly. Stacking gives every section the full row width it needs. */}
+      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
         {/* Left Section: Sidebar trigger and title */}
-        <div className="flex items-center gap-3 flex-shrink-0 justify-self-start">
+        <div className="flex items-center gap-3 flex-shrink-0 sm:justify-self-start">
           <SmoothSidebarTrigger position="rightPane" />
           <h2 className="text-lg font-semibold text-foreground">
             {calendarTitle.includes(' ') ? (
@@ -679,7 +689,7 @@ export const ConsolidatedCalendarHeader: React.FC<
         </div>
 
         {/* Center Section: View Switcher (dead center of header) */}
-        <div className="justify-self-center">
+        <div className="sm:justify-self-center">
           <CalendarViewSwitcher
             currentView={currentView}
             onViewChange={onViewChange}
@@ -687,7 +697,7 @@ export const ConsolidatedCalendarHeader: React.FC<
         </div>
 
         {/* Right Section: Today Button and Toolbar */}
-        <div className="flex items-center gap-3 flex-shrink-0 justify-self-end">
+        <div className="flex items-center gap-3 flex-shrink-0 flex-wrap sm:justify-self-end">
           {/* Today Button */}
           <Button
             variant="outline"
