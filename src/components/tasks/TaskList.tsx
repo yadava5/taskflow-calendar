@@ -344,7 +344,12 @@ const TaskListComponent: React.FC<TaskListProps> = ({
                   <span className="text-base">{activeTaskGroup.emoji}</span>
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-fit p-0" align="start">
+              {/* z-[60]: guards against this popover ever opening while a
+                  parent Dialog (z-50) is mounted — equal z-index would fall
+                  back to DOM order and let the dialog's own content paint
+                  over the picker. See CreateTaskDialog.tsx for the confirmed
+                  repro of this exact issue. */}
+              <PopoverContent className="w-fit p-0 z-[60]" align="start">
                 <Suspense fallback={null}>
                   <EmojiPicker
                     selectedEmoji={activeTaskGroup.emoji}
@@ -492,7 +497,12 @@ const TaskListComponent: React.FC<TaskListProps> = ({
                     <span className="text-base">{activeTaskGroup.emoji}</span>
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-fit p-0" align="start">
+                {/* z-[60]: guards against this popover ever opening while a
+                  parent Dialog (z-50) is mounted — equal z-index would fall
+                  back to DOM order and let the dialog's own content paint
+                  over the picker. See CreateTaskDialog.tsx for the confirmed
+                  repro of this exact issue. */}
+                <PopoverContent className="w-fit p-0 z-[60]" align="start">
                   <Suspense fallback={null}>
                     <EmojiPicker
                       selectedEmoji={activeTaskGroup.emoji}
