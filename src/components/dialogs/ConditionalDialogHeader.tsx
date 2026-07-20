@@ -53,7 +53,11 @@ export const ConditionalDialogHeader: React.FC<
   return (
     <div className={cn('space-y-4', className)}>
       <div className="flex items-center justify-between">
-        <Tabs value={activeTab} onValueChange={onTabChange} className="flex-1">
+        <Tabs
+          value={activeTab}
+          onValueChange={onTabChange}
+          className="flex-1 min-w-0"
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="event" aria-label="Create event">
               Event
