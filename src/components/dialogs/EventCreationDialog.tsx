@@ -954,7 +954,12 @@ function EventCreationDialogContent({
                     handleEndsChangeTopRow(val as 'never' | 'on' | 'after')
                   }
                 >
-                  <SelectTrigger className="w-[150px]">
+                  {/* w-[150px] used to clip "After N occurrences…" (its
+                      longest option) with no ellipsis, since the select
+                      value's flex child had no min-w-0 to shrink into — the
+                      text just spilled past the trigger's edge. Wide enough
+                      for the longest label fixes it at the source. */}
+                  <SelectTrigger className="w-[184px]">
                     <SelectValue placeholder="Never ends" />
                   </SelectTrigger>
                   <SelectContent>
