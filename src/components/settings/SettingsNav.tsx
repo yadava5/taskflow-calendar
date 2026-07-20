@@ -69,12 +69,12 @@ export function SettingsNav({
 
   return (
     <nav
-      className="space-y-3"
+      className="flex flex-row items-center gap-2 overflow-x-auto sm:flex-col sm:items-stretch sm:gap-0 sm:space-y-3 sm:overflow-visible"
       role="navigation"
       aria-label="Settings navigation"
     >
       {/* Profile Section */}
-      <div className="space-y-1">
+      <div className="flex shrink-0 items-center gap-2 sm:block sm:shrink sm:space-y-1">
         <button
           onClick={() => onSectionChange('profile')}
           className={cn(
@@ -82,14 +82,14 @@ export function SettingsNav({
             activeSection === 'profile'
               ? 'bg-muted hover:bg-muted text-foreground'
               : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground',
-            'w-full justify-start h-auto p-3 flex items-center gap-3'
+            'w-auto sm:w-full justify-start h-auto p-3 flex items-center gap-3 shrink-0'
           )}
         >
           <Avatar className="size-8">
             <AvatarImage src={profileData.picture} alt={profileData.name} />
             <AvatarFallback>{getInitials(profileData.name)}</AvatarFallback>
           </Avatar>
-          <div className="text-left flex-1 min-w-0">
+          <div className="text-left min-w-0 hidden sm:block sm:flex-1">
             <div className="font-medium text-sm truncate">
               {profileData.name}
             </div>
@@ -99,11 +99,12 @@ export function SettingsNav({
           </div>
         </button>
 
-        <Separator />
+        <Separator orientation="vertical" className="h-8 sm:hidden" />
+        <Separator className="hidden sm:block" />
       </div>
 
       {/* Other Settings Sections */}
-      <div className="space-y-1">
+      <div className="flex shrink-0 items-center gap-2 sm:block sm:shrink sm:space-y-1">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeSection === item.id;
@@ -117,16 +118,19 @@ export function SettingsNav({
                 isActive
                   ? 'bg-muted hover:bg-muted text-foreground'
                   : 'hover:bg-muted/50 text-muted-foreground hover:text-foreground',
-                'w-full justify-start h-auto p-3 flex items-center gap-3'
+                'w-auto sm:w-full justify-start h-auto p-3 flex items-center gap-3 shrink-0'
               )}
             >
               <Icon className="h-4 w-4 shrink-0" />
-              <div className="text-left flex-1 min-w-0">
+              <div className="text-left min-w-0 hidden sm:block sm:flex-1">
                 <div className="font-medium text-sm">{item.title}</div>
                 <div className="text-xs text-muted-foreground truncate">
                   {item.description}
                 </div>
               </div>
+              <span className="text-sm font-medium sm:hidden">
+                {item.title}
+              </span>
             </button>
           );
         })}
