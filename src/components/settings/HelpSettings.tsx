@@ -49,13 +49,13 @@ export function HelpSettings() {
               return (
                 <div
                   key={item.title}
-                  className="flex items-center justify-between p-4 border rounded-lg"
+                  className="flex flex-wrap items-center justify-between gap-3 p-4 border rounded-lg"
                 >
-                  <div className="flex items-center space-x-4">
-                    <div className="p-2 bg-muted rounded-md">
+                  <div className="flex items-center space-x-4 min-w-0">
+                    <div className="p-2 bg-muted rounded-md shrink-0">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <h4 className="font-medium">{item.title}</h4>
                       <p className="text-sm text-muted-foreground">
                         {item.description}
@@ -65,6 +65,7 @@ export function HelpSettings() {
                   <Button
                     variant="outline"
                     size="sm"
+                    className="shrink-0"
                     onClick={() => window.open(item.href, '_blank')}
                   >
                     {item.action}
