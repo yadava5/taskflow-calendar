@@ -31,6 +31,10 @@ import cors from 'cors';
 import { getAllServices, initServices } from '../lib/services/index';
 import { authService } from '../packages/backend/src/services/AuthService';
 import { refreshTokenService } from '../packages/backend/src/services/RefreshTokenService';
+import {
+  verifyToken,
+  extractTokenFromHeader,
+} from '../packages/backend/src/utils/jwt';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -558,6 +562,32 @@ app.post('/api/auth/logout', async (req, res) => {
     res.json({ success: true, data: { message: 'Logged out successfully' } });
   } catch {
     res.json({ success: true, data: { message: 'Logged out successfully' } });
+  }
+});
+
+// GET /api/auth/verify — mirrors server-handlers/auth/verify.ts so a
+// persisted session (JWT in localStorage) survives a page reload against
+// the local dev API, not just the deployed catch-all dispatcher.
+app.get('/api/auth/verify', async (req, res) => {
+  const token = extractTokenFromHeader(req.headers.authorization as string);
+  if (!token) {
+    return res.status(401).json({ success: false, valid: false });
+  }
+  try {
+    const payload = await verifyToken(token);
+    if (payload.type !== 'access') {
+      return res.status(401).json({ success: false, valid: false });
+    }
+    const user = await authService.getUserById(payload.userId);
+    if (!user) {
+      return res.status(401).json({ success: false, valid: false });
+    }
+    res.status(200).json({
+      success: true,
+      data: { user: { id: user.id, email: user.email, name: user.name } },
+    });
+  } catch {
+    res.status(401).json({ success: false, valid: false });
   }
 });
 
