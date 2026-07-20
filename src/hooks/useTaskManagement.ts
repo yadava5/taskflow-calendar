@@ -7,6 +7,35 @@ import { UseMutationResult } from '@tanstack/react-query';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
 
+// Legacy/foreign data can store a named icon identifier (e.g. "briefcase")
+// in the same column the emoji-mart picker uses for a real emoji glyph. If
+// we blindly render that string, users see the literal word "briefcase"
+// next to their list name instead of a glyph. Map the known named-icon
+// identifiers to an equivalent emoji, and otherwise trust the stored value
+// only when it actually looks like an emoji/symbol (non-ASCII) rather than
+// plain text.
+const NAMED_ICON_TO_EMOJI: Record<string, string> = {
+  folder: '📁',
+  briefcase: '💼',
+  home: '🏠',
+  heart: '❤️',
+  star: '⭐',
+  target: '🎯',
+  bookmark: '🔖',
+  flag: '🚩',
+  'check-square': '✅',
+};
+
+function normalizeListEmoji(value: unknown, fallback = '📁'): string {
+  const str = typeof value === 'string' ? value.trim() : '';
+  if (!str) return fallback;
+  const key = str.toLowerCase();
+  if (key in NAMED_ICON_TO_EMOJI) return NAMED_ICON_TO_EMOJI[key];
+  // Plain printable-ASCII text isn't a renderable emoji glyph; anything
+  // else (actual emoji, unicode symbols) is passed through as-is.
+  return /^[\x20-\x7E]*$/.test(str) ? fallback : str;
+}
+
 interface CreateTaskData {
   title: string;
   taskListId?: string;
@@ -170,7 +199,7 @@ export function useTaskManagement(
         (item: Record<string, unknown>) => ({
           id: String(item.id),
           name: String(item.name ?? 'Tasks'),
-          emoji: String(item.icon ?? '📁'),
+          emoji: normalizeListEmoji(item.icon),
           color: String(item.color ?? '#3b82f6'),
           description: String(item.description ?? ''),
         })
