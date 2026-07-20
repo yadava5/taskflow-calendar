@@ -91,10 +91,12 @@ export function SettingsDialog({
           <DialogTitle className="text-xl font-semibold">Settings</DialogTitle>
         </DialogHeader>
 
-        <div className="flex min-h-0 overflow-hidden">
-          {/* Navigation Sidebar */}
-          <aside className="w-64 border-r bg-muted/30 p-4 overflow-auto">
-            <div className="space-y-1">
+        <div className="flex flex-col sm:flex-row min-h-0 overflow-hidden">
+          {/* Navigation Sidebar: a horizontal scrollable pill bar under sm,
+              a fixed-width vertical sidebar at sm and up. The old unconditional
+              w-64 crushed the content pane to ~90px on a 375px-wide dialog. */}
+          <aside className="w-full sm:w-64 shrink-0 border-b sm:border-b-0 sm:border-r bg-muted/30 p-3 sm:p-4 overflow-x-auto sm:overflow-y-auto sm:overflow-x-visible">
+            <div className="sm:space-y-1">
               <SettingsNav
                 activeSection={activeSection}
                 onSectionChange={setActiveSection}
@@ -103,7 +105,7 @@ export function SettingsDialog({
           </aside>
 
           {/* Content Area */}
-          <div className="flex-1 min-h-0 overflow-auto">
+          <div className="flex-1 min-w-0 min-h-0 overflow-auto">
             <div className="p-6">
               <div className="mb-2 space-y-1">
                 <h2 className="text-lg font-semibold">{getSectionTitle()}</h2>
