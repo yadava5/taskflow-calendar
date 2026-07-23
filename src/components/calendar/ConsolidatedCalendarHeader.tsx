@@ -7,6 +7,7 @@ import {
   Filter,
   X,
   BarChart3,
+  Video,
 } from 'lucide-react';
 import { useInsightsStore } from '@/stores/insightsStore';
 import { format } from 'date-fns';
@@ -56,6 +57,8 @@ export interface ConsolidatedCalendarHeaderProps {
   onPrevClick: () => void;
   onNextClick: () => void;
   onCreateEvent: () => void;
+  /** Open the "Schedule a Google meeting" dialog (optional). */
+  onScheduleMeeting?: () => void;
   className?: string;
   calendarRef?: React.RefObject<FullCalendar | null>;
   searchValue?: string;
@@ -219,6 +222,7 @@ interface CalendarToolbarProps {
   onPrevClick: () => void;
   onNextClick: () => void;
   onCreateEvent: () => void;
+  onScheduleMeeting?: () => void;
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   filters?: CalendarFilterState;
@@ -454,6 +458,7 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onPrevClick,
   onNextClick,
   onCreateEvent,
+  onScheduleMeeting,
   searchValue = '',
   onSearchChange,
   filters = EMPTY_CALENDAR_FILTERS,
@@ -527,6 +532,26 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           <p>Next period</p>
         </TooltipContent>
       </Tooltip>
+
+      {/* Schedule a Google meeting (invite people + optional Meet link) */}
+      {onScheduleMeeting && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onScheduleMeeting}
+              aria-label="Schedule a Google meeting"
+              className="h-7 w-7 p-0"
+            >
+              <Video className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Schedule a meeting</p>
+          </TooltipContent>
+        </Tooltip>
+      )}
 
       {/* New Event Plus Button with glisten effect */}
       <Tooltip>
@@ -659,6 +684,7 @@ export const ConsolidatedCalendarHeader: React.FC<
   onPrevClick,
   onNextClick,
   onCreateEvent,
+  onScheduleMeeting,
   className,
   calendarRef,
   searchValue = '',
@@ -769,6 +795,7 @@ export const ConsolidatedCalendarHeader: React.FC<
             onPrevClick={onPrevClick}
             onNextClick={onNextClick}
             onCreateEvent={onCreateEvent}
+            onScheduleMeeting={onScheduleMeeting}
             searchValue={searchValue}
             onSearchChange={onSearchChange}
             filters={filters}
