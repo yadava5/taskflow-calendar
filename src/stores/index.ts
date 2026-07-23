@@ -10,3 +10,6 @@ export type { GoogleAuthTokens, GoogleUserInfo } from './authStore';
 
 export { useCalendarSettingsStore } from './calendarSettingsStore';
 export type { TimeRangeMode } from './calendarSettingsStore';
+
+export { useProfileOverridesStore } from './profileOverridesStore';
+export type { ProfileOverride } from './profileOverridesStore';
