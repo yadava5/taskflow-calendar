@@ -9,7 +9,10 @@
  * under the consolidated dispatcher and the filesystem router.
  */
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { verifyToken, extractTokenFromHeader } from '../../packages/backend/src/utils/jwt.js';
+import {
+  verifyToken,
+  extractTokenFromHeader,
+} from '../../packages/backend/src/utils/jwt.js';
 import { authService } from '../../packages/backend/src/services/AuthService.js';
 
 export default async function verify(req: VercelRequest, res: VercelResponse) {
