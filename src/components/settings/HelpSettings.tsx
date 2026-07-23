@@ -6,30 +6,34 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/Button';
-import { ExternalLink, Mail, MessageCircle, Book } from 'lucide-react';
+import { ExternalLink, Bug, Github, BookOpen } from 'lucide-react';
+
+// The project's real, public destinations. Keep these in sync with the repo.
+const REPO_URL = 'https://github.com/yadava5/taskflow-calendar';
 
 export function HelpSettings() {
   const helpItems = [
     {
-      title: 'Documentation',
-      description: 'Comprehensive guides and tutorials',
-      icon: Book,
-      action: 'View Docs',
-      href: 'https://developer.mozilla.org',
+      title: 'System Card',
+      description:
+        'How TaskFlow works, end to end — the parser, the stack, the guarantees',
+      icon: BookOpen,
+      action: 'Open',
+      href: '/system-card',
     },
     {
-      title: 'Contact Support',
-      description: 'Get help from our support team',
-      icon: Mail,
-      action: 'Contact Us',
-      href: 'mailto:support@example.com',
+      title: 'Source Code',
+      description: 'Browse the full source on GitHub',
+      icon: Github,
+      action: 'View Repo',
+      href: REPO_URL,
     },
     {
-      title: 'Community',
-      description: 'Join our community discussions',
-      icon: MessageCircle,
-      action: 'Join Community',
-      href: 'https://stackoverflow.com',
+      title: 'Report an Issue',
+      description: 'Found a bug or have a request? Open an issue',
+      icon: Bug,
+      action: 'Open Issues',
+      href: `${REPO_URL}/issues`,
     },
   ];
 
@@ -39,7 +43,7 @@ export function HelpSettings() {
         <CardHeader>
           <CardTitle>Help & Support</CardTitle>
           <CardDescription>
-            Get help, find documentation, and contact support
+            Learn how TaskFlow works, read the source, or report an issue
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -66,7 +70,9 @@ export function HelpSettings() {
                     variant="outline"
                     size="sm"
                     className="shrink-0"
-                    onClick={() => window.open(item.href, '_blank')}
+                    onClick={() =>
+                      window.open(item.href, '_blank', 'noopener,noreferrer')
+                    }
                   >
                     {item.action}
                     <ExternalLink className="ml-2 h-3 w-3" />
@@ -88,10 +94,6 @@ export function HelpSettings() {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Version:</span>
               <span>1.0.0</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Last Updated:</span>
-              <span>{new Date().toLocaleDateString()}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Environment:</span>
