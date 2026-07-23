@@ -239,7 +239,7 @@ export const InsideDispatchPage: React.FC<PageProps> = (p) => {
         <FigureCard
           label="the cap, cleared"
           source="vercel.json"
-          caption="Vercel's Hobby tier caps a deployment at 12 functions. TaskFlow ships one."
+          caption="Vercel's Hobby tier caps a deployment at 12 functions. Cadence ships one."
         >
           <Bullet
             min={0}
