@@ -369,12 +369,18 @@ export const TaskControls: React.FC<TaskControlsProps> = ({
   return (
     <div
       className={cn(
-        'grid grid-cols-[1fr_auto_1fr] items-center gap-4',
+        // Below `sm` the three sections stack instead of sharing one grid row.
+        // At 375px the right section alone (search, sort, filter, show-completed,
+        // add-pane, add-task) needs ~230px; in a single `grid-cols-[1fr_auto_1fr]`
+        // row it silently overflowed past the viewport with no scroll — the
+        // primary actions were unreachable. Stacking gives each section the full
+        // row width it needs.
+        'flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4',
         className
       )}
     >
       {/* Left Section - Sidebar Trigger + Today title */}
-      <div className="flex items-center gap-3 justify-self-start">
+      <div className="flex items-center gap-3 sm:justify-self-start">
         <SmoothSidebarTrigger position="rightPane" />
         <h2 className="text-lg font-semibold text-foreground">
           {todayTitle.includes(' ') ? (
@@ -392,7 +398,7 @@ export const TaskControls: React.FC<TaskControlsProps> = ({
       </div>
 
       {/* Center Section - View Mode Toggle */}
-      <div className="justify-self-center">
+      <div className="flex justify-center sm:block sm:justify-self-center">
         <SharedToggleButton
           currentValue={taskViewMode}
           options={VIEW_MODE_OPTIONS}
@@ -404,7 +410,7 @@ export const TaskControls: React.FC<TaskControlsProps> = ({
       </div>
 
       {/* Right Section - Icon-Only Controls */}
-      <div className="flex items-center gap-1 justify-self-end">
+      <div className="flex flex-wrap items-center justify-end gap-1 sm:flex-nowrap sm:justify-self-end">
         {/* Grouped Action Buttons */}
         <div className="flex items-center gap-1 bg-muted/30 rounded-md p-1">
           {/* Animated Search */}
