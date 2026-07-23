@@ -17,6 +17,10 @@ export default tseslint.config([
     'shared/**',
     '.shree/**',
     'screenshots/**',
+    // Standalone System Card booklet: its own package.json / tsconfig / vite
+    // toolchain (own `tsc --noEmit && vite build`); not a root workspace and
+    // not imported by the app, so the root config has no parser block for it.
+    'booklet/**',
   ]),
 
   // Frontend configuration
