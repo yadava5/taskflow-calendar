@@ -316,9 +316,9 @@ function CommandPaletteBody({ onClose }: { onClose: () => void }) {
 
   const runNewTask = useCallback(() => {
     onClose();
-    setCurrentView('calendar');
-    useSettingsStore.getState().setCalendarViewInputExpanded(true);
-    // Let the calendar view + collapsible quick-add mount, then focus it.
+    setCurrentView('task');
+    useSettingsStore.getState().setTaskViewInputExpanded(true);
+    // Let the task view + collapsible quick-add mount, then focus it.
     window.setTimeout(() => {
       const el = document.querySelector<HTMLInputElement>(
         'input[aria-label="Smart task input with highlighting"]'
