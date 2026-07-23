@@ -66,6 +66,22 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+/**
+ * Default start for a brand-new event (no seeded slot): the next sensible top
+ * of the hour rather than the current wall-clock minute. On the hour already
+ * (e.g. 14:00) it stays; otherwise it rounds up (14:37 → 15:00), so the
+ * prefilled time is a clean, schedulable slot instead of "3:47 PM".
+ */
+function nextSensibleHour(from: Date = new Date()): Date {
+  const d = new Date(from);
+  d.setSeconds(0, 0);
+  if (d.getMinutes() > 0) {
+    d.setMinutes(0);
+    d.setHours(d.getHours() + 1);
+  }
+  return d;
+}
+
 interface EventCreationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -248,15 +264,15 @@ function EventCreationDialogContent({
 
   // Form state with enhanced multi-day support
   const [formData, setFormData] = useState<EventFormData>(() => {
-    const now = new Date();
-    const oneHourLater = addHours(now, 1);
+    const defaultStart = nextSensibleHour();
+    const defaultEnd = addHours(defaultStart, 1);
 
     const startBase =
       (initialEventData?.occurrenceInstanceStart ?? initialEventData?.start) ||
-      now;
+      defaultStart;
     const endBase =
       (initialEventData?.occurrenceInstanceEnd ?? initialEventData?.end) ||
-      oneHourLater;
+      defaultEnd;
 
     return {
       title: initialEventData?.title || '',
@@ -319,15 +335,15 @@ function EventCreationDialogContent({
 
   // Reset form when initial data changes
   React.useEffect(() => {
-    const now = new Date();
-    const oneHourLater = addHours(now, 1);
+    const defaultStart = nextSensibleHour();
+    const defaultEnd = addHours(defaultStart, 1);
 
     const startBase =
       (initialEventData?.occurrenceInstanceStart ?? initialEventData?.start) ||
-      now;
+      defaultStart;
     const endBase =
       (initialEventData?.occurrenceInstanceEnd ?? initialEventData?.end) ||
-      oneHourLater;
+      defaultEnd;
 
     setFormData({
       title: initialEventData?.title || '',
