@@ -349,11 +349,15 @@ function MagneticLink({
   className,
   children,
   strength = 0.3,
+  target,
+  rel,
 }: {
   to: string;
   className?: string;
   children: React.ReactNode;
   strength?: number;
+  target?: string;
+  rel?: string;
 }) {
   const ref = useRef<HTMLAnchorElement>(null);
   const reduced = useReducedMotion();
@@ -383,6 +387,8 @@ function MagneticLink({
     <Link
       ref={ref}
       to={to}
+      target={target}
+      rel={rel}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
       className={cn(
@@ -904,42 +910,44 @@ function ParseShowcase() {
                     <p className="border-b border-white/[0.05] py-1.5 text-center font-mono text-[0.6rem] tracking-widest text-[#63666c]">
                       {day}
                     </p>
-                    {ex.filed.day === i && (
-                      <div
-                        className={cn(
-                          'absolute inset-x-1 rounded-md px-1.5 py-1 transition-all duration-500 ease-out will-change-transform motion-reduce:transition-none',
-                          ex.filed.kind === 'event'
-                            ? 'border border-emerald-400/40 bg-emerald-400/15'
-                            : 'border border-dashed border-emerald-400/40 bg-emerald-400/[0.07]',
-                          filedIn
-                            ? 'opacity-100 translate-y-0 scale-100'
-                            : 'opacity-0 -translate-y-2 scale-95'
-                        )}
-                        style={{ top: ex.filed.top }}
-                      >
-                        <p className="flex items-center gap-1 truncate text-[0.65rem] font-medium text-emerald-200">
-                          {ex.filed.kind === 'task' && (
-                            <Flag className="h-2.5 w-2.5 shrink-0" />
+                    <div className="relative h-[calc(100%-1.75rem)]">
+                      {ex.filed.day === i && (
+                        <div
+                          className={cn(
+                            'absolute inset-x-1 rounded-md px-1.5 py-1 transition-all duration-500 ease-out will-change-transform motion-reduce:transition-none',
+                            ex.filed.kind === 'event'
+                              ? 'border border-emerald-400/40 bg-emerald-400/15'
+                              : 'border border-dashed border-emerald-400/40 bg-emerald-400/[0.07]',
+                            filedIn
+                              ? 'opacity-100 translate-y-0 scale-100'
+                              : 'opacity-0 -translate-y-2 scale-95'
                           )}
-                          {ex.filed.label}
-                        </p>
-                        <p className="truncate font-mono text-[0.55rem] text-emerald-400/70">
-                          {ex.filed.detail}
-                        </p>
-                        {/* hover-detail — the full filed record on demand */}
-                        <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-1.5 hidden w-max max-w-[10rem] -translate-x-1/2 rounded-md border border-emerald-400/30 bg-[#0a0a0b] px-2 py-1.5 text-left shadow-xl group-hover/cell:block">
-                          <p className="font-mono text-[0.55rem] uppercase tracking-widest text-emerald-500/80">
-                            filed · {ex.filed.kind}
-                          </p>
-                          <p className="mt-0.5 text-[0.62rem] text-emerald-100">
+                          style={{ top: ex.filed.top }}
+                        >
+                          <p className="flex items-center gap-1 truncate text-[0.65rem] font-medium text-emerald-200">
+                            {ex.filed.kind === 'task' && (
+                              <Flag className="h-2.5 w-2.5 shrink-0" />
+                            )}
                             {ex.filed.label}
                           </p>
-                          <p className="font-mono text-[0.55rem] text-emerald-400/70">
+                          <p className="truncate font-mono text-[0.55rem] text-emerald-400/70">
                             {ex.filed.detail}
                           </p>
+                          {/* hover-detail — the full filed record on demand */}
+                          <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-1.5 hidden w-max max-w-[10rem] -translate-x-1/2 rounded-md border border-emerald-400/30 bg-[#0a0a0b] px-2 py-1.5 text-left shadow-xl group-hover/cell:block">
+                            <p className="font-mono text-[0.55rem] uppercase tracking-widest text-emerald-500/80">
+                              filed · {ex.filed.kind}
+                            </p>
+                            <p className="mt-0.5 text-[0.62rem] text-emerald-100">
+                              {ex.filed.label}
+                            </p>
+                            <p className="font-mono text-[0.55rem] text-emerald-400/70">
+                              {ex.filed.detail}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -1224,7 +1232,7 @@ function SignatureEnding() {
                   {target && (
                     <div
                       className={cn(
-                        'absolute inset-x-1 top-3 rounded-md border border-emerald-400/50 bg-emerald-400/15 px-1.5 py-1.5 transition-all duration-500 will-change-transform motion-reduce:transition-none',
+                        'absolute inset-x-1 top-8 rounded-md border border-emerald-400/50 bg-emerald-400/15 px-1.5 py-1.5 transition-all duration-500 will-change-transform motion-reduce:transition-none',
                         snap
                           ? 'translate-y-0 scale-100 opacity-100'
                           : '-translate-y-16 scale-110 opacity-0'
@@ -1458,6 +1466,8 @@ export default function WelcomePage() {
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <MagneticLink
                 to="/login"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-lg bg-[#f7f8f8] px-6 py-3 font-medium text-[#0a0a0b]"
               >
                 Try the live demo <ArrowRight className="h-4 w-4" />
@@ -1651,6 +1661,8 @@ export default function WelcomePage() {
             <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <MagneticLink
                 to="/login"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-6 py-3 font-medium text-[#052e1b]"
               >
                 <CalendarClock className="h-4 w-4" /> Try the live demo
@@ -1675,6 +1687,8 @@ export default function WelcomePage() {
           </p>
           <a
             href="/system-card"
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-3 inline-block font-mono text-[0.65rem] uppercase tracking-widest text-[#63666c] underline-offset-4 transition-colors hover:text-[#8a8f98] hover:underline"
           >
             System Card
