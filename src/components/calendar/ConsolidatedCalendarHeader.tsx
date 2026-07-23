@@ -235,9 +235,24 @@ const CalendarFilterPopover: React.FC<{
   onFiltersChange: (filters: CalendarFilterState) => void;
 }> = ({ filters, onFiltersChange }) => {
   const count = activeFilterCount(filters);
+  // Controlled so Escape reliably closes it. Radix's built-in escape-dismiss
+  // does not fire for this popover (its keydown never reaches the layer here),
+  // so we close it ourselves on Escape while it is open.
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setOpen(false);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => document.removeEventListener('keydown', onKeyDown, true);
+  }, [open]);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <Tooltip>
         <TooltipTrigger asChild>
           <PopoverTrigger asChild>
@@ -273,6 +288,7 @@ const CalendarFilterPopover: React.FC<{
         align="end"
         sideOffset={8}
         collisionPadding={12}
+        onEscapeKeyDown={() => setOpen(false)}
         className="w-[min(20rem,calc(100vw-1.5rem))] max-h-[min(28rem,calc(100vh-5rem))] space-y-4 overflow-y-auto overflow-x-hidden p-4"
       >
         <CalendarFilterBody
@@ -700,11 +716,14 @@ export const ConsolidatedCalendarHeader: React.FC<
           insights, filter, prev/next, new-event) silently overflowed past
           the viewport with no scroll affordance — unreachable, not just
           ugly. Stacking gives every section the full row width it needs. */}
-      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto_1fr] sm:items-center sm:gap-4">
-        {/* Left Section: Sidebar trigger and title */}
-        <div className="flex items-center gap-3 flex-shrink-0 sm:justify-self-start">
+      <div className="flex flex-col gap-3 sm:grid sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-4">
+        {/* Left Section: Sidebar trigger and title. `min-w-0` + a truncating
+            title let this track shrink instead of shoving the right-side
+            toolbar (expanded search + icons) past the viewport edge on narrow
+            desktop widths. */}
+        <div className="flex min-w-0 items-center gap-3 sm:justify-self-start">
           <SmoothSidebarTrigger position="rightPane" />
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="truncate text-lg font-semibold text-foreground">
             {calendarTitle.includes(' ') ? (
               <>
                 <span className="font-bold">{calendarTitle.split(' ')[0]}</span>
@@ -727,8 +746,10 @@ export const ConsolidatedCalendarHeader: React.FC<
           />
         </div>
 
-        {/* Right Section: Today Button and Toolbar */}
-        <div className="flex items-center gap-3 flex-shrink-0 flex-wrap sm:justify-self-end">
+        {/* Right Section: Today Button and Toolbar. Fills its (shrinkable)
+            track and wraps its contents rather than overflowing the viewport
+            when horizontal room runs low. */}
+        <div className="flex flex-wrap items-center justify-end gap-3 sm:justify-self-stretch">
           {/* Today Button */}
           <Button
             variant="outline"
