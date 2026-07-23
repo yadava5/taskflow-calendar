@@ -115,35 +115,44 @@ describe('LeftPane Component', () => {
     });
 
     (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      calendarViewInputExpanded: true,
-      toggleCalendarViewInput: vi.fn(),
-      taskViewMiniCalendarExpanded: true,
-      toggleTaskViewMiniCalendar: vi.fn(),
+      taskViewInputExpanded: true,
+      toggleTaskViewInput: vi.fn(),
+      calendarViewMiniCalendarExpanded: true,
+      toggleCalendarViewMiniCalendar: vi.fn(),
       leftSmartInputTaskListId: null,
       setLeftSmartInputTaskListId: vi.fn(),
       showSidebarTaskAnalytics: false,
     });
   });
 
-  it('renders task list and calendar list in calendar view', async () => {
+  // The left pane must mirror the active top-level view: 'calendar' shows
+  // calendar content (mini calendar + upcoming events + calendar list), 'task'
+  // shows task content (quick-add input + task list + task groups). A prior
+  // regression had these swapped — clicking "Calendar" surfaced the task list
+  // in the sidebar and vice versa.
+  it('shows calendar content (not task content) in calendar view', async () => {
     render(<LeftPane />);
 
-    expect(await screen.findByTestId('task-list')).toBeInTheDocument();
+    // Calendar-aligned content
+    expect(await screen.findByTestId('event-overview')).toBeInTheDocument();
     expect(screen.getByTestId('calendar-list')).toBeInTheDocument();
-    expect(screen.queryByTestId('event-overview')).not.toBeInTheDocument();
+
+    // Task content must NOT leak into the calendar-view sidebar
+    expect(screen.queryByTestId('task-list')).not.toBeInTheDocument();
     expect(screen.queryByTestId('task-group-list')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('smart-task-input')).not.toBeInTheDocument();
   });
 
-  it('renders event overview and task group list in task view', async () => {
+  it('shows task content (not calendar content) in task view', async () => {
     (useUIStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       currentView: 'task',
     });
 
     (useSettingsStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
-      calendarViewInputExpanded: false,
-      toggleCalendarViewInput: vi.fn(),
-      taskViewMiniCalendarExpanded: true,
-      toggleTaskViewMiniCalendar: vi.fn(),
+      taskViewInputExpanded: true,
+      toggleTaskViewInput: vi.fn(),
+      calendarViewMiniCalendarExpanded: false,
+      toggleCalendarViewMiniCalendar: vi.fn(),
       leftSmartInputTaskListId: null,
       setLeftSmartInputTaskListId: vi.fn(),
       showSidebarTaskAnalytics: true,
@@ -151,15 +160,29 @@ describe('LeftPane Component', () => {
 
     render(<LeftPane />);
 
-    expect(screen.getByTestId('event-overview')).toBeInTheDocument();
+    // Task-aligned content
+    expect(await screen.findByTestId('task-list')).toBeInTheDocument();
     expect(screen.getByTestId('task-group-list')).toBeInTheDocument();
     expect(await screen.findByTestId('task-analytics')).toBeInTheDocument();
+
+    // Calendar content must NOT leak into the task-view sidebar
     expect(screen.queryByTestId('calendar-list')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('event-overview')).not.toBeInTheDocument();
   });
 
-  it('renders SmartTaskInput in calendar view when expanded', async () => {
+  it('renders the SmartTaskInput quick-add in task view when expanded', async () => {
+    (useUIStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      currentView: 'task',
+    });
+
     render(<LeftPane />);
 
     expect(await screen.findByTestId('smart-task-input')).toBeInTheDocument();
+  });
+
+  it('does not render the SmartTaskInput quick-add in calendar view', () => {
+    render(<LeftPane />);
+
+    expect(screen.queryByTestId('smart-task-input')).not.toBeInTheDocument();
   });
 });
