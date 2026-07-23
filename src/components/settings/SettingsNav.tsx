@@ -3,7 +3,6 @@ import { buttonVariants } from '@/components/ui/button-variants';
 import {
   Settings2,
   HelpCircle,
-  Shield,
   Sliders,
   Calendar as CalendarIcon,
 } from 'lucide-react';
@@ -30,13 +29,7 @@ const navItems = [
     id: 'preferences' as const,
     title: 'Preferences',
     icon: Settings2,
-    description: 'Workspace and display settings',
-  },
-  {
-    id: 'security' as const,
-    title: 'Security',
-    icon: Shield,
-    description: 'Password and authentication',
+    description: 'Display and formatting',
   },
   {
     id: 'help' as const,
