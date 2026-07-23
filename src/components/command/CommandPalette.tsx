@@ -119,6 +119,11 @@ function eventWhen(ev: CalendarEvent): string {
   }
 }
 
+// Module-level throttle timestamp. Kept outside the component so it is immune
+// to re-renders/re-mounts of CommandPalette (a component-scoped ref reset
+// between rapid presses, letting the guard slip).
+let lastPaletteToggleAt = 0;
+
 /** Public entry point — always mounted in the app shell, owns the ⌘K shortcut. */
 export function CommandPalette() {
   const open = useCommandPaletteStore((s) => s.open);
@@ -133,6 +138,14 @@ export function CommandPalette() {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         e.stopPropagation();
+        // Throttle: rapid ⌘K mashing flipped the Radix dialog open→closed
+        // faster than its 200ms open/close transition, which left an orphan
+        // dialog node and a stuck `body { pointer-events: none }` (whole page
+        // frozen until the next click). Ignoring toggles inside the transition
+        // window keeps the dialog lifecycle from racing itself.
+        const now = Date.now();
+        if (now - lastPaletteToggleAt < 300) return;
+        lastPaletteToggleAt = now;
         toggle();
       }
     };
@@ -141,6 +154,22 @@ export function CommandPalette() {
     return () =>
       document.removeEventListener('keydown', handler, { capture: true });
   }, [toggle, shortcutsEnabled]);
+
+  // Safety net: if a race ever leaves the body pointer-events lock behind after
+  // the palette closes (and no other modal is open), release it so the page
+  // never gets stuck unclickable.
+  useEffect(() => {
+    if (open) return;
+    const t = window.setTimeout(() => {
+      const anyModalOpen = document.querySelector(
+        '[data-slot="dialog-content"][data-state="open"], [role="dialog"][data-state="open"], [role="alertdialog"][data-state="open"]'
+      );
+      if (!anyModalOpen && document.body.style.pointerEvents === 'none') {
+        document.body.style.pointerEvents = '';
+      }
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
