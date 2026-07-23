@@ -105,8 +105,10 @@ export const BaseSidebarPane: React.FC<BaseSidebarPaneProps> = ({
 
         <SidebarSeparator />
 
-        {/* Main Content Area */}
-        <SidebarContent className="flex-1 px-4 py-2">
+        {/* Main Content Area — its own scroll container (own height +
+            overflow-y), isolated from the calendar via overscroll-contain so
+            scrolling the left pane never chains into the calendar grid. */}
+        <SidebarContent className="flex-1 overscroll-contain px-4 py-2">
           {mainContent}
         </SidebarContent>
 
@@ -135,8 +137,11 @@ export const BaseSidebarPane: React.FC<BaseSidebarPaneProps> = ({
         {additionalHeaderContent}
       </SidebarHeader>
 
-      {/* Main Content */}
-      <SidebarContent>
+      {/* Main Content — the left pane is its own scroll container (own
+          height + overflow-y from SidebarContent); overscroll-contain keeps
+          its scroll from chaining into the calendar so the two panes scroll
+          independently. */}
+      <SidebarContent className="overscroll-contain">
         <SidebarGroup>{mainContent}</SidebarGroup>
       </SidebarContent>
 
