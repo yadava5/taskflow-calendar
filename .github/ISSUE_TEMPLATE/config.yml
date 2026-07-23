@@ -1,8 +1,8 @@
 blank_issues_enabled: true
 contact_links:
   - name: 💬 Discussions
-    url: https://github.com/yadava5/taskflow-calendar/discussions
+    url: https://github.com/yadava5/cadence/discussions
     about: Ask questions and discuss ideas
   - name: 📖 Documentation
-    url: https://github.com/yadava5/taskflow-calendar#readme
+    url: https://github.com/yadava5/cadence#readme
     about: Check out the documentation

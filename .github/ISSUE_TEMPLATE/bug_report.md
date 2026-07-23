@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug to help us improve Taskflow Calendar
+about: Report a bug to help us improve Cadence
 title: '[BUG] '
 labels: bug
 assignees: ''
