@@ -10,7 +10,6 @@ import { SettingsNav } from './SettingsNav';
 import { ProfileSettings } from './ProfileSettings';
 import { GeneralSettings } from './GeneralSettings';
 import { PreferencesSettings } from './PreferencesSettings';
-import { SecuritySettings } from './SecuritySettings';
 import { HelpSettings } from './HelpSettings';
 import { CalendarSettings } from './CalendarSettings';
 
@@ -18,7 +17,6 @@ export type SettingsSection =
   | 'general'
   | 'profile'
   | 'preferences'
-  | 'security'
   | 'help'
   | 'calendar';
 
@@ -53,8 +51,6 @@ export function SettingsDialog({
         return <ProfileSettings />;
       case 'preferences':
         return <PreferencesSettings />;
-      case 'security':
-        return <SecuritySettings />;
       case 'help':
         return <HelpSettings />;
       default:
@@ -72,8 +68,6 @@ export function SettingsDialog({
         return 'Profile';
       case 'preferences':
         return 'Preferences';
-      case 'security':
-        return 'Security';
       case 'help':
         return 'Help & Support';
       default:
@@ -115,9 +109,7 @@ export function SettingsDialog({
                   {activeSection === 'profile' &&
                     'Manage your personal information and preferences'}
                   {activeSection === 'preferences' &&
-                    'Customize your workspace and default preferences'}
-                  {activeSection === 'security' &&
-                    'Manage your password and security settings'}
+                    'Customize how information is displayed across the app'}
                   {activeSection === 'help' &&
                     'Get help, documentation, and support'}
                 </p>
