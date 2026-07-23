@@ -22,10 +22,10 @@ export interface SavedTaskPaneConfig {
 
 interface SettingsState {
   dateDisplayMode: DateDisplayMode;
-  /** Expanded/collapsed state of SmartTaskInput in the left pane when in calendar view */
-  calendarViewInputExpanded: boolean;
-  /** Expanded/collapsed state of mini calendar in the left pane when in task view */
-  taskViewMiniCalendarExpanded: boolean;
+  /** Expanded/collapsed state of the SmartTaskInput quick-add in the left pane when in task view */
+  taskViewInputExpanded: boolean;
+  /** Expanded/collapsed state of the mini calendar in the left pane when in calendar view */
+  calendarViewMiniCalendarExpanded: boolean;
   /** Expanded/collapsed state of the main sidebar */
   sidebarExpanded: boolean;
   /** App-level view mode: calendar vs task */
@@ -59,10 +59,10 @@ interface SettingsState {
 
   // Actions
   setDateDisplayMode: (mode: DateDisplayMode) => void;
-  setCalendarViewInputExpanded: (expanded: boolean) => void;
-  toggleCalendarViewInput: () => void;
-  setTaskViewMiniCalendarExpanded: (expanded: boolean) => void;
-  toggleTaskViewMiniCalendar: () => void;
+  setTaskViewInputExpanded: (expanded: boolean) => void;
+  toggleTaskViewInput: () => void;
+  setCalendarViewMiniCalendarExpanded: (expanded: boolean) => void;
+  toggleCalendarViewMiniCalendar: () => void;
   setSidebarExpanded: (expanded: boolean) => void;
   toggleSidebar: () => void;
   setAppViewMode: (view: AppViewMode) => void;
@@ -86,8 +86,8 @@ export const useSettingsStore = create<SettingsState>()(
     persist(
       (set, get) => ({
         dateDisplayMode: 'relative',
-        calendarViewInputExpanded: true,
-        taskViewMiniCalendarExpanded: true,
+        taskViewInputExpanded: true,
+        calendarViewMiniCalendarExpanded: true,
         sidebarExpanded: true,
         appViewMode: 'calendar',
         calendarSubView: 'timeGridWeek',
@@ -113,31 +113,32 @@ export const useSettingsStore = create<SettingsState>()(
 
         setDateDisplayMode: (mode) =>
           set({ dateDisplayMode: mode }, false, 'setDateDisplayMode'),
-        setCalendarViewInputExpanded: (expanded) =>
+        setTaskViewInputExpanded: (expanded) =>
           set(
-            { calendarViewInputExpanded: expanded },
+            { taskViewInputExpanded: expanded },
             false,
-            'setCalendarViewInputExpanded'
+            'setTaskViewInputExpanded'
           ),
-        toggleCalendarViewInput: () =>
+        toggleTaskViewInput: () =>
           set(
-            { calendarViewInputExpanded: !get().calendarViewInputExpanded },
+            { taskViewInputExpanded: !get().taskViewInputExpanded },
             false,
-            'toggleCalendarViewInput'
+            'toggleTaskViewInput'
           ),
-        setTaskViewMiniCalendarExpanded: (expanded) =>
+        setCalendarViewMiniCalendarExpanded: (expanded) =>
           set(
-            { taskViewMiniCalendarExpanded: expanded },
+            { calendarViewMiniCalendarExpanded: expanded },
             false,
-            'setTaskViewMiniCalendarExpanded'
+            'setCalendarViewMiniCalendarExpanded'
           ),
-        toggleTaskViewMiniCalendar: () =>
+        toggleCalendarViewMiniCalendar: () =>
           set(
             {
-              taskViewMiniCalendarExpanded: !get().taskViewMiniCalendarExpanded,
+              calendarViewMiniCalendarExpanded:
+                !get().calendarViewMiniCalendarExpanded,
             },
             false,
-            'toggleTaskViewMiniCalendar'
+            'toggleCalendarViewMiniCalendar'
           ),
         setSidebarExpanded: (expanded) =>
           set({ sidebarExpanded: expanded }, false, 'setSidebarExpanded'),
@@ -208,8 +209,9 @@ export const useSettingsStore = create<SettingsState>()(
         name: 'settings-store',
         partialize: (state) => ({
           dateDisplayMode: state.dateDisplayMode,
-          calendarViewInputExpanded: state.calendarViewInputExpanded,
-          taskViewMiniCalendarExpanded: state.taskViewMiniCalendarExpanded,
+          taskViewInputExpanded: state.taskViewInputExpanded,
+          calendarViewMiniCalendarExpanded:
+            state.calendarViewMiniCalendarExpanded,
           sidebarExpanded: state.sidebarExpanded,
           appViewMode: state.appViewMode,
           calendarSubView: state.calendarSubView,
