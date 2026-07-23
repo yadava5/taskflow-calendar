@@ -110,9 +110,18 @@ export const BackCoverPage: React.FC = () => (
           color: COLORS.ON_DARK_MUTED,
         }}
       >
-        {BACK_COVER.wordmark.split("_")[0]}
-        <span style={{ color: COLORS.STEEL_SUBTLE }}>_</span>
-        {BACK_COVER.wordmark.split("_")[1]}
+        {BACK_COVER.wordmark}
+        <span
+          style={{
+            display: "inline-block",
+            width: 2,
+            height: 11,
+            marginLeft: 3,
+            borderRadius: 1,
+            background: COLORS.EMERALD_400,
+            transform: "translateY(1px)",
+          }}
+        />
       </div>
       <div
         style={{
