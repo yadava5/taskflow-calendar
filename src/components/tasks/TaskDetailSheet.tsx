@@ -179,6 +179,7 @@ export const TaskDetailSheet: React.FC<TaskDetailSheetProps> = ({
               onClose={() => onOpenChange(false)}
               isDeleting={false}
               showPeekToggle={false}
+              entityLabel="task"
             />
           </div>
         </div>
