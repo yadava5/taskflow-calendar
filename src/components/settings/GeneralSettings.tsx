@@ -131,11 +131,23 @@ function GoogleCalendarCard() {
         method: 'POST',
         body: JSON.stringify({}),
       });
-      const payload = await resp.json();
+      const payload = await resp.json().catch(() => null);
       if (!resp.ok) {
-        throw new Error(payload.error?.message || 'Sync failed');
+        // Give the two connection-related failures a clear, actionable message
+        // instead of a silent no-op: 401 = the Cadence session expired; 409 =
+        // Google was never connected (or the grant needs a reconnect).
+        if (resp.status === 401) {
+          throw new Error('Your session expired — sign in again to sync.');
+        }
+        if (resp.status === 409) {
+          throw new Error(
+            payload?.error?.message ||
+              'Connect Google Calendar first, then sync.'
+          );
+        }
+        throw new Error(payload?.error?.message || 'Sync failed');
       }
-      setMessage(`Synced ${payload.data?.synced ?? 0} events from Google.`);
+      setMessage(`Synced ${payload?.data?.synced ?? 0} events from Google.`);
     } catch (error) {
       setMessage((error as Error).message);
     } finally {
@@ -148,8 +160,8 @@ function GoogleCalendarCard() {
       <CardHeader>
         <CardTitle>Connected accounts</CardTitle>
         <CardDescription>
-          Pull your Google Calendar into Cadence (read-only — we never write to
-          your Google account)
+          Connect Google Calendar to sync events into Cadence and schedule
+          Google Meet meetings with email invites
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -178,8 +190,9 @@ function GoogleCalendarCard() {
         </div>
         {message && <p className="text-sm text-muted-foreground">{message}</p>}
         <p className="text-xs text-muted-foreground">
-          Uses Google&apos;s official OAuth with the minimal read-only calendar
-          scope; your Google tokens are stored server-side only.
+          Uses Google&apos;s official OAuth with the least-privilege
+          calendar.events scope (events only — never Gmail or full calendar
+          access); your Google tokens are stored server-side only.
         </p>
       </CardContent>
     </Card>
