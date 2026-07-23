@@ -15,3 +15,9 @@ packages/*/node_modules
 .env.local
 .env.production
 .env.staging
+
+# Standalone System Card booklet sub-project (own toolchain formats itself)
+booklet
+
+# Built System Card assets served statically (minified bundle output)
+public/system-card
