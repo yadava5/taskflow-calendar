@@ -85,13 +85,18 @@ export async function parseQuickAdd(query: string): Promise<QuickAddResult> {
       }
     }
 
-    // Build the title by removing ONLY the date/time and priority spans from the
-    // original text. We deliberately keep people/label/project words (e.g.
-    // "lunch with Sam") in the title — the NLP pipeline's cleanText strips those
-    // too, which would leave a meaningless title like "With".
+    // Build the title by removing the date/time and priority spans, plus any
+    // explicit `#hashtag` spans, from the original text. We deliberately keep
+    // people/label/project words (e.g. "lunch with Sam") in the title — the NLP
+    // pipeline's cleanText strips those too, which would leave a meaningless
+    // title like "With" — but an explicit `#tag` is chip-only, never title text.
     const spansToRemove = result.tags
       .filter(
-        (t) => t.type === 'date' || t.type === 'time' || t.type === 'priority'
+        (t) =>
+          t.type === 'date' ||
+          t.type === 'time' ||
+          t.type === 'priority' ||
+          t.source === 'hashtag-parser'
       )
       .sort((a, b) => b.startIndex - a.startIndex);
     let cleaned = raw;
