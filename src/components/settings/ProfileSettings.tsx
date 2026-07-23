@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -32,6 +32,37 @@ import {
   TIMEZONE_OPTIONS,
 } from '@/hooks/useProfileData';
 import { useAuthStore } from '@/stores/authStore';
+import { useProfileOverridesStore } from '@/stores/profileOverridesStore';
+
+/**
+ * Read an image File and return a downscaled JPEG data-URL (longest side
+ * capped at `max`px). Keeps the persisted avatar tiny so it fits comfortably
+ * in localStorage.
+ */
+function downscaleImageToDataUrl(file: File, max = 256): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read the image file'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not decode the image'));
+      img.onload = () => {
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas is unavailable'));
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 const profileFormSchema = z.object({
   name: z
@@ -55,6 +86,10 @@ export function ProfileSettings() {
   const profileData = useProfileData();
   const formData = useProfileFormData();
   const { authMethod } = useAuthStore();
+  const setProfileOverride = useProfileOverridesStore(
+    (s) => s.setProfileOverride
+  );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -72,21 +107,65 @@ export function ProfileSettings() {
       setUpdateError(null);
       setUpdateSuccess(false);
 
-      // TODO: Implement profile update API call
-      console.log('Profile update data:', data);
+      const userId = profileData.id;
+      if (!userId) {
+        throw new Error('You need to be signed in to update your profile');
+      }
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Persist the edit client-side (no backend profile endpoint exists on
+      // the demo). useProfileData merges these over the auth data, so the
+      // change is real, visible app-wide, and survives a reload.
+      setProfileOverride(userId, {
+        name: data.name.trim(),
+        bio: data.bio?.trim() ? data.bio.trim() : undefined,
+        timezone: data.timezone || undefined,
+      });
+
+      // Reset the form's baseline so "unsaved changes" clears without
+      // discarding the just-saved values.
+      form.reset({
+        name: data.name,
+        bio: data.bio ?? '',
+        timezone: data.timezone ?? '',
+      });
 
       setUpdateSuccess(true);
       setTimeout(() => setUpdateSuccess(false), 3000);
     } catch (error) {
-      console.error('Profile update error:', error);
       setUpdateError(
         error instanceof Error ? error.message : 'Failed to update profile'
       );
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handlePhotoSelected = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    // Allow re-selecting the same file later.
+    event.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setUpdateError('Please choose an image file');
+      return;
+    }
+    const userId = profileData.id;
+    if (!userId) {
+      setUpdateError('You need to be signed in to change your photo');
+      return;
+    }
+    try {
+      setUpdateError(null);
+      const dataUrl = await downscaleImageToDataUrl(file);
+      setProfileOverride(userId, { picture: dataUrl });
+      setUpdateSuccess(true);
+      setTimeout(() => setUpdateSuccess(false), 3000);
+    } catch (error) {
+      setUpdateError(
+        error instanceof Error ? error.message : 'Could not update your photo'
+      );
     }
   };
 
@@ -129,7 +208,20 @@ export function ProfileSettings() {
             )}
           </div>
         </div>
-        <Button variant="outline" size="sm" disabled>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoSelected}
+          aria-hidden="true"
+          tabIndex={-1}
+        />
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+        >
           <Camera className="h-4 w-4 mr-2" />
           Change Photo
         </Button>
