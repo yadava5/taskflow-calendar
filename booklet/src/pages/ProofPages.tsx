@@ -134,7 +134,10 @@ export const ProofTestsPage: React.FC<PageProps> = (p) => {
         style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 6,
+          // 22 (was 6): at 92px/0.95lh the comma's descender hangs ~18px
+          // below the numeral's line box and was striking through the
+          // "TESTS PASSING" caption underneath.
+          gap: 22,
           marginBottom: 18,
         }}
       >
@@ -446,7 +449,10 @@ const ShowcaseCard: React.FC<{ ex: (typeof COVER.examples)[number] }> = ({
                   position: 'absolute',
                   left: 3,
                   right: 3,
-                  top: ex.filed.top,
+                  // Clamp: the day header row is ~17px tall and the filed
+                  // percentages are tuned for the taller cover grids — at
+                  // this 62px cell "12%" (Ship → FRI) lands ON the header.
+                  top: `max(${ex.filed.top}, 20px)`,
                   padding: '4px 5px',
                   borderRadius: 5,
                   border:
