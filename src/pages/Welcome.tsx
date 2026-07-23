@@ -31,7 +31,7 @@ import { cn } from '@/lib/utils';
  * The page is layered with restrained, reduced-motion-safe micro-interactions
  * — a living token→chip background, a cursor-lit signature card, magnetic CTAs,
  * count-up receipts, a decoding headline, a hidden quick-parse (press "/"), and
- * a signature finale where one sentence collapses into the task_flow mark.
+ * a signature finale where one sentence collapses into the Cadence mark.
  * Every flourish degrades to a clean static state under prefers-reduced-motion.
  *
  * Every number on this page is verified against the repo; nothing is invented.
@@ -548,19 +548,86 @@ function DecodeText({ text, className }: { text: string; className?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
-/* CursorWordmark — the task_flow mark, its letters lifting toward the  */
-/* cursor (restraint borrowed from shreechaturvedi.com: opacity + a     */
-/* few pixels of rise, never a circus). Reduced motion → it sits still. */
+/* CadenceTile — the caret-on-timeline logomark, drawn inline so it can  */
+/* animate. An emerald caret stands over a hairline timeline; `caretLand` */
+/* plays the one-shot "downbeat" (used by the finale), while in the nav   */
+/* the same beat fires on hover via CSS. Always-dark chip, one accent —   */
+/* the app's house rule. Decorative: the adjacent text is the a11y name.  */
 /* ------------------------------------------------------------------ */
-function CursorWordmark() {
+function CadenceTile({
+  px = 22,
+  caretLand = false,
+}: {
+  px?: number;
+  caretLand?: boolean;
+}) {
+  return (
+    <svg
+      width={px}
+      height={px}
+      viewBox="0 0 48 48"
+      fill="none"
+      aria-hidden
+      className="shrink-0"
+    >
+      <rect
+        x="0.75"
+        y="0.75"
+        width="46.5"
+        height="46.5"
+        rx="12"
+        fill="#0a0a0b"
+        stroke="rgba(128,128,128,0.35)"
+        strokeWidth="1"
+      />
+      <g strokeLinecap="round" strokeLinejoin="round">
+        <path
+          d="M10 33 H38"
+          stroke="#f7f8f8"
+          strokeOpacity="0.82"
+          strokeWidth="2"
+        />
+        <path
+          d="M15 30.5 V33"
+          stroke="#f7f8f8"
+          strokeOpacity="0.28"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M22 30.5 V33"
+          stroke="#f7f8f8"
+          strokeOpacity="0.28"
+          strokeWidth="1.5"
+        />
+        <path
+          d="M36 30.5 V33"
+          stroke="#f7f8f8"
+          strokeOpacity="0.28"
+          strokeWidth="1.5"
+        />
+        <g className="cad-caret" data-land={caretLand ? 'true' : undefined}>
+          <path
+            d="M25.6 15.2 L29 18.6 L32.4 15.2"
+            stroke="#34d399"
+            strokeWidth="2.4"
+          />
+          <path d="M29 18.6 V33" stroke="#34d399" strokeWidth="2.4" />
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* CadenceWordmark — the site wordmark in the nav: the logomark beside    */
+/* "cadence" set in the page's own mono voice. The emerald caret beats on  */
+/* hover; the letters lift toward the cursor (restraint carried over from  */
+/* the old mark). Reduced motion → it sits perfectly still.                */
+/* ------------------------------------------------------------------ */
+function CadenceWordmark() {
   const reduced = useReducedMotion();
-  const ref = useRef<HTMLParagraphElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const raf = useRef(0);
-  const parts: Array<{ ch: string; dim?: boolean }> = [
-    ...'task'.split('').map((ch) => ({ ch })),
-    { ch: '_', dim: true },
-    ...'flow'.split('').map((ch) => ({ ch })),
-  ];
 
   const onMove = (e: React.MouseEvent) => {
     if (reduced) return;
@@ -568,8 +635,7 @@ function CursorWordmark() {
     if (!el) return;
     cancelAnimationFrame(raf.current);
     raf.current = requestAnimationFrame(() => {
-      const letters = el.querySelectorAll<HTMLElement>('[data-l]');
-      letters.forEach((l) => {
+      el.querySelectorAll<HTMLElement>('[data-l]').forEach((l) => {
         const r = l.getBoundingClientRect();
         const dx = e.clientX - (r.left + r.width / 2);
         const dy = e.clientY - (r.top + r.height / 2);
@@ -591,25 +657,26 @@ function CursorWordmark() {
   };
 
   return (
-    <p
+    <div
       ref={ref}
+      role="img"
+      aria-label="Cadence"
       onMouseMove={onMove}
       onMouseLeave={onLeave}
-      className="select-none font-mono text-sm font-semibold text-[#f7f8f8]"
+      className="cad-mark flex select-none items-center gap-2"
     >
-      {parts.map((p, i) => (
-        <span
-          key={i}
-          data-l
-          className={cn(
-            'inline-block transition-[transform,color] duration-150 ease-out motion-reduce:transition-none',
-            p.dim && 'text-[#63666c]'
-          )}
-        >
-          {p.ch}
-        </span>
-      ))}
-    </p>
+      <CadenceTile px={22} />
+      <span
+        aria-hidden
+        className="font-mono text-[0.95rem] font-semibold tracking-tight text-[#f7f8f8]"
+      >
+        {'cadence'.split('').map((ch, i) => (
+          <span key={i} data-l className="cad-letter">
+            {ch}
+          </span>
+        ))}
+      </span>
+    </div>
   );
 }
 
@@ -1143,9 +1210,10 @@ function QuickParseEgg() {
 /* ------------------------------------------------------------------ */
 /* SignatureEnding — the page's own sign-off. One plain sentence        */
 /* collapses, parses into a single filed chip, and the chip snaps onto  */
-/* a week cell to form the task_flow mark. Reduced motion shows the     */
-/* resolved composition — sentence gone, chip filed, mark set — with no */
-/* animation. This finale is unique to TaskFlow.                        */
+/* a week cell — then the Cadence mark forms as its emerald caret lands  */
+/* on the timeline (the same downbeat). Reduced motion shows the         */
+/* resolved composition — sentence gone, chip filed, mark set — with no  */
+/* animation. This finale is unique to Cadence.                          */
 /* ------------------------------------------------------------------ */
 function SignatureEnding() {
   const reduced = useReducedMotion();
@@ -1256,27 +1324,26 @@ function SignatureEnding() {
             })}
           </div>
 
-          {/* The mark it forms. */}
+          {/* The mark it forms — the caret lands as the composition resolves. */}
           <div
             className={cn(
               'mt-10 text-center transition-all duration-700 ease-out motion-reduce:transition-none',
               mark ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
             )}
           >
-            <p className="font-mono text-3xl font-semibold tracking-tight text-[#f7f8f8] sm:text-4xl">
-              task
-              <span className="text-emerald-400">_</span>
-              flow
+            <div
+              role="img"
+              aria-label="Cadence"
+              className="flex items-center justify-center gap-3"
+            >
+              <CadenceTile px={44} caretLand={mark && !reduced} />
               <span
-                className={cn(
-                  'ml-1 inline-block text-emerald-400',
-                  mark && !reduced && 'animate-pulse'
-                )}
                 aria-hidden
+                className="font-mono text-3xl font-semibold tracking-tight text-[#f7f8f8] sm:text-4xl"
               >
-                ▍
+                cadence
               </span>
-            </p>
+            </div>
             <p className="mt-4 font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[#63666c]">
               a sentence, filed. that is the whole idea.
             </p>
@@ -1385,7 +1452,7 @@ const NEW_CAPS = [
   {
     icon: Link2,
     title: 'Google Calendar sync',
-    body: 'An incremental, read-only pull: TaskFlow asks only for the calendar.readonly scope, so it can show your Google events without touching them.',
+    body: 'An incremental, read-only pull: Cadence asks only for the calendar.readonly scope, so it can show your Google events without touching them.',
   },
 ] as const;
 
@@ -1424,7 +1491,7 @@ export default function WelcomePage() {
         {/* Nav */}
         <header className="sticky top-0 z-30 border-b border-white/[0.06] bg-[#0a0a0b]/80 backdrop-blur">
           <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6">
-            <CursorWordmark />
+            <CadenceWordmark />
             <nav className="flex items-center gap-2">
               <Link
                 to="/login"
@@ -1683,7 +1750,7 @@ export default function WelcomePage() {
             a sentence
           </p>
           <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-widest text-[#63666c]">
-            task_flow · calendar &amp; tasks, in plain English · by Ayush Yadav
+            Cadence · calendar &amp; tasks, in plain English · by Ayush Yadav
           </p>
           <a
             href="/system-card"
