@@ -264,8 +264,17 @@ const CalendarFilterPopover: React.FC<{
         </TooltipContent>
       </Tooltip>
       {/* Radix only mounts PopoverContent (and its useCalendars query) when
-          open, so the header itself needs no QueryClient just to render. */}
-      <PopoverContent align="end" className="w-72 space-y-4">
+          open, so the header itself needs no QueryClient just to render.
+          The base PopoverContent primitive ships no padding, so pad it here
+          (p-4) and constrain it to the viewport (responsive width + capped
+          height with its own scroll) so nothing clips at the edges or on a
+          narrow phone. collisionPadding keeps it off the window edge. */}
+      <PopoverContent
+        align="end"
+        sideOffset={8}
+        collisionPadding={12}
+        className="w-[min(20rem,calc(100vw-1.5rem))] max-h-[min(28rem,calc(100vh-5rem))] space-y-4 overflow-y-auto overflow-x-hidden p-4"
+      >
         <CalendarFilterBody
           filters={filters}
           onFiltersChange={onFiltersChange}
@@ -369,34 +378,56 @@ const CalendarFilterBody: React.FC<{
 
       <div className="space-y-2">
         <p className="text-xs font-medium text-muted-foreground">Date range</p>
-        <div className="flex items-center gap-2">
-          <Input
-            type="date"
-            aria-label="Filter start date"
-            value={
-              filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : ''
-            }
-            max={
-              filters.endDate
-                ? format(filters.endDate, 'yyyy-MM-dd')
-                : undefined
-            }
-            onChange={(e) => setStart(e.target.value)}
-            className="h-8 text-xs"
-          />
-          <span className="text-muted-foreground">–</span>
-          <Input
-            type="date"
-            aria-label="Filter end date"
-            value={filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : ''}
-            min={
-              filters.startDate
-                ? format(filters.startDate, 'yyyy-MM-dd')
-                : undefined
-            }
-            onChange={(e) => setEnd(e.target.value)}
-            className="h-8 text-xs"
-          />
+        {/* Stacked, full-width inputs: native date pickers have a wide
+            intrinsic min-width, so a side-by-side row clipped the second
+            field inside the narrow popover. */}
+        <div className="space-y-2">
+          <div className="space-y-1">
+            <Label
+              htmlFor="filter-start-date"
+              className="text-xs text-muted-foreground"
+            >
+              From
+            </Label>
+            <Input
+              id="filter-start-date"
+              type="date"
+              aria-label="Filter start date"
+              value={
+                filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : ''
+              }
+              max={
+                filters.endDate
+                  ? format(filters.endDate, 'yyyy-MM-dd')
+                  : undefined
+              }
+              onChange={(e) => setStart(e.target.value)}
+              className="h-8 w-full min-w-0 text-xs"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label
+              htmlFor="filter-end-date"
+              className="text-xs text-muted-foreground"
+            >
+              To
+            </Label>
+            <Input
+              id="filter-end-date"
+              type="date"
+              aria-label="Filter end date"
+              value={
+                filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : ''
+              }
+              min={
+                filters.startDate
+                  ? format(filters.startDate, 'yyyy-MM-dd')
+                  : undefined
+              }
+              onChange={(e) => setEnd(e.target.value)}
+              className="h-8 w-full min-w-0 text-xs"
+            />
+          </div>
         </div>
       </div>
     </>
