@@ -861,6 +861,39 @@ h1 {
     }
   }
 
+  /* ---- Cadence wordmark (nav + signature finale) -------------------- */
+  /* The emerald caret "lands" on the timeline as a downbeat — a nod to the
+     name — while the mono letters lift toward the cursor (the restraint
+     carried over from the old mark). Both are purely cosmetic and collapse
+     to a clean, static logo under prefers-reduced-motion. */
+  .cad-caret {
+    will-change: transform;
+  }
+  @keyframes cad-beat {
+    0% {
+      transform: translateY(0);
+    }
+    28% {
+      transform: translateY(-4px);
+    }
+    60% {
+      transform: translateY(1.2px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+  .cad-mark:hover .cad-caret,
+  .cad-caret[data-land='true'] {
+    animation: cad-beat 0.62s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+  .cad-letter {
+    display: inline-block;
+    transition:
+      transform 0.15s ease-out,
+      color 0.15s ease-out;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .tf-beam {
       animation: none;
@@ -869,6 +902,17 @@ h1 {
     .tf-tilt {
       transform: none !important;
       transition: none !important;
+    }
+    .cad-mark:hover .cad-caret,
+    .cad-caret[data-land='true'] {
+      animation: none !important;
+    }
+    .cad-caret {
+      transform: none !important;
+    }
+    .cad-letter {
+      transition: none !important;
+      transform: none !important;
     }
   }
 }
