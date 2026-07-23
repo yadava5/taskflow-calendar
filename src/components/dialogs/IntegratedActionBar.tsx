@@ -13,6 +13,8 @@ interface IntegratedActionBarProps {
   isDeleting?: boolean;
   className?: string;
   showPeekToggle?: boolean;
+  /** Noun used in the Edit/Delete accessible labels (e.g. "event", "task"). */
+  entityLabel?: string;
 }
 
 export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
@@ -24,6 +26,7 @@ export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
   isDeleting = false,
   className,
   showPeekToggle = true,
+  entityLabel = 'event',
 }) => {
   return (
     <div className={cn('flex items-center gap-1', className)}>
@@ -33,7 +36,7 @@ export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
           size="sm"
           onClick={onEdit}
           className="p-2 hover:bg-accent hover:text-accent-foreground"
-          aria-label="Edit event"
+          aria-label={`Edit ${entityLabel}`}
         >
           <Pencil className="h-4 w-4" />
         </Button>
@@ -46,7 +49,7 @@ export const IntegratedActionBar: React.FC<IntegratedActionBarProps> = ({
           onClick={onDelete}
           disabled={isDeleting}
           className="p-2 text-destructive hover:text-destructive hover:bg-destructive/10 disabled:opacity-50"
-          aria-label="Delete event"
+          aria-label={`Delete ${entityLabel}`}
         >
           <Trash2 className="h-4 w-4" />
         </Button>
