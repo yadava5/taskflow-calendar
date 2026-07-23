@@ -9,14 +9,14 @@ import { Button } from '@/components/ui/Button';
 import { ExternalLink, Bug, Github, BookOpen } from 'lucide-react';
 
 // The project's real, public destinations. Keep these in sync with the repo.
-const REPO_URL = 'https://github.com/yadava5/taskflow-calendar';
+const REPO_URL = 'https://github.com/yadava5/cadence';
 
 export function HelpSettings() {
   const helpItems = [
     {
       title: 'System Card',
       description:
-        'How TaskFlow works, end to end — the parser, the stack, the guarantees',
+        'How Cadence works, end to end — the parser, the stack, the guarantees',
       icon: BookOpen,
       action: 'Open',
       href: '/system-card',
@@ -43,7 +43,7 @@ export function HelpSettings() {
         <CardHeader>
           <CardTitle>Help & Support</CardTitle>
           <CardDescription>
-            Learn how TaskFlow works, read the source, or report an issue
+            Learn how Cadence works, read the source, or report an issue
           </CardDescription>
         </CardHeader>
         <CardContent>
