@@ -40,9 +40,18 @@ test.describe('command palette', () => {
       .poll(async () => (await storedEventTitles(page)).join('|'))
       .toContain('Coffee with Alex');
 
-    // Clean up: delete it from the list.
-    await page.getByRole('button', { name: 'List', exact: true }).click();
-    await page.locator('.fc').getByText('Coffee with Alex').first().click();
+    // Clean up: delete it. The parser uses forwardDate, so "Thursday" resolves
+    // to a future Thursday that can fall outside the week-scoped List view after
+    // a reload — so find the event through ⌘K search (date-independent) and open
+    // it directly, which navigates to its date and opens the details dialog.
+    await openPalette(page);
+    await page.locator(CMDK_INPUT).fill('Coffee with Alex');
+    await page
+      .locator('[cmdk-item][data-value^="__event_"]', {
+        hasText: 'Coffee with Alex',
+      })
+      .first()
+      .click();
     await page.getByRole('button', { name: 'Delete event' }).click();
     await expect
       .poll(async () => (await storedEventTitles(page)).join('|'))
