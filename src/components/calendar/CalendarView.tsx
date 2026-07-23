@@ -52,6 +52,37 @@ function paletteColor(seed: string): string {
   return EVENT_PALETTE[h % EVENT_PALETTE.length];
 }
 
+/**
+ * Pick a foreground (near-black or white) that meets WCAG AA (>=4.5:1) against
+ * the given event background. Hard-coding white failed on mid-tone calendar
+ * colors — blue #3B82F6 gives white only 3.68:1 — so we compare both candidates
+ * by contrast ratio and take the winner. Falls back to white for unparseable
+ * input.
+ */
+function readableTextColor(bg: string): string {
+  const hex = bg.trim().replace('#', '');
+  const full =
+    hex.length === 3
+      ? hex
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : hex;
+  if (!/^[0-9a-fA-F]{6}$/.test(full)) return '#ffffff';
+  const toLin = (v: number) => {
+    const s = v / 255;
+    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+  };
+  const r = toLin(parseInt(full.slice(0, 2), 16));
+  const g = toLin(parseInt(full.slice(2, 4), 16));
+  const b = toLin(parseInt(full.slice(4, 6), 16));
+  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  const contrastWhite = 1.05 / (L + 0.05);
+  const contrastBlack = (L + 0.05) / 0.05;
+  // Near-black rather than pure black keeps the chips from looking harsh.
+  return contrastBlack >= contrastWhite ? '#0b0b0c' : '#ffffff';
+}
+
 export interface CalendarViewProps {
   /** Optional class name for custom styling */
   className?: string;
@@ -306,6 +337,9 @@ export const CalendarView = ({
         const instanceKey = new Date(occurrenceStart).toISOString();
         const eventId = `${event.id}::${instanceKey}`;
 
+        const eventColor =
+          event.color || calendar?.color || paletteColor(event.id);
+
         return {
           id: eventId,
           groupId: event.id, // stable master/series id
@@ -315,10 +349,9 @@ export const CalendarView = ({
           allDay: event.allDay || false,
           // Disable drag/resize for optimistic temp events to avoid 404 updates
           editable: !String(event.id).startsWith('temp-'),
-          backgroundColor:
-            event.color || calendar?.color || paletteColor(event.id),
-          borderColor: event.color || calendar?.color || paletteColor(event.id),
-          textColor: '#ffffff',
+          backgroundColor: eventColor,
+          borderColor: eventColor,
+          textColor: readableTextColor(eventColor),
           extendedProps: {
             description: event.description,
             location: event.location,
