@@ -36,7 +36,7 @@
 
   <!-- Title -->
   <text x="320" y="90" font-family="system-ui, -apple-system, sans-serif" font-size="42" font-weight="700" fill="#1e293b">
-    Taskflow
+    Cadence
   </text>
   <text x="320" y="130" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="400" fill="#64748b">
     Calendar
