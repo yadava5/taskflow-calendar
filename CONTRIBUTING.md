@@ -1,4 +1,4 @@
-# Contributing to Taskflow Calendar
+# Contributing to Cadence
 
 Thank you for your interest in contributing! This document provides guidelines for contributing to the project.
 
@@ -15,8 +15,8 @@ Thank you for your interest in contributing! This document provides guidelines f
 1. Fork the repository
 2. Clone your fork:
    ```bash
-   git clone https://github.com/your-username/taskflow-calendar.git
-   cd taskflow-calendar
+   git clone https://github.com/yadava5/cadence.git
+   cd cadence
    ```
 3. Install dependencies:
    ```bash
