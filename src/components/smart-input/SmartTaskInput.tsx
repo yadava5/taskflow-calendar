@@ -158,8 +158,27 @@ export const SmartTaskInput: React.FC<SmartTaskInputProps> = ({
     (e: React.FormEvent) => {
       e.preventDefault();
 
-      // Always use the original input text as the title (user's requirement)
-      const titleToUse = inputText.trim();
+      // Use the original input as the title, but strip any explicit `#hashtag`
+      // spans — those become tag chips (from the parser), never literal title
+      // text, so quick-added tasks match how the seeded tasks look. Everything
+      // else (people, plain words) stays in the title as before.
+      const hashtagTags =
+        enableSmartParsing && tags.length > 0
+          ? [...tags]
+              .filter((t) => t.source === 'hashtag-parser')
+              .sort((a, b) => b.startIndex - a.startIndex)
+          : [];
+      let strippedTitle = inputText;
+      for (const t of hashtagTags) {
+        // Guard against stale parse indices by confirming the span is a hashtag.
+        if (inputText.slice(t.startIndex, t.endIndex).startsWith('#')) {
+          strippedTitle =
+            strippedTitle.slice(0, t.startIndex) +
+            strippedTitle.slice(t.endIndex);
+        }
+      }
+      const titleToUse =
+        strippedTitle.replace(/\s{2,}/g, ' ').trim() || inputText.trim();
 
       if (titleToUse) {
         // Capitalize first letter
