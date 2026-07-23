@@ -148,7 +148,7 @@ function GoogleCalendarCard() {
       <CardHeader>
         <CardTitle>Connected accounts</CardTitle>
         <CardDescription>
-          Pull your Google Calendar into TaskFlow (read-only — we never write to
+          Pull your Google Calendar into Cadence (read-only — we never write to
           your Google account)
         </CardDescription>
       </CardHeader>
@@ -313,7 +313,7 @@ export function GeneralSettings() {
         if (result === 'denied') {
           toast('Reminders will show in-app', {
             description:
-              'Browser notifications are blocked; TaskFlow will use in-app toasts instead.',
+              'Browser notifications are blocked; Cadence will use in-app toasts instead.',
           });
         }
       }
@@ -482,7 +482,7 @@ export function GeneralSettings() {
               <Label htmlFor="notifications">Desktop Notifications</Label>
               <p className="text-sm text-muted-foreground">
                 In-app reminders for events and tasks starting soon (while
-                TaskFlow is open). Uses browser notifications when allowed,
+                Cadence is open). Uses browser notifications when allowed,
                 otherwise in-app alerts.
               </p>
             </div>
