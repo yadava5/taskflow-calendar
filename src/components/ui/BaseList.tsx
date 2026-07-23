@@ -225,6 +225,12 @@ export function BaseList<T extends BaseListItem>({
                 size="sm"
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="h-5 w-5 p-0"
+                aria-label={
+                  isCollapsed
+                    ? `Expand ${addButtonLabel.toLowerCase()} list`
+                    : `Collapse ${addButtonLabel.toLowerCase()} list`
+                }
+                aria-expanded={!isCollapsed}
               >
                 <div
                   className={`transition-transform duration-200 ${isCollapsed ? 'rotate-0' : 'rotate-180'}`}
