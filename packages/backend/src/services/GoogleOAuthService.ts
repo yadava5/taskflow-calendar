@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { query, withTransaction } from '../config/database.js';
 import { generateTokenPair, TokenPair } from '../utils/jwt.js';
@@ -24,6 +25,31 @@ export interface GoogleAuthResult {
   };
   tokens: TokenPair;
   isNewUser: boolean;
+}
+
+/** Input for creating a Google Calendar event (a "meeting") from TaskFlow. */
+export interface CreateCalendarEventInput {
+  summary: string;
+  description?: string;
+  /** RFC3339 / ISO 8601 start instant (e.g. 2026-08-01T15:00:00.000Z). */
+  start: string;
+  /** RFC3339 / ISO 8601 end instant. */
+  end: string;
+  /** IANA time zone the start/end are displayed in (e.g. America/New_York). */
+  timeZone: string;
+  /** Attendee email addresses; Google emails each an invite. */
+  attendees: string[];
+  /** When true, attach a Google Meet video conference to the event. */
+  addMeet: boolean;
+}
+
+/** The subset of the created Google event we hand back to the client. */
+export interface CreatedCalendarEvent {
+  id: string;
+  htmlLink: string;
+  /** The Google Meet URL, when a conference was requested and created. */
+  hangoutLink?: string;
+  attendees: string[];
 }
 
 class GoogleOAuthService {
@@ -174,6 +200,98 @@ class GoogleOAuthService {
       throw new Error('GOOGLE_TOKEN_REFRESH_FAILED');
     }
     return token;
+  }
+
+  /**
+   * Create an event on the user's PRIMARY Google Calendar and let Google email
+   * a calendar invite (with Accept/Decline) to every attendee.
+   *
+   * Uses the stored Google refresh token (granted the calendar.events scope) to
+   * mint a fresh access token, then POSTs events.insert with `sendUpdates=all`
+   * so Google — not TaskFlow — delivers the invites; no Gmail send scope is
+   * required. When `addMeet` is set, a Google Meet conference is requested and
+   * `conferenceDataVersion=1` is passed so Google actually mints the video link.
+   *
+   * Throws `GOOGLE_NOT_CONNECTED` when the user has no stored grant and
+   * `GOOGLE_CALENDAR_REAUTH_REQUIRED` when Google rejects the write (401/403),
+   * which typically means an older read-only grant that must be reconnected.
+   */
+  async insertCalendarEvent(
+    userId: string,
+    input: CreateCalendarEventInput
+  ): Promise<CreatedCalendarEvent> {
+    const accessToken = await this.getFreshAccessToken(userId);
+
+    const requestBody: Record<string, unknown> = {
+      summary: input.summary,
+      start: { dateTime: input.start, timeZone: input.timeZone },
+      end: { dateTime: input.end, timeZone: input.timeZone },
+      attendees: input.attendees.map((email) => ({ email })),
+    };
+    if (input.description) {
+      requestBody.description = input.description;
+    }
+
+    const url = new URL(
+      'https://www.googleapis.com/calendar/v3/calendars/primary/events'
+    );
+    // Google emails the invite (Accept/Decline) to every attendee.
+    url.searchParams.set('sendUpdates', 'all');
+
+    if (input.addMeet) {
+      requestBody.conferenceData = {
+        createRequest: {
+          requestId: randomUUID(),
+          conferenceSolutionKey: { type: 'hangoutsMeet' },
+        },
+      };
+      // Required for Google to create (rather than ignore) the Meet link.
+      url.searchParams.set('conferenceDataVersion', '1');
+    }
+
+    const resp = await fetch(url.toString(), {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestBody),
+    });
+
+    if (!resp.ok) {
+      // 401/403 = token expired or the grant lacks calendar.events (an older
+      // read-only consent). Surface a distinct code so the API layer can tell
+      // the user to reconnect Google rather than showing a generic failure.
+      if (resp.status === 401 || resp.status === 403) {
+        throw new Error('GOOGLE_CALENDAR_REAUTH_REQUIRED');
+      }
+      throw new Error(`GOOGLE_CALENDAR_INSERT_FAILED_${resp.status}`);
+    }
+
+    const body = (await resp.json()) as {
+      id: string;
+      htmlLink: string;
+      hangoutLink?: string;
+      conferenceData?: {
+        entryPoints?: Array<{ entryPointType?: string; uri?: string }>;
+      };
+      attendees?: Array<{ email?: string }>;
+    };
+
+    const meetLink =
+      body.hangoutLink ??
+      body.conferenceData?.entryPoints?.find(
+        (e) => e.entryPointType === 'video'
+      )?.uri;
+
+    return {
+      id: body.id,
+      htmlLink: body.htmlLink,
+      hangoutLink: meetLink,
+      attendees: (body.attendees ?? [])
+        .map((a) => a.email)
+        .filter((e): e is string => Boolean(e)),
+    };
   }
 
   /**
