@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authAPI } from '@/services/api/auth';
 import { useAuthStore } from '@/stores/authStore';
 import {
@@ -37,11 +37,6 @@ export function LoginForm({
     }
     setJWTAuth(res.data.tokens, res.data.user);
     navigate('/');
-  };
-
-  const handleSignupLink = (e: React.MouseEvent) => {
-    e.preventDefault();
-    navigate('/signup');
   };
 
   const handleGoogleLogin = () => {
@@ -143,13 +138,9 @@ export function LoginForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Don&apos;t have an account?{' '}
-              <a
-                href="#"
-                onClick={handleSignupLink}
-                className="underline underline-offset-4"
-              >
+              <Link to="/signup" className="underline underline-offset-4">
                 Sign up
-              </a>
+              </Link>
             </div>
           </form>
         </CardContent>
