@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "TaskFlow System Card — a printed 8.5×11 booklet exported to PDF via Puppeteer.",
+  "description": "Cadence System Card — a printed 8.5×11 booklet exported to PDF via Puppeteer.",
   "scripts": {
     "dev": "vite --port 5183",
     "build": "tsc --noEmit && vite build",
