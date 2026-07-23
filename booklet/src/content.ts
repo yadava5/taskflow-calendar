@@ -1,5 +1,5 @@
 /**
- * TaskFlow System Card — copy + verified data (self-contained).
+ * Cadence System Card — copy + verified data (self-contained).
  *
  * Every number here is verified against the taskflow-calendar-main repo
  * (branch main) and carries a `source · file:line` rail where it is a
@@ -29,8 +29,8 @@ import type { SectionKey } from "./theme";
 // ---------------------------------------------------------------------------
 
 export const BRAND = {
-  name: "TaskFlow",
-  wordmark: "task_flow",
+  name: "Cadence",
+  wordmark: "cadence",
   subtitle: "Type it the way you'd say it. It lands where it belongs.",
   author: "Ayush Yadav",
   year: "2026",
@@ -56,7 +56,7 @@ export const MASTHEAD = {
 export const ABSTRACT = {
   greeting: "Welcome.",
   body:
-    "Every calendar app hands you a form: title, date, start, end, priority, list. TaskFlow deletes the form. You type one plain sentence — “Lunch with Sam tomorrow 1pm” — and a three-stage parser reads the time, the language, and the priority, shows you its reading as chips, then files it as an event or a task on the week. Behind it: a React 19 app, one serverless dispatcher, a CA-pinned Postgres, and 1,145 tests.",
+    "Every calendar app hands you a form: title, date, start, end, priority, list. Cadence deletes the form. You type one plain sentence — “Lunch with Sam tomorrow 1pm” — and a three-stage parser reads the time, the language, and the priority, shows you its reading as chips, then files it as an event or a task on the week. Behind it: a React 19 app, one serverless dispatcher, a CA-pinned Postgres, and 1,145 tests.",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -66,9 +66,9 @@ export const ABSTRACT = {
 // ---------------------------------------------------------------------------
 
 export const COVER = {
-  masthead: "TaskFlow · System Card",
-  wordmark: "task_flow",
-  title: "TaskFlow",
+  masthead: "Cadence · System Card",
+  wordmark: "cadence",
+  title: "Cadence",
   marginNote: "you type · it reads · it files",
   days: ["MON", "TUE", "WED", "THU", "FRI"] as const,
   examples: [
@@ -158,7 +158,7 @@ export const TOC = {
   ],
   colophon: [
     "© 2026 · Ayush Yadav",
-    "TaskFlow · System Card Vol. 01",
+    "Cadence · System Card Vol. 01",
     "React 19 · Vercel · Supabase",
   ],
   teaser:
@@ -376,7 +376,7 @@ export const HOW = {
     lede:
       "Two parsers can claim the same words. The resolver keeps exactly one tag per span — the highest priority, then the highest confidence — and drops the rest, so the reading is never double-counted.",
     body:
-      "What survives becomes the record: a clean title with the matched spans removed, plus typed tags for date, time, priority, and list. TaskFlow shows that reading as chips, checks the new event against the calendar for time conflicts, and only then writes it — as an event on the grid or a task in its list.",
+      "What survives becomes the record: a clean title with the matched spans removed, plus typed tags for date, time, priority, and list. Cadence shows that reading as chips, checks the new event against the calendar for time conflicts, and only then writes it — as an event on the grid or a task in its list.",
     bands: [
       { range: "overlap", verb: "COMPARE", detail: "same span, two parsers." },
       { range: "priority", verb: "RANK", detail: "chrono > priority > compromise." },
@@ -399,7 +399,7 @@ export const INSIDE = {
     eyebrow: "§03 · THE DISPATCHER",
     headline: "32 handlers, one function.",
     lede:
-      "Vercel's Hobby tier caps a deployment at 12 serverless functions. TaskFlow has 32 API handlers. So all of them ship inside a single catch-all function that routes by URL path.",
+      "Vercel's Hobby tier caps a deployment at 12 serverless functions. Cadence has 32 API handlers. So all of them ship inside a single catch-all function that routes by URL path.",
     body:
       "Every former per-file handler is imported into one dispatcher and matched against a route table — static patterns winning over “:id” params — with the dynamic segments injected back into req.query exactly as Vercel's filesystem router would have. One function, byte-for-byte the same handlers, no framework routing assumptions.",
     before: { value: "32", label: "API handlers" },
@@ -429,7 +429,7 @@ export const INSIDE = {
       { k: "RESILIENCE", v: "idle-error swallow · transient retry-once" },
     ],
     honest:
-      "The search_path pin is the fix for a real, intermittent 500: a pooled connection left on schema=lifequest was resolving TaskFlow's unqualified queries against the wrong schema.",
+      "The search_path pin is the fix for a real, intermittent 500: a pooled connection left on schema=lifequest was resolving Cadence's unqualified queries against the wrong schema.",
     source: "source · lib/config/database.ts:13–20,66,72–74,122–150 · supabaseCA.ts",
   },
 
@@ -478,7 +478,7 @@ export const PROOF = {
     eyebrow: "§04 · THE SHOWCASE",
     headline: "You type. It reads. It files.",
     lede:
-      "The signature TaskFlow moment, rendered here from the app's own landing examples: one sentence, three beats. You type a line; the parser reads it into typed chips; the result lands on the week.",
+      "The signature Cadence moment, rendered here from the app's own landing examples: one sentence, three beats. You type a line; the parser reads it into typed chips; the result lands on the week.",
     illustrativeNote: "The app's real landing examples (Welcome.tsx:34–66), verbatim.",
     rows: [
       { subject: "Lunch with Sam tomorrow 1pm at Patterson's", chips: "event · when · where", filed: "event → THU", kind: "event" },
@@ -502,7 +502,7 @@ export const PROOF = {
       { k: "SCOPE", v: "calendar.readonly — it can only read" },
     ],
     honest:
-      "Google sync is intentionally one-way: the handler requests only the calendar.readonly scope, so TaskFlow imports your events and never writes back.",
+      "Google sync is intentionally one-way: the handler requests only the calendar.readonly scope, so Cadence imports your events and never writes back.",
     source: "source · CalendarView.tsx:96–107 · google/calendar.ts:2,25",
   },
 
@@ -602,11 +602,11 @@ export const BUILD = {
 // ---------------------------------------------------------------------------
 
 export const BACK_COVER = {
-  wordmark: "task_flow",
-  title: "TaskFlow",
+  wordmark: "cadence",
+  title: "Cadence",
   closingLine: "You already said it. It just needed reading.",
   marginNote: "the form, deleted",
-  colophon: ["TaskFlow · System Card", "Vol. 01 · 2026", "Ayush Yadav"],
+  colophon: ["Cadence · System Card", "Vol. 01 · 2026", "Ayush Yadav"],
   fin: "fin · one sentence, filed",
 } as const;
 
