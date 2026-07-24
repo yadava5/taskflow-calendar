@@ -52,37 +52,6 @@ function paletteColor(seed: string): string {
   return EVENT_PALETTE[h % EVENT_PALETTE.length];
 }
 
-/**
- * Pick a foreground (near-black or white) that meets WCAG AA (>=4.5:1) against
- * the given event background. Hard-coding white failed on mid-tone calendar
- * colors — blue #3B82F6 gives white only 3.68:1 — so we compare both candidates
- * by contrast ratio and take the winner. Falls back to white for unparseable
- * input.
- */
-function readableTextColor(bg: string): string {
-  const hex = bg.trim().replace('#', '');
-  const full =
-    hex.length === 3
-      ? hex
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : hex;
-  if (!/^[0-9a-fA-F]{6}$/.test(full)) return '#ffffff';
-  const toLin = (v: number) => {
-    const s = v / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  };
-  const r = toLin(parseInt(full.slice(0, 2), 16));
-  const g = toLin(parseInt(full.slice(2, 4), 16));
-  const b = toLin(parseInt(full.slice(4, 6), 16));
-  const L = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-  const contrastWhite = 1.05 / (L + 0.05);
-  const contrastBlack = (L + 0.05) / 0.05;
-  // Near-black rather than pure black keeps the chips from looking harsh.
-  return contrastBlack >= contrastWhite ? '#0b0b0c' : '#ffffff';
-}
-
 export interface CalendarViewProps {
   /** Optional class name for custom styling */
   className?: string;
@@ -349,15 +318,16 @@ export const CalendarView = ({
           allDay: event.allDay || false,
           // Disable drag/resize for optimistic temp events to avoid 404 updates
           editable: !String(event.id).startsWith('temp-'),
-          backgroundColor: eventColor,
-          borderColor: eventColor,
-          textColor: readableTextColor(eventColor),
+          // Appearance is CSS-driven: eventDidMount stamps this color onto the
+          // chip as `--event-color`, and calendar.css derives the tinted
+          // surface, accent bar, and readable text tone from it per theme.
           extendedProps: {
             description: event.description,
             location: event.location,
             notes: event.notes,
             calendarName: event.calendarName,
             originalEvent: event,
+            eventColor,
           },
         };
       });
@@ -666,8 +636,14 @@ export const CalendarView = ({
               }
               return classes;
             }}
-            eventBackgroundColor={defaultCalendar?.color}
-            eventBorderColor={defaultCalendar?.color}
+            eventDidMount={(info) => {
+              // Expose the event's calendar color to CSS; calendar.css builds
+              // the whole chip (tint, bar, text, list dot) from this variable.
+              const color = (
+                info.event.extendedProps as { eventColor?: string }
+              ).eventColor;
+              if (color) info.el.style.setProperty('--event-color', color);
+            }}
             aspectRatio={isMobile ? 1.0 : undefined}
             handleWindowResize={true}
             contentHeight="100%"
@@ -688,8 +664,23 @@ export const CalendarView = ({
             eventTimeFormat={{
               hour: 'numeric',
               minute: '2-digit',
-              omitZeroMinute: false,
+              omitZeroMinute: true,
               hour12: true,
+            }}
+            views={{
+              // Month chips are the tightest surface in the app: start time
+              // only ("9:30" not "9:30 AM – 10:30 AM") keeps the title the
+              // loudest thing on the chip. Week/day/list keep the full range.
+              dayGridMonth: {
+                displayEventEnd: false,
+                eventTimeFormat: {
+                  hour: 'numeric',
+                  minute: '2-digit',
+                  omitZeroMinute: true,
+                  meridiem: 'narrow',
+                  hour12: true,
+                },
+              },
             }}
             dayHeaderContent={(args) => {
               const viewType = args.view?.type ?? '';
