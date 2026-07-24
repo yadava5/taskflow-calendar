@@ -109,7 +109,9 @@ function Calendar({
         range_middle: cn('rounded-none', defaultClassNames.range_middle),
         range_end: cn('rounded-r-md bg-accent', defaultClassNames.range_end),
         today: cn(
-          'bg-accent text-accent-foreground rounded-md data-[selected=true]:rounded-none',
+          // Cadence emerald wash — matches the main grid's today column so
+          // every calendar surface points at "now" with the same accent.
+          'bg-cadence/15 font-medium text-foreground rounded-md data-[selected=true]:rounded-none',
           defaultClassNames.today
         ),
         outside: cn(
