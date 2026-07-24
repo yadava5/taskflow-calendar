@@ -52,6 +52,7 @@ import {
   Download,
   CalendarDays,
   CheckSquare,
+  Check,
   Tag,
 } from 'lucide-react';
 import {
@@ -76,6 +77,11 @@ function GoogleCalendarCard() {
   const [state, setState] = useState<
     'unknown' | 'unavailable' | 'idle' | 'connecting' | 'syncing'
   >('unknown');
+  // Whether this user already has a stored Google Calendar grant (a refresh
+  // token). True for anyone who signed in with Google (the sign-in consent now
+  // grants calendar.events in one step) or who used the connect button below.
+  // When true we show "Connected" instead of prompting to connect again.
+  const [connected, setConnected] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [needsLogin, setNeedsLogin] = useState(false);
 
@@ -111,15 +117,22 @@ function GoogleCalendarCard() {
   };
 
   useEffect(() => {
-    // One availability probe; 503 = not configured on this deployment.
+    // One probe that answers both questions the card needs: is Google
+    // configured on this deployment (503 = no → hide the card), and is THIS
+    // user already connected. GET /api/google/meeting returns { connected }
+    // from the presence of a stored refresh token, so a Google-signed-in user
+    // shows "Connected" without a second manual connect.
     let cancelled = false;
-    authedFetch(
-      `/api/google/calendar?redirectUri=${encodeURIComponent(
-        `${window.location.origin}/auth/google/callback`
-      )}`
-    )
-      .then((r) => {
-        if (!cancelled) setState(r.status === 503 ? 'unavailable' : 'idle');
+    authedFetch('/api/google/meeting', { method: 'GET' })
+      .then(async (r) => {
+        if (cancelled) return;
+        if (r.status === 503) {
+          setState('unavailable');
+          return;
+        }
+        const body = await r.json().catch(() => null);
+        setConnected(Boolean(body?.data?.connected));
+        setState('idle');
       })
       .catch(() => {
         if (!cancelled) setState('unavailable');
@@ -186,6 +199,9 @@ function GoogleCalendarCard() {
           throw new Error('Your session expired — sign in again to sync.');
         }
         if (resp.status === 409) {
+          // Not actually connected (or the grant needs a reconnect) — reflect
+          // that so the card offers Connect rather than a stale "Connected".
+          setConnected(false);
           throw new Error(
             payload?.error?.message ||
               'Connect Google Calendar first, then sync.'
@@ -193,6 +209,8 @@ function GoogleCalendarCard() {
         }
         throw new Error(payload?.error?.message || 'Sync failed');
       }
+      // A successful sync proves the grant is live.
+      setConnected(true);
       setMessage(`Synced ${payload?.data?.synced ?? 0} events from Google.`);
     } catch (error) {
       setMessage((error as Error).message);
@@ -206,33 +224,74 @@ function GoogleCalendarCard() {
       <CardHeader>
         <CardTitle>Connected accounts</CardTitle>
         <CardDescription>
-          Connect Google Calendar to sync events into Cadence and schedule
-          Google Meet meetings with email invites
+          {connected
+            ? 'Google Calendar is connected — events sync into Cadence and you can schedule Google Meet meetings with email invites'
+            : 'Signing in with Google connects your calendar automatically. Signed in with email & password? Connect Google Calendar to sync events and schedule Google Meet meetings'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
+        {connected && (
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="secondary"
+              className="flex items-center gap-1 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300"
+            >
+              <Check className="h-3 w-3" />
+              Connected
+            </Badge>
+            <span className="text-sm text-muted-foreground">
+              Google Calendar
+            </span>
+          </div>
+        )}
         <div className="flex flex-wrap items-center gap-2">
-          <Button
-            size="sm"
-            onClick={connect}
-            disabled={state !== 'idle'}
-            className="flex items-center gap-2"
-          >
-            <CalendarClock className="h-4 w-4" />
-            {state === 'connecting'
-              ? 'Opening Google…'
-              : 'Connect Google Calendar'}
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={syncNow}
-            disabled={state !== 'idle'}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            {state === 'syncing' ? 'Syncing…' : 'Sync now'}
-          </Button>
+          {connected ? (
+            <>
+              <Button
+                size="sm"
+                onClick={syncNow}
+                disabled={state !== 'idle'}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {state === 'syncing' ? 'Syncing…' : 'Sync now'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={connect}
+                disabled={state !== 'idle'}
+                className="flex items-center gap-2"
+              >
+                <CalendarClock className="h-4 w-4" />
+                {state === 'connecting' ? 'Opening Google…' : 'Reconnect'}
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                onClick={connect}
+                disabled={state !== 'idle'}
+                className="flex items-center gap-2"
+              >
+                <CalendarClock className="h-4 w-4" />
+                {state === 'connecting'
+                  ? 'Opening Google…'
+                  : 'Connect Google Calendar'}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={syncNow}
+                disabled={state !== 'idle'}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                {state === 'syncing' ? 'Syncing…' : 'Sync now'}
+              </Button>
+            </>
+          )}
         </div>
         {message && <p className="text-sm text-muted-foreground">{message}</p>}
         {needsLogin && (
