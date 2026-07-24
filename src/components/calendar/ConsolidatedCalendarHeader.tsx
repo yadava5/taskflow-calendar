@@ -8,9 +8,10 @@ import {
   X,
   BarChart3,
   Video,
+  ArrowRight,
 } from 'lucide-react';
 import { useInsightsStore } from '@/stores/insightsStore';
-import { format } from 'date-fns';
+import { format, startOfDay, startOfWeek, endOfWeek, addDays } from 'date-fns';
 import type FullCalendar from '@fullcalendar/react';
 import { Button } from '@/components/ui/Button';
 import { SmoothSidebarTrigger } from '@/components/layout/SmoothSidebarTrigger';
@@ -28,7 +29,6 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/Input';
 import { useCalendars } from '@/hooks/useCalendars';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { cn } from '@/lib/utils';
@@ -284,16 +284,17 @@ const CalendarFilterPopover: React.FC<{
       </Tooltip>
       {/* Radix only mounts PopoverContent (and its useCalendars query) when
           open, so the header itself needs no QueryClient just to render.
-          The base PopoverContent primitive ships no padding, so pad it here
-          (p-4) and constrain it to the viewport (responsive width + capped
-          height with its own scroll) so nothing clips at the edges or on a
-          narrow phone. collisionPadding keeps it off the window edge. */}
+          Sections manage their own padding (p-0 here) so hairline dividers
+          can run edge to edge; the panel is viewport-constrained (responsive
+          width + capped height with its own scroll) so nothing clips at the
+          edges or on a narrow phone. collisionPadding keeps it off the
+          window edge. */}
       <PopoverContent
         align="end"
         sideOffset={8}
         collisionPadding={12}
         onEscapeKeyDown={() => setOpen(false)}
-        className="w-[min(20rem,calc(100vw-1.5rem))] max-h-[min(28rem,calc(100vh-5rem))] space-y-4 overflow-y-auto overflow-x-hidden p-4"
+        className="w-[min(21rem,calc(100vw-1.5rem))] max-h-[min(30rem,calc(100vh-5rem))] overflow-y-auto overflow-x-hidden p-0 shadow-lg"
       >
         <CalendarFilterBody
           filters={filters}
@@ -303,6 +304,34 @@ const CalendarFilterPopover: React.FC<{
     </Popover>
   );
 };
+
+/** Small uppercase section label used inside the filter panel. */
+const FilterSectionLabel: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
+  <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+    {children}
+  </p>
+);
+
+/** Quick date-range presets for the filter panel. */
+const RANGE_PRESETS = [
+  {
+    label: 'Today',
+    range: (today: Date) => ({ start: today, end: today }),
+  },
+  {
+    label: 'This week',
+    range: (today: Date) => ({
+      start: startOfWeek(today),
+      end: endOfWeek(today),
+    }),
+  },
+  {
+    label: 'Next 7 days',
+    range: (today: Date) => ({ start: today, end: addDays(today, 6) }),
+  },
+] as const;
 
 const CalendarFilterBody: React.FC<{
   filters: CalendarFilterState;
@@ -339,15 +368,37 @@ const CalendarFilterBody: React.FC<{
       endDate: value ? parseLocalDate(value) : undefined,
     });
 
+  const today = startOfDay(new Date());
+  const fmt = (d: Date | undefined) => (d ? format(d, 'yyyy-MM-dd') : '');
+  const isPresetActive = (preset: (typeof RANGE_PRESETS)[number]) => {
+    const { start, end } = preset.range(today);
+    return (
+      fmt(filters.startDate) === fmt(start) && fmt(filters.endDate) === fmt(end)
+    );
+  };
+  const applyPreset = (preset: (typeof RANGE_PRESETS)[number]) => {
+    const { start, end } = preset.range(today);
+    // Tapping the active preset again clears the range — chips act as toggles.
+    if (isPresetActive(preset)) {
+      onFiltersChange({ ...filters, startDate: undefined, endDate: undefined });
+    } else {
+      onFiltersChange({ ...filters, startDate: start, endDate: end });
+    }
+  };
+  const hasRange = Boolean(filters.startDate || filters.endDate);
+
   return (
-    <>
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium">Filter events</span>
+    <div className="text-popover-foreground">
+      {/* ── Panel header ─────────────────────────────────────────────── */}
+      <div className="flex h-11 items-center justify-between border-b border-border/60 px-4">
+        <span className="text-sm font-semibold tracking-tight">
+          Filter events
+        </span>
         {count > 0 && (
           <Button
             variant="ghost"
             size="sm"
-            className="h-6 px-2 text-xs"
+            className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
             onClick={() => onFiltersChange(EMPTY_CALENDAR_FILTERS)}
           >
             Clear filters
@@ -355,16 +406,17 @@ const CalendarFilterBody: React.FC<{
         )}
       </div>
 
+      {/* ── Calendars ────────────────────────────────────────────────── */}
       {allNames.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-xs font-medium text-muted-foreground">Calendars</p>
-          <div className="max-h-40 space-y-1.5 overflow-y-auto">
+        <div className="px-4 pb-2 pt-3.5">
+          <FilterSectionLabel>Calendars</FilterSectionLabel>
+          <div className="-mx-2 mt-1.5 max-h-44 space-y-0.5 overflow-y-auto">
             {allNames.map((name) => {
               const cal = calendars.find((c) => c.name === name);
               return (
                 <label
                   key={name}
-                  className="flex cursor-pointer items-center gap-2 text-sm"
+                  className="flex cursor-pointer items-center gap-2.5 rounded-md px-2 py-1.5 text-sm transition-colors duration-150 hover:bg-muted/60"
                 >
                   <Checkbox
                     checked={selected.includes(name)}
@@ -372,10 +424,10 @@ const CalendarFilterBody: React.FC<{
                     aria-label={name}
                   />
                   <span
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
+                    className="h-2.5 w-2.5 shrink-0 rounded-full ring-2 ring-inset ring-black/5 dark:ring-white/10"
                     style={{ backgroundColor: cal?.color || 'var(--primary)' }}
                   />
-                  <span className="truncate">{name}</span>
+                  <span className="truncate font-medium">{name}</span>
                 </label>
               );
             })}
@@ -383,10 +435,19 @@ const CalendarFilterBody: React.FC<{
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <Label htmlFor="filter-all-day" className="text-sm">
-          All-day events only
-        </Label>
+      {/* ── All-day toggle ───────────────────────────────────────────── */}
+      <div className="flex items-center justify-between gap-4 border-t border-border/60 px-4 py-3">
+        <div className="min-w-0">
+          <Label
+            htmlFor="filter-all-day"
+            className="text-sm font-medium leading-none"
+          >
+            All-day events only
+          </Label>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Hide timed events from the grid
+          </p>
+        </div>
         <Switch
           id="filter-all-day"
           checked={filters.allDayOnly}
@@ -396,61 +457,80 @@ const CalendarFilterBody: React.FC<{
         />
       </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-medium text-muted-foreground">Date range</p>
-        {/* Stacked, full-width inputs: native date pickers have a wide
-            intrinsic min-width, so a side-by-side row clipped the second
-            field inside the narrow popover. */}
-        <div className="space-y-2">
-          <div className="space-y-1">
-            <Label
-              htmlFor="filter-start-date"
-              className="text-xs text-muted-foreground"
+      {/* ── Date range ───────────────────────────────────────────────── */}
+      <div className="border-t border-border/60 px-4 pb-4 pt-3">
+        <div className="flex items-center justify-between">
+          <FilterSectionLabel>Date range</FilterSectionLabel>
+          {hasRange && (
+            <button
+              type="button"
+              className="text-xs text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 rounded-sm"
+              onClick={() =>
+                onFiltersChange({
+                  ...filters,
+                  startDate: undefined,
+                  endDate: undefined,
+                })
+              }
             >
-              From
-            </Label>
-            <Input
-              id="filter-start-date"
-              type="date"
-              aria-label="Filter start date"
-              value={
-                filters.startDate ? format(filters.startDate, 'yyyy-MM-dd') : ''
-              }
-              max={
-                filters.endDate
-                  ? format(filters.endDate, 'yyyy-MM-dd')
-                  : undefined
-              }
-              onChange={(e) => setStart(e.target.value)}
-              className="h-8 w-full min-w-0 text-xs"
-            />
-          </div>
-          <div className="space-y-1">
-            <Label
-              htmlFor="filter-end-date"
-              className="text-xs text-muted-foreground"
-            >
-              To
-            </Label>
-            <Input
-              id="filter-end-date"
-              type="date"
-              aria-label="Filter end date"
-              value={
-                filters.endDate ? format(filters.endDate, 'yyyy-MM-dd') : ''
-              }
-              min={
-                filters.startDate
-                  ? format(filters.startDate, 'yyyy-MM-dd')
-                  : undefined
-              }
-              onChange={(e) => setEnd(e.target.value)}
-              className="h-8 w-full min-w-0 text-xs"
-            />
-          </div>
+              Reset
+            </button>
+          )}
+        </div>
+
+        {/* Quick presets */}
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {RANGE_PRESETS.map((preset) => {
+            const active = isPresetActive(preset);
+            return (
+              <button
+                key={preset.label}
+                type="button"
+                aria-pressed={active}
+                onClick={() => applyPreset(preset)}
+                className={cn(
+                  'rounded-full border px-2.5 py-1 text-xs font-medium transition-colors duration-150',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
+                  active
+                    ? 'border-foreground/25 bg-foreground/[0.07] text-foreground dark:bg-foreground/10'
+                    : 'border-border/70 text-muted-foreground hover:border-border hover:bg-muted/60 hover:text-foreground'
+                )}
+              >
+                {preset.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Joined from → to range field: one bordered control, two quiet
+            native date inputs. Reads as a single range, not two loose
+            mm/dd/yyyy boxes. */}
+        <div className="mt-2.5 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center rounded-lg border border-input bg-transparent shadow-xs transition-[color,box-shadow] focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 dark:bg-input/30">
+          <input
+            id="filter-start-date"
+            type="date"
+            aria-label="Filter start date"
+            value={fmt(filters.startDate)}
+            max={filters.endDate ? fmt(filters.endDate) : undefined}
+            onChange={(e) => setStart(e.target.value)}
+            className="h-9 w-full min-w-0 rounded-l-lg border-0 bg-transparent px-2.5 text-xs text-foreground outline-none [color-scheme:light] dark:[color-scheme:dark]"
+          />
+          <ArrowRight
+            className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70"
+            aria-hidden="true"
+          />
+          <input
+            id="filter-end-date"
+            type="date"
+            aria-label="Filter end date"
+            value={fmt(filters.endDate)}
+            min={filters.startDate ? fmt(filters.startDate) : undefined}
+            onChange={(e) => setEnd(e.target.value)}
+            className="h-9 w-full min-w-0 rounded-r-lg border-0 bg-transparent px-2.5 text-xs text-foreground outline-none [color-scheme:light] dark:[color-scheme:dark]"
+          />
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
@@ -465,8 +545,13 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onFiltersChange,
 }) => {
   const openInsights = useInsightsStore((s) => s.setOpen);
+  // Hairline between the toolbar's logical clusters (find/insight/filter ·
+  // navigate · create) — quiet grouping instead of seven identical icons.
+  const divider = (
+    <div className="mx-0.5 h-4 w-px shrink-0 bg-border/70" aria-hidden="true" />
+  );
   return (
-    <div className="flex flex-wrap items-center gap-1 bg-muted/30 rounded-md p-1">
+    <div className="flex flex-wrap items-center gap-0.5 rounded-lg border border-border/50 bg-muted/40 p-1">
       {/* Animated Search */}
       <AnimatedSearch
         value={searchValue}
@@ -496,6 +581,8 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         filters={filters}
         onFiltersChange={onFiltersChange || (() => {})}
       />
+
+      {divider}
 
       {/* Back Button */}
       <Tooltip>
@@ -532,6 +619,8 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           <p>Next period</p>
         </TooltipContent>
       </Tooltip>
+
+      {divider}
 
       {/* Schedule a Google meeting (invite people + optional Meet link) */}
       {onScheduleMeeting && (
@@ -749,11 +838,11 @@ export const ConsolidatedCalendarHeader: React.FC<
             desktop widths. */}
         <div className="flex min-w-0 items-center gap-3 sm:justify-self-start">
           <SmoothSidebarTrigger position="rightPane" />
-          <h2 className="truncate text-lg font-semibold text-foreground">
+          <h2 className="truncate text-xl font-semibold tracking-tight text-foreground">
             {calendarTitle.includes(' ') ? (
               <>
                 <span className="font-bold">{calendarTitle.split(' ')[0]}</span>
-                <span className="font-normal">
+                <span className="font-normal text-muted-foreground">
                   {' '}
                   {calendarTitle.split(' ').slice(1).join(' ')}
                 </span>
