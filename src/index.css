@@ -922,6 +922,26 @@ h1 {
       color 0.15s ease-out;
   }
 
+  /* ---- Signature-finale week pulse ---------------------------------- */
+  /* The full-bleed ghost week's resting heartbeat: each column's bottom
+     glow breathes in sequence (staggered via --pd), a calm metronome
+     sweep across the page's last band. Motion-safe only. */
+  .cad-colpulse {
+    opacity: 0;
+  }
+  .cad-colpulse[data-on='true'] {
+    animation: cad-colpulse 3.6s ease-in-out var(--pd, 0s) infinite;
+  }
+  @keyframes cad-colpulse {
+    0%,
+    100% {
+      opacity: 0;
+    }
+    40% {
+      opacity: 1;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .tf-beam {
       animation: none;
@@ -941,6 +961,11 @@ h1 {
     .cad-letter {
       transition: none !important;
       transform: none !important;
+    }
+    .cad-colpulse,
+    .cad-colpulse[data-on='true'] {
+      animation: none !important;
+      opacity: 0 !important;
     }
   }
 }
