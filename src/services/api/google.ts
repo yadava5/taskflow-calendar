@@ -11,13 +11,35 @@ import { useAuthStore } from '@/stores/authStore';
 
 const apiBase = '/api';
 
-function authHeaders(): Record<string, string> {
-  try {
-    const token = useAuthStore.getState().getValidAccessToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
-  } catch {
-    return {};
+/**
+ * Authenticated fetch with refresh-on-401. The Cadence access token is
+ * short-lived (~15 min); a stale one makes an actually-connected user look
+ * disconnected (isConnected -> false) or blocks initiating the connect. We
+ * proactively refresh a near-expired token before spending it and, on a 401,
+ * force one refresh + a single retry — the freshest token is read per attempt.
+ */
+async function authedFetch(
+  input: string,
+  init?: RequestInit
+): Promise<Response> {
+  await useAuthStore.getState().refreshTokenIfNeeded();
+  const send = () => {
+    const token = useAuthStore.getState().jwtTokens?.accessToken ?? '';
+    return fetch(input, {
+      ...init,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(init?.headers ?? {}),
+      },
+    });
+  };
+  let resp = await send();
+  if (resp.status === 401) {
+    const refreshed = await useAuthStore.getState().refreshTokenIfNeeded(true);
+    if (refreshed) resp = await send();
   }
+  return resp;
 }
 
 export interface CreateMeetingInput {
@@ -62,9 +84,8 @@ const RECONNECT_CODES = new Set([
 export const googleCalendarApi = {
   /** Whether the signed-in user has connected Google Calendar. */
   isConnected: async (): Promise<boolean> => {
-    const res = await fetch(`${apiBase}/google/meeting`, {
+    const res = await authedFetch(`${apiBase}/google/meeting`, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
     });
     if (!res.ok) return false;
     const body = await res.json().catch(() => null);
@@ -78,12 +99,9 @@ export const googleCalendarApi = {
    */
   getConnectUrl: async (): Promise<string> => {
     const redirectUri = `${window.location.origin}/auth/google/callback`;
-    const res = await fetch(
+    const res = await authedFetch(
       `${apiBase}/google/calendar?redirectUri=${encodeURIComponent(redirectUri)}`,
-      {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json', ...authHeaders() },
-      }
+      { method: 'GET' }
     );
     const body = await res.json().catch(() => null);
     if (!res.ok || !body?.data?.authUrl) {
@@ -98,9 +116,8 @@ export const googleCalendarApi = {
    * set, attaches a Google Meet link.
    */
   createMeeting: async (input: CreateMeetingInput): Promise<CreatedMeeting> => {
-    const res = await fetch(`${apiBase}/google/meeting`, {
+    const res = await authedFetch(`${apiBase}/google/meeting`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...authHeaders() },
       body: JSON.stringify(input),
     });
     const body = await res.json().catch(() => null);
