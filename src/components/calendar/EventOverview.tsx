@@ -98,9 +98,18 @@ const EventOverviewComponent: React.FC<EventOverviewProps> = ({
           </div>
         )}
 
-        <div className="text-center py-4 text-muted-foreground">
-          <CalendarIcon className="w-6 h-6 mx-auto mb-2 opacity-50" />
-          <p className="text-xs">No upcoming events</p>
+        <div className="flex flex-col items-center gap-2.5 rounded-lg border border-dashed border-border/70 px-4 py-6 text-center">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+            <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+          </span>
+          <div>
+            <p className="text-xs font-medium text-sidebar-foreground/90">
+              No upcoming events
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              What you schedule next lands here
+            </p>
+          </div>
         </div>
       </div>
     );
