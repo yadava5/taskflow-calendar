@@ -89,8 +89,11 @@ export function ViewSwitcher<T extends string = string>({
     <div
       ref={containerRef}
       className={cn(
-        'relative inline-flex rounded-lg border bg-background shadow-xs',
-        'hover:bg-accent/50 dark:bg-input/30 dark:border-input dark:hover:bg-input/50',
+        // Recessed track + raised active pill: the segmented control reads
+        // instantly in both themes (the old background-on-background slider
+        // was nearly invisible in light mode).
+        'relative inline-flex rounded-lg border border-border/50 bg-muted/60',
+        'dark:border-input dark:bg-input/30',
         'p-0.5 transition-all duration-200',
         className
       )}
@@ -99,7 +102,11 @@ export function ViewSwitcher<T extends string = string>({
     >
       {/* Sliding background indicator */}
       <div
-        className="absolute bg-background dark:bg-background rounded-md shadow-sm transition-all duration-200 ease-out"
+        className={cn(
+          'absolute rounded-md border border-border/60 bg-background shadow-sm',
+          'dark:border-white/10 dark:bg-background/80',
+          'transition-all duration-200 ease-out motion-reduce:transition-none'
+        )}
         style={sliderStyle}
         aria-hidden="true"
       />
@@ -115,6 +122,7 @@ export function ViewSwitcher<T extends string = string>({
             disabled={disabled}
             className={cn(
               'relative z-10 font-medium rounded-md transition-colors duration-150',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50',
               sizeClasses[size],
               value === optValue
                 ? 'text-foreground'
