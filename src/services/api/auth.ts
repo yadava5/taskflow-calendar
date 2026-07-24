@@ -319,15 +319,30 @@ class AuthAPI {
     }
   }
 
-  // Get Google OAuth URL
+  // Get Google OAuth URL.
+  //
+  // Cadence's Google sign-in doubles as the Google Calendar connect: the SAME
+  // consent that authenticates the user also grants the calendar.events scope,
+  // so a Google-signed-in user is calendar-connected in one step — no separate
+  // "Connect Google Calendar" round-trip. The backend persists the Google
+  // refresh token during the code exchange (GoogleOAuthService.handleCallback),
+  // so the grant is durable server-side. `access_type=offline` + `prompt=consent`
+  // guarantee a refresh token on every sign-in; `include_granted_scopes` makes
+  // this an incremental grant that composes with any scopes already consented.
+  //
+  // Users who sign up with email/password (never through Google) instead use the
+  // separate connect affordance in Settings; and a Google user who declines the
+  // calendar checkbox on the consent screen falls back to that same affordance.
   getGoogleAuthUrl(redirectUri: string): string {
     const params = new URLSearchParams({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '',
       redirect_uri: redirectUri,
       response_type: 'code',
-      scope: 'openid email profile',
+      scope:
+        'openid email profile https://www.googleapis.com/auth/calendar.events',
       access_type: 'offline',
       prompt: 'consent',
+      include_granted_scopes: 'true',
     });
 
     return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
