@@ -45,18 +45,32 @@ export function GoogleCallbackPage() {
           // "Connect Google Calendar" grant for an already-signed-in user:
           // hand the code to the calendar endpoint (Bearer-authed), which
           // stores the refresh token server-side and runs a first sync.
-          const accessToken = useAuthStore.getState().jwtTokens?.accessToken;
-          if (!accessToken) {
+          // The Google consent round-trip can outlast the short-lived (~15 min)
+          // Cadence access token, so refresh a near-expired token first and
+          // retry once on a 401 — otherwise this final hand-off 401s with
+          // "Sign in first" the instant after the user consented.
+          await useAuthStore.getState().refreshTokenIfNeeded();
+          if (!useAuthStore.getState().jwtTokens?.accessToken) {
             throw new Error('Sign in before connecting Google Calendar');
           }
-          const resp = await fetch('/api/google/calendar', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({ code, redirectUri }),
-          });
+          const postConnect = () =>
+            fetch('/api/google/calendar', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${
+                  useAuthStore.getState().jwtTokens?.accessToken ?? ''
+                }`,
+              },
+              body: JSON.stringify({ code, redirectUri }),
+            });
+          let resp = await postConnect();
+          if (resp.status === 401) {
+            const refreshed = await useAuthStore
+              .getState()
+              .refreshTokenIfNeeded(true);
+            if (refreshed) resp = await postConnect();
+          }
           const payload = await resp.json();
           if (!resp.ok || !payload.success) {
             throw new Error(
