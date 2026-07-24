@@ -60,6 +60,13 @@
   --sidebar-ring: oklch(0.705 0.015 286.067);
   --info-popover: color-mix(in srgb, var(--popover) 95%, black 5%);
   --info-popover-foreground: var(--popover-foreground);
+  /* Cadence brand accent — the emerald "downbeat" from the landing/auth
+     surfaces, tuned per scheme for AA contrast. `--cadence` carries small
+     text/badges (white foreground in light, near-black in dark);
+     `--cadence-wash` is the translucent surface tint for "today". */
+  --cadence: oklch(0.53 0.14 155);
+  --cadence-foreground: oklch(0.985 0 0);
+  --cadence-wash: oklch(0.72 0.17 155 / 0.08);
   /* Global scrollbar tokens */
   --scrollbar-size: 8px;
   --scrollbar-size-lg: 12px;
@@ -147,6 +154,22 @@ h1 {
   --color-sidebar-ring: var(--sidebar-ring);
   --color-info-popover: var(--info-popover);
   --color-info-popover-foreground: var(--info-popover-foreground);
+  --color-cadence: var(--cadence);
+  --color-cadence-foreground: var(--cadence-foreground);
+}
+
+/* Motion is always an enhancement, never a requirement: collapse every
+   animation/transition to a single frame for users who ask for less motion.
+   Component-level `motion-reduce:` utilities still apply on top of this. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 .dark {
@@ -185,6 +208,11 @@ h1 {
   --sidebar-ring: oklch(0.552 0.016 285.938);
   --info-popover: color-mix(in srgb, var(--popover) 95%, black 5%);
   --info-popover-foreground: var(--popover-foreground);
+  /* Cadence brand accent — brighter in dark mode, with a near-black
+     foreground so badges stay ≥4.5:1. */
+  --cadence: oklch(0.78 0.15 155);
+  --cadence-foreground: oklch(0.2 0.03 155);
+  --cadence-wash: oklch(0.78 0.15 155 / 0.07);
   /* Dark mode scrollbar tokens */
   --scrollbar-size: 8px;
   --scrollbar-size-lg: 12px;
