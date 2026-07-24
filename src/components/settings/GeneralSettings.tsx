@@ -60,27 +60,55 @@ import {
   type DefaultViewPreference,
 } from '@/stores/settingsStore';
 
+// The public demo account is shared and seeded; the Google app only lets
+// whitelisted test users through consent, so it can't bind a personal Google
+// Calendar. Detect it to explain that instead of sending it into consent.
+const DEMO_EMAIL = 'john@example.com';
+
 /**
  * Connected accounts — Google Calendar connect + manual pull sync.
  * Renders nothing when the server has no Google OAuth configured (503),
  * so the card never shows a dead affordance.
  */
 function GoogleCalendarCard() {
-  const jwtTokens = useAuthStore((s) => s.jwtTokens);
+  const navigate = useNavigate();
+  const user = useAuthStore((s) => s.user);
   const [state, setState] = useState<
     'unknown' | 'unavailable' | 'idle' | 'connecting' | 'syncing'
   >('unknown');
   const [message, setMessage] = useState<string | null>(null);
+  const [needsLogin, setNeedsLogin] = useState(false);
 
-  const authedFetch = (input: string, init?: RequestInit) =>
-    fetch(input, {
-      ...init,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${jwtTokens?.accessToken ?? ''}`,
-        ...(init?.headers ?? {}),
-      },
-    });
+  // Authenticated fetch with refresh-on-401. The Cadence access token is
+  // short-lived (~15 min); a stale one 401s and the connect used to fail with a
+  // cryptic "Sign in first". We proactively refresh a near-expired token before
+  // spending it, and on a 401 we force one refresh + single retry — so a
+  // genuinely signed-in user always reaches Google's consent screen.
+  const authedFetch = async (
+    input: string,
+    init?: RequestInit
+  ): Promise<Response> => {
+    await useAuthStore.getState().refreshTokenIfNeeded();
+    const send = () => {
+      const token = useAuthStore.getState().jwtTokens?.accessToken ?? '';
+      return fetch(input, {
+        ...init,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          ...(init?.headers ?? {}),
+        },
+      });
+    };
+    let resp = await send();
+    if (resp.status === 401) {
+      const refreshed = await useAuthStore
+        .getState()
+        .refreshTokenIfNeeded(true);
+      if (refreshed) resp = await send();
+    }
+    return resp;
+  };
 
   useEffect(() => {
     // One availability probe; 503 = not configured on this deployment.
@@ -99,19 +127,37 @@ function GoogleCalendarCard() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (state === 'unknown' || state === 'unavailable') return null;
 
   const connect = async () => {
+    // The shared demo account can't (and shouldn't) bind a personal Google
+    // Calendar — say so plainly rather than opening a consent screen that
+    // would reject it.
+    if (user?.email === DEMO_EMAIL) {
+      setNeedsLogin(false);
+      setMessage(
+        "The shared demo account can't connect a personal Google Calendar. Sign in with your own Cadence account to connect Google."
+      );
+      return;
+    }
     setState('connecting');
     setMessage(null);
+    setNeedsLogin(false);
     try {
       const redirectUri = `${window.location.origin}/auth/google/callback`;
       const resp = await authedFetch(
         `/api/google/calendar?redirectUri=${encodeURIComponent(redirectUri)}`
       );
+      if (resp.status === 401) {
+        // authedFetch already tried to refresh and still got 401 — the session
+        // is genuinely gone. Offer a real way back in, not "Sign in first".
+        setNeedsLogin(true);
+        throw new Error(
+          'Your Cadence session has expired. Sign in again to connect Google Calendar.'
+        );
+      }
       const payload = await resp.json();
       if (!resp.ok || !payload.data?.authUrl) {
         throw new Error(payload.error?.message || 'Could not start connect');
@@ -189,6 +235,16 @@ function GoogleCalendarCard() {
           </Button>
         </div>
         {message && <p className="text-sm text-muted-foreground">{message}</p>}
+        {needsLogin && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigate('/login')}
+            className="w-fit"
+          >
+            Sign in
+          </Button>
+        )}
         <p className="text-xs text-muted-foreground">
           Uses Google&apos;s official OAuth with the least-privilege
           calendar.events scope (events only — never Gmail or full calendar
