@@ -375,22 +375,37 @@ function CommandPaletteBody({ onClose }: { onClose: () => void }) {
 
   const runConnectGoogle = useCallback(async () => {
     onClose();
-    const token = useAuthStore.getState().jwtTokens?.accessToken;
-    if (!token) {
-      toast.error('Sign in to connect Google Calendar');
-      return;
-    }
-    try {
-      const redirectUri = `${window.location.origin}/auth/google/callback`;
-      const resp = await fetch(
+    // Refresh a near-expired Cadence token before spending it, and force one
+    // refresh + retry on a 401 — the raw ~15-min access token would otherwise
+    // 401 and the connect would silently fail with "isn't available right now".
+    await useAuthStore.getState().refreshTokenIfNeeded();
+    const redirectUri = `${window.location.origin}/auth/google/callback`;
+    const send = () =>
+      fetch(
         `/api/google/calendar?redirectUri=${encodeURIComponent(redirectUri)}`,
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${
+              useAuthStore.getState().jwtTokens?.accessToken ?? ''
+            }`,
           },
         }
       );
+    try {
+      let resp = await send();
+      if (resp.status === 401) {
+        const refreshed = await useAuthStore
+          .getState()
+          .refreshTokenIfNeeded(true);
+        if (refreshed) resp = await send();
+      }
+      if (resp.status === 401) {
+        toast.error(
+          'Your session expired — sign in again to connect Google Calendar.'
+        );
+        return;
+      }
       const payload = await resp.json().catch(() => null);
       if (resp.ok && payload?.data?.authUrl) {
         window.location.href = payload.data.authUrl as string;
