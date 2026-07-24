@@ -1208,20 +1208,61 @@ function QuickParseEgg() {
 }
 
 /* ------------------------------------------------------------------ */
-/* SignatureEnding — the page's own sign-off. One plain sentence        */
-/* collapses, parses into a single filed chip, and the chip snaps onto  */
-/* a week cell — then the Cadence mark forms as its emerald caret lands  */
-/* on the timeline (the same downbeat). Reduced motion shows the         */
-/* resolved composition — sentence gone, chip filed, mark set — with no  */
-/* animation. This finale is unique to Cadence.                          */
+/* SignatureEnding — the page's own sign-off, as a full-bleed band at   */
+/* the very bottom (the AutoML-landing treatment, in Cadence's voice).  */
+/* One plain sentence collapses, the Cadence mark forms on the same     */
+/* downbeat, and the chip snaps onto a ghost week that runs edge to     */
+/* edge and bleeds off the bottom of the page. Once filed, a calm       */
+/* emerald pulse sweeps the columns — the page's resting heartbeat.     */
+/* Clicking the band files ANOTHER sentence (each targets a different   */
+/* day). Reduced motion shows the resolved composition, no animation.   */
 /* ------------------------------------------------------------------ */
+const FINALE = [
+  {
+    sentence: 'email the team friday 9am #standup',
+    day: 4,
+    title: 'Standup',
+    when: 'Fri · 9am',
+  },
+  {
+    sentence: 'lunch with sam tuesday noon',
+    day: 1,
+    title: 'Lunch with Sam',
+    when: 'Tue · 12pm',
+  },
+  {
+    sentence: 'design review wednesday 2pm !high',
+    day: 2,
+    title: 'Design review',
+    when: 'Wed · 2pm',
+  },
+  { sentence: 'gym monday 7am', day: 0, title: 'Gym', when: 'Mon · 7am' },
+  {
+    sentence: 'ship the release thursday 4pm #launch',
+    day: 3,
+    title: 'Ship the release',
+    when: 'Thu · 4pm',
+  },
+] as const;
+
 function SignatureEnding() {
   const reduced = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLButtonElement>(null);
+  const [runIdx, setRunIdx] = useState(0);
   const [collapse, setCollapse] = useState(reduced);
   const [snap, setSnap] = useState(reduced);
   const [mark, setMark] = useState(reduced);
   const played = useRef(reduced);
+  const timers = useRef<number[]>([]);
+
+  const play = () => {
+    timers.current.forEach((t) => window.clearTimeout(t));
+    timers.current = [
+      window.setTimeout(() => setCollapse(true), 200),
+      window.setTimeout(() => setSnap(true), 750),
+      window.setTimeout(() => setMark(true), 1350),
+    ];
+  };
 
   useEffect(() => {
     if (reduced) {
@@ -1237,41 +1278,54 @@ function SignatureEnding() {
       setMark(true);
       return;
     }
-    const timers: number[] = [];
     const io = new IntersectionObserver(
       (entries) => {
         if (!entries[0]?.isIntersecting || played.current) return;
         played.current = true;
         io.disconnect();
-        timers.push(window.setTimeout(() => setCollapse(true), 200));
-        timers.push(window.setTimeout(() => setSnap(true), 750));
-        timers.push(window.setTimeout(() => setMark(true), 1350));
+        play();
       },
-      { threshold: 0.4 }
+      { threshold: 0.3 }
     );
     io.observe(el);
     return () => {
       io.disconnect();
-      timers.forEach((t) => window.clearTimeout(t));
+      timers.current.forEach((t) => window.clearTimeout(t));
     };
   }, [reduced]);
 
-  const SENTENCE = 'email the team friday 9am #standup';
+  const replay = () => {
+    if (reduced) return; // resolved composition stays put
+    played.current = true;
+    setRunIdx((i) => (i + 1) % FINALE.length);
+    setCollapse(false);
+    setSnap(false);
+    setMark(false);
+    play();
+  };
+
+  const { sentence, day, title, when } = FINALE[runIdx];
 
   return (
     <section className="relative border-t border-white/[0.06] bg-[#0c0c0d]">
-      <div className="mx-auto w-full max-w-6xl px-6 py-24">
-        <Reveal className="text-center">
-          <p className="mb-4 font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[#63666c]">
+      <button
+        ref={ref}
+        type="button"
+        onClick={replay}
+        aria-label="Cadence signature: a plain sentence files itself onto the week. Activate to file another sentence."
+        className="block w-full cursor-pointer text-left focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-emerald-400/60"
+      >
+        <div className="pt-20 text-center">
+          <p className="mb-6 font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[#63666c]">
             <span className="text-emerald-500/80">✳</span> · the last sentence
+            · click to file another
           </p>
-        </Reveal>
 
-        <div ref={ref} className="mx-auto mt-6 max-w-xl">
-          {/* The sentence — collapses toward the chip. */}
+          {/* The sentence — collapses toward the week below. */}
           <p
+            key={`s-${runIdx}`}
             className={cn(
-              'text-center font-mono text-base text-[#8a8f98] transition-all duration-700 ease-out motion-reduce:transition-none sm:text-lg',
+              'mx-auto max-w-xl px-6 text-center font-mono text-base text-[#8a8f98] transition-all duration-700 ease-out motion-reduce:transition-none sm:text-lg',
               collapse
                 ? 'scale-95 opacity-0 [letter-spacing:-0.05em] blur-[1px]'
                 : 'scale-100 opacity-100'
@@ -1279,55 +1333,13 @@ function SignatureEnding() {
             aria-hidden={collapse}
           >
             <span className="text-emerald-500/60">› </span>
-            {SENTENCE}
+            {sentence}
           </p>
 
-          {/* The ghost week — the chip drops onto Friday. */}
-          <div className="mt-6 grid grid-cols-5 overflow-hidden rounded-xl border border-white/10 bg-[#0f1011]">
-            {DAYS.map((day, i) => {
-              const target = i === 4; // FRI
-              return (
-                <div
-                  key={day}
-                  className={cn(
-                    'relative h-24 border-r border-white/[0.05] last:border-r-0 transition-colors duration-500',
-                    target && snap && 'bg-emerald-400/[0.04]'
-                  )}
-                >
-                  <p className="border-b border-white/[0.05] py-1.5 text-center font-mono text-[0.6rem] tracking-widest text-[#63666c]">
-                    {day}
-                  </p>
-                  {target && (
-                    <div
-                      className={cn(
-                        'absolute inset-x-1 top-8 rounded-md border border-emerald-400/50 bg-emerald-400/15 px-1.5 py-1.5 transition-all duration-500 will-change-transform motion-reduce:transition-none',
-                        snap
-                          ? 'translate-y-0 scale-100 opacity-100'
-                          : '-translate-y-16 scale-110 opacity-0'
-                      )}
-                      style={{
-                        transitionTimingFunction: snap
-                          ? 'cubic-bezier(0.34, 1.56, 0.64, 1)'
-                          : 'ease-out',
-                      }}
-                    >
-                      <p className="truncate text-[0.62rem] font-medium leading-tight text-emerald-100">
-                        Standup
-                      </p>
-                      <p className="truncate font-mono text-[0.5rem] text-emerald-400/70">
-                        Fri · 9am
-                      </p>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* The mark it forms — the caret lands as the composition resolves. */}
+          {/* The mark it forms — the caret lands as the chip files. */}
           <div
             className={cn(
-              'mt-10 text-center transition-all duration-700 ease-out motion-reduce:transition-none',
+              'mt-8 text-center transition-all duration-700 ease-out motion-reduce:transition-none',
               mark ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0'
             )}
           >
@@ -1349,7 +1361,59 @@ function SignatureEnding() {
             </p>
           </div>
         </div>
-      </div>
+
+        {/* The ghost week — full bleed, edge to edge, running off the page
+            bottom. The chip snaps onto the sentence's day; once it lands, a
+            calm emerald pulse sweeps the columns left to right. */}
+        <div className="mt-12 grid w-full grid-cols-5 border-t border-white/10 bg-[#0f1011]">
+          {DAYS.map((d, i) => {
+            const target = i === day;
+            return (
+              <div
+                key={d}
+                className={cn(
+                  'relative h-32 border-r border-white/[0.05] transition-colors duration-500 last:border-r-0 sm:h-40',
+                  target && snap && 'bg-emerald-400/[0.04]'
+                )}
+              >
+                <p className="border-b border-white/[0.05] py-2 text-center font-mono text-[0.6rem] tracking-widest text-[#63666c]">
+                  {d}
+                </p>
+                {target && (
+                  <div
+                    key={`chip-${runIdx}`}
+                    className={cn(
+                      'absolute inset-x-2 top-10 rounded-md border border-emerald-400/50 bg-emerald-400/15 px-2 py-2 transition-all duration-500 will-change-transform motion-reduce:transition-none sm:inset-x-3 sm:top-12',
+                      snap
+                        ? 'translate-y-0 scale-100 opacity-100'
+                        : '-translate-y-16 scale-110 opacity-0'
+                    )}
+                    style={{
+                      transitionTimingFunction: snap
+                        ? 'cubic-bezier(0.34, 1.56, 0.64, 1)'
+                        : 'ease-out',
+                    }}
+                  >
+                    <p className="truncate text-[0.68rem] font-medium leading-tight text-emerald-100">
+                      {title}
+                    </p>
+                    <p className="truncate font-mono text-[0.55rem] text-emerald-400/70">
+                      {when}
+                    </p>
+                  </div>
+                )}
+                {/* the resting heartbeat — motion-safe only */}
+                <span
+                  aria-hidden
+                  className="cad-colpulse pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-emerald-400/[0.09] to-transparent"
+                  data-on={mark && !reduced ? 'true' : undefined}
+                  style={{ ['--pd' as string]: `${i * 0.72}s` }}
+                />
+              </div>
+            );
+          })}
+        </div>
+      </button>
     </section>
   );
 }
@@ -1392,9 +1456,6 @@ function TheForm() {
           </span>
         </div>
       </div>
-      <p className="mt-3 text-center font-mono text-[0.62rem] uppercase tracking-widest text-[#63666c]">
-        six fields to write down one lunch
-      </p>
     </div>
   );
 }
@@ -1424,7 +1485,7 @@ const STACK = [
   {
     icon: ServerCog,
     title: '32 handlers, one function',
-    body: 'Vercel’s Hobby tier caps a deployment at 12 functions, so every API handler ships inside a single catch-all dispatcher that routes by URL path — byte-for-byte the same handlers, no framework routing assumptions.',
+    body: 'Every API handler ships inside a single catch-all dispatcher that routes by URL path — byte-for-byte the same handlers, no framework routing assumptions.',
   },
   {
     icon: Lock,
@@ -1741,9 +1802,6 @@ export default function WelcomePage() {
           </Reveal>
         </section>
 
-        {/* Signature finale */}
-        <SignatureEnding />
-
         <footer className="mx-auto w-full max-w-6xl border-t border-white/10 px-6 py-8 text-center">
           <p className="font-mono text-[0.6rem] uppercase tracking-widest text-[#4a4d53]">
             psst — press <span className="text-emerald-500/70">/</span> to parse
@@ -1761,6 +1819,10 @@ export default function WelcomePage() {
             System Card
           </a>
         </footer>
+
+        {/* Signature finale — the page's last image, full bleed at the very
+            bottom, below the footer meta (AutoML-landing style). */}
+        <SignatureEnding />
       </div>
     </div>
   );
