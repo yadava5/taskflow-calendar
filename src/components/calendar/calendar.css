@@ -2,21 +2,13 @@
    FULLCALENDAR THEME INTEGRATION
    ================================ */
 
-/* CSS Custom Properties for theme consistency */
+/* CSS Custom Properties for theme consistency. The today/now accent is the
+   Cadence emerald (see --cadence/--cadence-wash in index.css) so the grid,
+   the mini calendar, and the brand read as one system in both themes. */
 .fc {
   --fc-border-color: var(--border);
-  --fc-today-bg-color: oklch(
-    0.7 0.15 140 / 0.15
-  ) !important; /* Muted green for today */
-  --fc-page-bg-color: var(--background) !important;
-  --fc-neutral-bg-color: var(--background) !important;
-}
-
-.dark .fc {
-  --fc-border-color: var(--border);
-  --fc-today-bg-color: oklch(
-    0.7 0.15 140 / 0.1
-  ) !important; /* Muted green for dark mode */
+  --fc-today-bg-color: var(--cadence-wash) !important;
+  --fc-now-indicator-color: var(--cadence) !important;
   --fc-page-bg-color: var(--background) !important;
   --fc-neutral-bg-color: var(--background) !important;
 }
@@ -57,17 +49,10 @@
    CURRENT DAY STYLING
    ================================ */
 
-/* Today highlighting - Subtle muted green background for current day COLUMN (not headers) */
+/* Today highlighting — a whisper of the Cadence emerald over the current
+   day column. The wash token carries its own per-theme opacity. */
 .fc-day-today {
-  background-color: oklch(
-    0.7 0.15 140 / 0.15
-  ) !important; /* Light mode muted green */
-}
-
-.dark .fc-day-today {
-  background-color: oklch(
-    0.7 0.15 140 / 0.1
-  ) !important; /* Dark mode muted green - different opacity for theme responsiveness */
+  background-color: var(--cadence-wash) !important;
 }
 
 /* NO SPECIAL STYLING FOR TODAY'S COLUMN HEADER - BOTH LIGHT AND DARK MODE */
@@ -87,9 +72,11 @@
 .fc-timeGridWeek-view .day-header-name,
 .fc-dayGridMonth-view .day-header-name {
   text-transform: uppercase;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   color: var(--muted-foreground);
-  opacity: 0.5; /* match AM/PM time label style */
+  opacity: 0.6; /* match AM/PM time label style */
 }
 
 .fc-timeGridWeek-view .day-header-number,
@@ -104,19 +91,15 @@
 }
 
 .day-header-number.today {
-  background-color: oklch(0.7 0.15 140);
-  color: white;
+  background-color: var(--cadence);
+  color: var(--cadence-foreground);
   font-weight: 600;
-}
-
-.dark .day-header-number.today {
-  background-color: oklch(0.6 0.25 140);
 }
 
 /* Today's date number - circular highlight */
 .fc-day-today .fc-daygrid-day-number {
-  background-color: oklch(0.7 0.3 140);
-  color: white;
+  background-color: var(--cadence);
+  color: var(--cadence-foreground);
   border-radius: 50%;
   width: 24px;
   height: 24px;
@@ -124,10 +107,6 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
-}
-
-.dark .fc-day-today .fc-daygrid-day-number {
-  background-color: oklch(0.6 0.25 140);
 }
 
 /* ================================
@@ -247,11 +226,14 @@
    EVENTS
    ================================ */
 
-.fc-event {
-  background-color: var(--primary);
-  border-color: var(--primary);
-  color: var(--primary-foreground);
-  border-radius: 4px;
+/* Event chips — tinted surfaces instead of solid saturated pills.
+   `--event-color` is stamped on each event root by CalendarView's
+   eventDidMount; everything below derives from it with color-mix so one
+   calendar color yields a translucent tint, a solid accent bar, and a
+   readable text tone in both themes. `!important` is required because
+   FullCalendar injects its own stylesheet after ours at runtime. */
+.fc .fc-event {
+  --_ec: var(--event-color, var(--default-calendar-color, var(--primary)));
   font-size: 0.875rem;
   cursor: pointer;
   transition:
@@ -259,6 +241,28 @@
     border-color 0.2s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
+}
+
+.fc .fc-daygrid-event,
+.fc .fc-timegrid-event {
+  background-color: color-mix(
+    in oklab,
+    var(--_ec) 14%,
+    var(--background)
+  ) !important;
+  border: 1px solid color-mix(in oklab, var(--_ec) 22%, transparent) !important;
+  border-left: 3px solid var(--_ec) !important;
+  border-radius: 5px;
+  color: color-mix(in oklab, var(--_ec) 55%, var(--foreground)) !important;
+  box-shadow: none;
+}
+
+/* FullCalendar's own theme paints .fc-event-main with a fixed white
+   --fc-event-text-color; make it inherit the chip's derived tone instead
+   (white-on-pastel fails contrast in light mode). */
+.fc .fc-daygrid-event .fc-event-main,
+.fc .fc-timegrid-event .fc-event-main {
+  color: inherit !important;
 }
 
 /* Mirror/preview event (selection or drag) should match real event styling and use default calendar color */
@@ -271,11 +275,17 @@
   opacity: 0.9;
 }
 
-.fc-event:hover {
-  background-color: oklch(from var(--primary) l c h / 0.9);
-  border-color: oklch(from var(--primary) l c h / 0.9);
+.fc .fc-daygrid-event:hover,
+.fc .fc-timegrid-event:hover {
+  background-color: color-mix(
+    in oklab,
+    var(--_ec) 22%,
+    var(--background)
+  ) !important;
+  border-color: color-mix(in oklab, var(--_ec) 35%, transparent) !important;
+  border-left-color: var(--_ec) !important;
   transform: translateY(-1px);
-  box-shadow: 0 4px 8px oklch(from var(--primary) l c h / 0.3);
+  box-shadow: 0 3px 10px color-mix(in oklab, var(--_ec) 22%, transparent);
 }
 
 /* .fc-event-main inherits color from .fc-event */
@@ -287,9 +297,10 @@
 }
 
 .fc-event-time {
-  font-size: 0.8em;
+  font-size: 0.75em;
   font-weight: 500;
   color: inherit;
+  opacity: 0.75;
 }
 
 /* Event areas */
@@ -305,22 +316,30 @@
    NOW INDICATOR
    ================================ */
 
+/* The "now" line is the Cadence downbeat: a 2px emerald rule with a dot
+   resting on the time axis — the brand caret landing on the timeline. */
 .fc-timegrid-now-indicator-line {
-  background: var(--destructive) !important;
+  background: var(--cadence) !important;
+  border: none !important;
   height: 2px;
 }
+.fc-timegrid-now-indicator-line::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  background: var(--cadence);
+  box-shadow: 0 0 0 3px var(--cadence-wash);
+}
 
-/* Ensure the now-indicator arrow renders as a triangle. FullCalendar builds it with
-   borders; we must keep three sides transparent and only color the side that points
-   toward the grid. Handle both LTR and RTL directions. */
-.fc .fc-now-indicator-arrow {
-  border-color: transparent !important;
-}
-.fc:not(.fc-direction-rtl) .fc-now-indicator-arrow {
-  border-left-color: var(--destructive) !important;
-}
-.fc.fc-direction-rtl .fc-now-indicator-arrow {
-  border-right-color: var(--destructive) !important;
+/* The axis arrow duplicates the dot; hide it in both directions. */
+.fc .fc-now-indicator-arrow,
+.fc .fc-timegrid-now-indicator-arrow {
+  display: none !important;
 }
 
 /* ================================
@@ -371,6 +390,9 @@
   background-color: var(--muted);
   color: var(--muted-foreground);
   font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   padding: 8px 12px;
 }
 
@@ -395,23 +417,31 @@
 
 .fc-list-event-time {
   font-weight: 500;
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
 }
 
 .fc-list-event-title {
   color: var(--foreground);
+  font-weight: 500;
   width: 100%;
 }
 
-.fc-list-event-dot {
-  background-color: var(--primary);
-  border-color: var(--primary);
+/* The row dot takes the event's own color (stamped as --_ec on .fc-event);
+   !important beats the inline border-color FullCalendar writes. */
+.fc .fc-list-event-dot {
+  background-color: var(--_ec, var(--primary)) !important;
+  border-color: var(--_ec, var(--primary)) !important;
 }
 
 .fc-list-empty {
+  background: transparent !important;
   color: var(--muted-foreground);
   text-align: center;
-  padding: 2rem;
-  font-style: italic;
+  padding: 3rem 2rem;
+  font-size: 0.875rem;
+  font-style: normal;
 }
 
 /* ================================
@@ -505,7 +535,7 @@
 }
 
 .fc-event-past {
-  opacity: 0.8;
+  opacity: 0.6;
 }
 
 .fc-day-disabled {
